@@ -343,13 +343,15 @@ values: {
 	persistence: {
 		worker: {
 			enabled: true
+			storageClass: "ceph-filesystem"
 			size:    "8Gi"
-			accessModes: ["ReadWriteOnce"]
+			accessModes: ["ReadWriteMany"]
 		}
 		logs: {
 			enabled: true
+			storageClass: "ceph-filesystem"
 			size:    "8Gi"
-			accessModes: ["ReadWriteOnce"]
+			accessModes: ["ReadWriteMany"]
 		}
 	}
 
