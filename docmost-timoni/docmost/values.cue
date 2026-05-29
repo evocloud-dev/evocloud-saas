@@ -1,4 +1,5 @@
 // Note that this file must have no imports and all values must be concrete.
+// REFERENCE: https://github.com/helmforgedev/charts/blob/main/charts/docmost/values.yaml
 
 @if(!debug)
 
