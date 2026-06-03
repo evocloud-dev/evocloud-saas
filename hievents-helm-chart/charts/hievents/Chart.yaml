@@ -1,0 +1,12 @@
+apiVersion: v2
+name: hievents
+description: A Helm chart for deploying Hi.Events on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "v1.9.0-beta"
+keywords:
+  - hievents
+  - laravel
+  - events
+maintainers:
+  - name: evocloud

@@ -1,0 +1,75 @@
+{{- if and .Values.webProxy.enabled .Values.frontend.enabled .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hievents.nginxDeploymentName" . }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "nginx") | nindent 4 }}
+spec:
+  replicas: {{ .Values.webProxy.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "hievents.selectorLabels" (dict "root" . "component" "nginx") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hievents.podLabels" (dict "root" . "component" "nginx") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-nginx.yaml") . | sha256sum }}
+        {{- if or .Values.commonAnnotations .Values.podAnnotations }}
+        {{- include "hievents.podAnnotations" $ | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      {{- with .Values.webProxy.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx
+          image: {{ include "hievents.image" .Values.webProxy.image | quote }}
+          imagePullPolicy: {{ .Values.webProxy.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.webProxy.service.targetPort }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: {{ .Values.webProxy.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ .Values.webProxy.probes.startup.timeoutSeconds }}
+            failureThreshold: {{ .Values.webProxy.probes.startup.failureThreshold }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.webProxy.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webProxy.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.webProxy.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.webProxy.probes.liveness.failureThreshold }}
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.webProxy.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webProxy.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.webProxy.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.webProxy.probes.readiness.failureThreshold }}
+          {{- with .Values.webProxy.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.webProxy.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "hievents.nginxConfigMapName" . }}
+      {{- include "hievents.podScheduling" (dict "root" . "componentValues" .Values.webProxy) | nindent 6 }}
+{{- end }}

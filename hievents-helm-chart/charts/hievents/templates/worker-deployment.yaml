@@ -1,0 +1,66 @@
+{{- if and .Values.worker.enabled .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "worker") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "worker") | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "hievents.selectorLabels" (dict "root" . "component" "worker") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hievents.podLabels" (dict "root" . "component" "worker") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- if or .Values.commonAnnotations .Values.podAnnotations }}
+        {{- include "hievents.podAnnotations" . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      terminationGracePeriodSeconds: {{ .Values.worker.terminationGracePeriodSeconds }}
+      {{- with (.Values.worker.podSecurityContext | default .Values.backend.podSecurityContext) }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.initContainers.postgresql.enabled .Values.initContainers.redis.enabled }}
+      initContainers:
+        {{- if .Values.initContainers.postgresql.enabled }}
+        {{- include "hievents.initContainers.waitForPostgresql" . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.initContainers.redis.enabled }}
+        {{- include "hievents.initContainers.waitForRedis" . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: worker
+          image: {{ include "hievents.image" .Values.backend.image | quote }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.worker.command | nindent 12 }}
+          args:
+            {{- toYaml .Values.worker.args | nindent 12 }}
+          env:
+            {{- include "hievents.env.laravelVariables" . | nindent 12 }}
+            {{- include "hievents.env.databaseVariables" . | nindent 12 }}
+            {{- include "hievents.env.redisVariables" . | nindent 12 }}
+            {{- include "hievents.env.s3Variables" . | nindent 12 }}
+          {{- with (.Values.worker.securityContext | default .Values.backend.securityContext) }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.worker.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- include "hievents.backendStorageVolumeMounts" . | nindent 10 }}
+      {{- include "hievents.backendStorageVolumes" . | nindent 6 }}
+      {{- include "hievents.podScheduling" (dict "root" . "componentValues" .Values.worker) | nindent 6 }}
+{{- end }}

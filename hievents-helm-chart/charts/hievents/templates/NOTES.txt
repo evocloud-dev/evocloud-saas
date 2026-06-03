@@ -1,0 +1,28 @@
+Hi.Events has been deployed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+Services:
+  Backend:  {{ include "hievents.componentName" (dict "root" . "component" "backend") }}:{{ .Values.backend.service.port }}
+  Frontend: {{ include "hievents.componentName" (dict "root" . "component" "frontend") }}:{{ .Values.frontend.service.port }}
+  {{- if .Values.webProxy.enabled }}
+  Nginx:    {{ include "hievents.nginxServiceName" . }}:{{ .Values.webProxy.service.port }}
+  {{- end }}
+
+Verify:
+  kubectl get pods -n {{ .Release.Namespace }}
+  kubectl get jobs -n {{ .Release.Namespace }}
+  kubectl get cronjobs -n {{ .Release.Namespace }}
+
+Inspect migration logs with:
+  kubectl logs -n {{ .Release.Namespace }} job/{{ include "hievents.migrationJobName" . }}
+
+{{- if .Values.webProxy.enabled }}
+
+For local browser testing:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "hievents.nginxServiceName" . }} 8080:{{ .Values.webProxy.service.port }}
+
+Open:
+  http://localhost:8080/auth/register
+{{- end }}

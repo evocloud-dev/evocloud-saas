@@ -1,0 +1,16 @@
+{{- if and .Values.webProxy.enabled .Values.frontend.enabled .Values.backend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hievents.nginxServiceName" . }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "nginx") | nindent 4 }}
+spec:
+  type: {{ .Values.webProxy.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.webProxy.service.port }}
+      targetPort: {{ .Values.webProxy.service.targetPort }}
+  selector:
+    {{- include "hievents.selectorLabels" (dict "root" . "component" "nginx") | nindent 4 }}
+{{- end }}

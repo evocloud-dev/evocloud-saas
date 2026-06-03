@@ -1,0 +1,16 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "backend") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "backend") | nindent 4 }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+  selector:
+    {{- include "hievents.selectorLabels" (dict "root" . "component" "backend") | nindent 4 }}
+{{- end }}

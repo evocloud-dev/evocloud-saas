@@ -1,0 +1,108 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hievents.fullname" . }}-redis-headless
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.port }}
+      targetPort: redis
+  selector:
+    {{- include "hievents.selectorLabels" (dict "root" . "component" "redis") | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hievents.fullname" . }}-redis
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.port }}
+      targetPort: redis
+  selector:
+    {{- include "hievents.selectorLabels" (dict "root" . "component" "redis") | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hievents.fullname" . }}-redis
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  serviceName: {{ include "hievents.fullname" . }}-redis-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hievents.selectorLabels" (dict "root" . "component" "redis") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hievents.podLabels" (dict "root" . "component" "redis") | nindent 8 }}
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          command:
+            - redis-server
+          args:
+            - --appendonly
+            - "yes"
+            - --requirepass
+            - $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hievents.redisSecretName" . }}
+                  key: {{ .Values.secrets.redis.passwordKey }}
+          ports:
+            - name: redis
+              containerPort: 6379
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -h localhost -a "$REDIS_PASSWORD" ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -h localhost -a "$REDIS_PASSWORD" ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- with .Values.redis.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.redis.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          {{- end }}
+  {{- if .Values.redis.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- if .Values.redis.persistence.storageClass }}
+        storageClassName: {{ .Values.redis.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.persistence.size }}
+  {{- end }}
+{{- end }}
