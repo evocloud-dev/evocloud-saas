@@ -1,0 +1,491 @@
+nameOverride: ""
+fullnameOverride: ""
+
+labels: {}
+podLabels: {}
+commonAnnotations: {}
+podAnnotations: {}
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+hieventsConfig:
+  app:
+    name: "Hi.Events"
+    env: local
+    debug: "false"
+    # For local testing via port-forwarding, set these to http://localhost:<port>
+    url: "http://localhost:8080"
+    frontendUrl: "http://localhost:8080"
+    cdnUrl: "http://localhost:8080/storage"
+
+    # Comma-separated list of domains that should be treated as stateful for Sanctum auth.
+    # For local testing through the nginx service, include localhost:8080.
+    sanctumStatefulDomains: "localhost:80"
+    # Session domain (e.g., .example.com). Leave empty for host-only cookies.
+    # Do not set this to "localhost"; browsers commonly reject Domain=localhost cookies.
+    sessionDomain: ""
+    # Comma-separated list of trusted proxies (e.g., "10.0.0.0/8" or "*").
+    trustedProxies: "*"
+    logQueries: "false"
+    homepageViewsUpdateBatchSize: 8
+    allowedInternalWebhookHosts: ""
+    emailLogoUrl: ""
+    emailLogoLinkUrl: ""
+    disableRegistration: "false"
+    platformSupportEmail: "support@example.com"
+    saasModeEnabled: "false"
+    saasStripeApplicationFeePercent: "0"
+    saasStripeApplicationFeeFixed: "0"
+    stripeConnectAccountType: "express"
+    timezone: "UTC"
+    locale: "en"
+    # Explicitly set VITE_ variables if they differ from the defaults derived from url/frontendUrl
+    viteApiUrlClient: "http://localhost:8080/api"
+    viteApiUrlServer: "http://localhost:8080/api"
+    viteFrontendUrl: "http://localhost:8080"
+  mail:
+    # Set mailer to "log" to see emails in backend logs for testing.
+    mailer: log
+    # Added for compatibility with older image versions
+    driver: log
+    host: ""
+    port: 587
+    username: ""
+    encryption: tls
+    fromAddress: "hello@example.com"
+    fromName: "Hi.Events"
+  logging:
+    channel: stderr
+    level: info
+    deprecationsChannel: ""
+  queue:
+    connection: redis
+    webhookQueueName: webhook-queue
+  cache:
+    driver: redis
+  session:
+    driver: redis
+    lifetime: 120
+  broadcast:
+    driver: log
+  jwt:
+    algo: HS256
+  storage:
+    # Use "s3" for object storage or "local" for Laravel local/public disks.
+    # Local storage requires backend.persistence.enabled=true.
+    driver: local
+    # Default disk to use for the application. Set to "public" or "s3".
+    disk: ""
+    # Added for compatibility
+    filesystemDriver: ""
+    # Leave empty to use driver defaults: s3-public/s3-private for s3, public/local for local.
+    publicDisk: ""
+    privateDisk: ""
+  postgresql:
+    port: 5432
+    database: hievents
+    username: hievents
+    # Optional full PostgreSQL URL. Leave empty to derive DATABASE_URL from DB_* env vars.
+    databaseUrl: ""
+  redis:
+    client: phpredis
+    port: 6379
+    database: 0
+    cacheDatabase: 1
+    username: ""
+    # Optional full Redis URL.
+    url: ""
+  s3:
+    # Defaults match the upstream Hi.Events backend .env.example for MinIO-compatible storage.
+    # For AWS S3, set endpoint/url empty and use your bucket/region values.
+    region: us-east-1
+    publicBucket: hievents-public
+    privateBucket: hievents-private
+    endpoint: "http://minio:9000"
+    url: ""
+    usePathStyleEndpoint: "true"
+
+secrets:
+  app:
+    # Set to true if you want to use an already existing Kubernetes secret
+    useExisting: false
+    # The name of the Kubernetes secret (Helm creates it or references existing)
+    secretName: app
+    # The key name (label) inside the Kubernetes secret
+    appKeySecretKey: app-key
+    # The actual Laravel APP_KEY value (stored inside the key name above)
+    appKey: "base64:7A8CbXQ6O2V5RzZpTzJvTzJvTzJvTzJvTzJvTzJvTzI="
+    # The key name (label) for the JWT secret inside the Kubernetes secret
+    jwtSecretKey: jwt-secret
+    # The actual JWT secret value (stored inside the key name above)
+    jwtSecret: "base64:MjY1Njg5MGFiY2RlZmdoaWpsbW5vcHFyc3R1dnd4eXo="
+    stripePublishableKeyKey: stripe-publishable-key
+    stripePublishableKey: ""
+    stripeSecretKeyKey: stripe-secret-key
+    stripeSecretKey: ""
+    stripeWebhookSecretKey: stripe-webhook-secret
+    stripeWebhookSecret: ""
+
+  postgresql:
+    useExisting: false
+    secretName: postgresql
+    passwordKey: postgres-password
+    password: "change-me-please"
+
+  redis:
+    useExisting: false
+    secretName: redis
+    passwordKey: redis-password
+    password: "change-me-please"
+
+  mail:
+    useExisting: false
+    secretName: mail
+    passwordKey: mail-password
+    password: ""
+
+  s3:
+    useExisting: false
+    secretName: s3
+    accessKeyIdKey: aws-access-key-id
+    secretAccessKeyKey: aws-secret-access-key
+    accessKeyId: ""
+    secretAccessKey: ""
+
+backend:
+  enabled: true
+  replicaCount: 2
+  image:
+    registry: docker.io
+    repository: daveearley/hi.events-backend
+    tag: v1.9.0-beta
+    digest: ""
+    pullPolicy: IfNotPresent
+  command: []
+  args: []
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  probes:
+    type: tcpSocket
+    startup:
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 10
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  podSecurityContext:
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+
+  persistence:
+    # Enable when hieventsConfig.storage.driver=local and uploaded files must survive pod restarts.
+    # The PVC template is templates/pvc.yaml.
+    # This volume is mounted at Laravel's storage/app path, which covers both:
+    # - private local disk: storage/app
+    # - public local disk: storage/app/public
+    enabled: true
+    existingClaim: ""
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    mountPath: /var/www/html/storage/app
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    registry: docker.io
+    repository: daveearley/hi.events-frontend
+    tag: v1.9.0-beta
+    digest: ""
+    pullPolicy: IfNotPresent
+
+  env:
+    # viteApiUrlServer should point to the backend service. 
+    # The default template uses the hievents.backendInternalUrl helper if this is empty.
+    viteApiUrlServer: ""
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 5678
+
+  probes:
+    type: tcpSocket
+    startup:
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+    liveness:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+    readiness:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 10
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  podSecurityContext:
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+webProxy:
+  # Mirrors the official all-in-one nginx routing:
+  # - /api/* is rewritten to /* and sent to the backend
+  # - /storage/* is sent to the backend
+  # - everything else is sent to the frontend
+  #
+  # For local testing, port-forward this service and open http://localhost:8080:
+  # kubectl port-forward svc/hievents-service-nginx 8080:80 -n hievents
+  enabled: true
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: nginx
+    tag: 1.27-alpine
+    digest: ""
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  probes:
+    startup:
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 12
+    liveness:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+worker:
+  enabled: true
+  replicaCount: 1
+  command:
+    - php
+    - artisan
+    - queue:work
+  args:
+    - --queue=default,webhook-queue
+    - --sleep=3
+    - --tries=3
+    - --timeout=60
+  terminationGracePeriodSeconds: 60
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 768Mi
+  podSecurityContext: {}
+  securityContext: {}
+
+scheduler:
+  enabled: true
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  command:
+    - php
+    - artisan
+    - schedule:run
+  args:
+    - --no-interaction
+    
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+  podSecurityContext: {}
+  securityContext: {}
+
+migration:
+  enabled: true
+  # Keep disabled by default so bundled PostgreSQL/Redis resources are created
+  # before the migration job waits for them.
+  useHelmHooks: false
+  hookDeletePolicy: before-hook-creation,hook-succeeded
+  command:
+    - sh
+    - -c
+  args:
+    - |
+      php artisan migrate --force
+      php artisan cache:clear
+      php artisan config:clear
+      php artisan route:clear
+      php artisan view:clear
+      php artisan storage:link
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 768Mi
+  podSecurityContext: {}
+  securityContext: {}
+
+initContainers:
+  postgresql:
+    enabled: true
+    image: postgres:17-alpine
+    imagePullPolicy: IfNotPresent
+  redis:
+    enabled: true
+    image: docker.io/valkey/valkey:9.1.0-alpine
+    imagePullPolicy: IfNotPresent
+
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "17-alpine"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+  service:
+    port: 5432
+  resources: {}
+
+externalDatabase:
+  host: ""
+
+redis:
+  enabled: true
+  image:
+    repository: docker.io/valkey/valkey
+    tag: "9.1.0-alpine"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: ""
+  service:
+    port: 6379
+  resources: {}
+
+externalRedis:
+  host: ""
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+  rules:
+    apiPrefix: /api
+
+networkPolicy:
+  enabled: false

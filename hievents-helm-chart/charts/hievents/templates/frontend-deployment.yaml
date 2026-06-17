@@ -1,0 +1,90 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "frontend") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "frontend") | nindent 4 }}
+spec:
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hievents.selectorLabels" (dict "root" . "component" "frontend") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hievents.podLabels" (dict "root" . "component" "frontend") | nindent 8 }}
+      {{- if or .Values.commonAnnotations .Values.podAnnotations }}
+      annotations:
+        {{- include "hievents.podAnnotations" $ | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      {{- with .Values.frontend.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: frontend
+          image: {{ include "hievents.image" .Values.frontend.image | quote }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.service.targetPort }}
+          env:
+            {{- include "hievents.env.frontendVariables" . | nindent 12 }}
+            - name: PORT
+              value: {{ .Values.frontend.service.targetPort | quote }}
+          startupProbe:
+            {{- if eq .Values.frontend.probes.type "tcpSocket" }}
+            tcpSocket:
+              port: http
+            {{- else if eq .Values.frontend.probes.type "httpGet" }}
+            httpGet:
+              path: /
+              port: http
+            {{- end }}
+            periodSeconds: {{ .Values.frontend.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.probes.startup.timeoutSeconds }}
+            failureThreshold: {{ .Values.frontend.probes.startup.failureThreshold }}
+          livenessProbe:
+            {{- if eq .Values.frontend.probes.type "tcpSocket" }}
+            tcpSocket:
+              port: http
+            {{- else if eq .Values.frontend.probes.type "httpGet" }}
+            httpGet:
+              path: /
+              port: http
+            {{- end }}
+            initialDelaySeconds: {{ .Values.frontend.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.frontend.probes.liveness.failureThreshold }}
+          readinessProbe:
+            {{- if eq .Values.frontend.probes.type "tcpSocket" }}
+            tcpSocket:
+              port: http
+            {{- else if eq .Values.frontend.probes.type "httpGet" }}
+            httpGet:
+              path: /
+              port: http
+            {{- end }}
+            initialDelaySeconds: {{ .Values.frontend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.frontend.probes.readiness.failureThreshold }}
+          {{- with .Values.frontend.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.frontend.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- include "hievents.podScheduling" (dict "root" . "componentValues" .Values.frontend) | nindent 6 }}
+{{- end }}

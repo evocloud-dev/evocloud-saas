@@ -1,0 +1,55 @@
+{{- if and .Values.migration.enabled .Values.backend.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hievents.migrationJobName" . }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "migration") | nindent 4 }}
+  {{- if .Values.migration.useHelmHooks }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": {{ .Values.migration.hookDeletePolicy | quote }}
+  {{- end }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "hievents.podLabels" (dict "root" . "component" "migration") | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      {{- with (.Values.migration.podSecurityContext | default .Values.backend.podSecurityContext) }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.initContainers.postgresql.enabled }}
+      initContainers:
+        {{- include "hievents.initContainers.waitForPostgresql" . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migration
+          image: {{ include "hievents.image" .Values.backend.image | quote }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.migration.command | nindent 12 }}
+          args:
+            {{- toYaml .Values.migration.args | nindent 12 }}
+          env:
+            {{- include "hievents.env.laravelVariables" . | nindent 12 }}
+            {{- include "hievents.env.databaseVariables" . | nindent 12 }}
+            {{- include "hievents.env.redisVariables" . | nindent 12 }}
+            {{- include "hievents.env.s3Variables" . | nindent 12 }}
+          {{- with (.Values.migration.securityContext | default .Values.backend.securityContext) }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.migration.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

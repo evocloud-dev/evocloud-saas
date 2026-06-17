@@ -1,0 +1,17 @@
+{{- if and (include "hievents.localStorageEnabled" .) (not .Values.backend.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "backend-storage") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "backend") | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.backend.persistence.accessModes | nindent 4 }}
+  {{- if .Values.backend.persistence.storageClass }}
+  storageClassName: {{ .Values.backend.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.backend.persistence.size }}
+{{- end }}

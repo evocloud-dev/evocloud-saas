@@ -1,0 +1,16 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "frontend") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "frontend") | nindent 4 }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+  selector:
+    {{- include "hievents.selectorLabels" (dict "root" . "component" "frontend") | nindent 4 }}
+{{- end }}

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hievents.configMapName" . }}
+  labels:
+    {{- include "hievents.labels" . | nindent 4 }}
+data:
+  APP_NAME: {{ .Values.hieventsConfig.app.name | quote }}
+  APP_ENV: {{ .Values.hieventsConfig.app.env | quote }}
+  APP_DEBUG: {{ .Values.hieventsConfig.app.debug | quote }}
+  APP_URL: {{ .Values.hieventsConfig.app.url | quote }}
+  APP_FRONTEND_URL: {{ .Values.hieventsConfig.app.frontendUrl | quote }}
+  APP_TIMEZONE: {{ .Values.hieventsConfig.app.timezone | quote }}
+  APP_LOCALE: {{ .Values.hieventsConfig.app.locale | quote }}
+  SANCTUM_STATEFUL_DOMAINS: {{ .Values.hieventsConfig.app.sanctumStatefulDomains | quote }}
+{{ if .Values.hieventsConfig.app.sessionDomain }}
+  SESSION_DOMAIN: {{ .Values.hieventsConfig.app.sessionDomain | quote }}
+{{ end }}
+  CORS_ALLOWED_ORIGINS: {{ printf "%s,%s" .Values.hieventsConfig.app.url .Values.hieventsConfig.app.frontendUrl | quote }}
+  TRUSTED_PROXIES: {{ .Values.hieventsConfig.app.trustedProxies | quote }}
+  DB_CONNECTION: "pgsql"
+  DB_HOST: {{ include "hievents.databaseHost" . | quote }}
+  REDIS_HOST: {{ include "hievents.redisHost" . | quote }}
+  QUEUE_CONNECTION: {{ .Values.hieventsConfig.queue.connection | quote }}
+  FILESYSTEM_DISK: {{ include "hievents.storageDisk" . | quote }}
+  FILESYSTEM_PUBLIC_DISK: {{ include "hievents.storagePublicDisk" . | quote }}
+  FILESYSTEM_PRIVATE_DISK: {{ include "hievents.storagePrivateDisk" . | quote }}

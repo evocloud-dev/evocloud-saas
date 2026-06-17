@@ -1,0 +1,61 @@
+{{- if and .Values.scheduler.enabled .Values.backend.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "hievents.componentName" (dict "root" . "component" "scheduler") }}
+  labels:
+    {{- include "hievents.componentLabels" (dict "root" . "component" "scheduler") | nindent 4 }}
+spec:
+  schedule: {{ .Values.scheduler.schedule | quote }}
+  concurrencyPolicy: {{ .Values.scheduler.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.scheduler.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.scheduler.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "hievents.podLabels" (dict "root" . "component" "scheduler") | nindent 12 }}
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          {{- include "hievents.imagePullSecrets" $ | nindent 10 }}
+          {{- end }}
+          serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+          restartPolicy: OnFailure
+          {{- with (.Values.scheduler.podSecurityContext | default .Values.backend.podSecurityContext) }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.initContainers.postgresql.enabled .Values.initContainers.redis.enabled }}
+          initContainers:
+            {{- if .Values.initContainers.postgresql.enabled }}
+            {{- include "hievents.initContainers.waitForPostgresql" . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.initContainers.redis.enabled }}
+            {{- include "hievents.initContainers.waitForRedis" . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          containers:
+            - name: scheduler
+              image: {{ include "hievents.image" .Values.backend.image | quote }}
+              imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+              command:
+                {{- toYaml .Values.scheduler.command | nindent 16 }}
+              args:
+                {{- toYaml .Values.scheduler.args | nindent 16 }}
+              env:
+                {{- include "hievents.env.laravelVariables" . | nindent 16 }}
+                {{- include "hievents.env.databaseVariables" . | nindent 16 }}
+                {{- include "hievents.env.redisVariables" . | nindent 16 }}
+                {{- include "hievents.env.s3Variables" . | nindent 16 }}
+              {{- with (.Values.scheduler.securityContext | default .Values.backend.securityContext) }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .Values.scheduler.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- include "hievents.backendStorageVolumeMounts" . | nindent 14 }}
+          {{- include "hievents.backendStorageVolumes" . | nindent 10 }}
+{{- end }}
