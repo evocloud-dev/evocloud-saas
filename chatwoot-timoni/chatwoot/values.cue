@@ -10,7 +10,7 @@ package main
 values: {
 	image: {
 		repository: "chatwoot/chatwoot"
-		tag:        "v4.12.1"
+		tag:        "v4.15.1"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -98,7 +98,15 @@ values: {
 
 	podAnnotations: {}
 
-	podSecurityContext: {}
+	podSecurityContext: {
+		runAsNonRoot: true
+		runAsUser:    10001
+		runAsGroup:   10001
+		fsGroup:      10001
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
+	}
 
 	securityContext: {
 		capabilities: {
@@ -106,7 +114,8 @@ values: {
 		}
 		readOnlyRootFilesystem: true
 		runAsNonRoot: true
-		runAsUser: 1000
+		runAsUser:    10001
+		runAsGroup:   10001
 	}
 
 	service: {
@@ -219,7 +228,7 @@ values: {
 		FB_APP_SECRET: ""
 		FB_VERIFY_TOKEN: ""
 		FORCE_SSL: "false"
-		FRONTEND_URL: ""
+		FRONTEND_URL: "http://localhost:9090"
 		INSTALLATION_ENV: "timoni"
 		IOS_APP_ID: "6C953F3RX2.com.chatwoot.app"
 		LOG_LEVEL: "info"

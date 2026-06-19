@@ -40,23 +40,27 @@ import (
 					image:           "\(#config.image.repository):\(#config.image.tag)"
 					imagePullPolicy: #config.image.pullPolicy
 					command: ["/bin/sh"]
-					args: ["-c", "until pg_isready -h \(#config.#postgresql.host) -p \(#config.#postgresql.port); do sleep 2; done; echo 'Database ready to accept connections.';"]
+					args: ["-c", "until pg_isready -h \(#config.#postgresql.host) -p \(#config.#postgresql.port) -U \(#config.#postgresql.user); do sleep 2; done; echo 'Database ready to accept connections.';"]
+					if #config.securityContext != _|_ {
+						securityContext: #config.securityContext
+					}
 				},
 				{
 					name:            "init-redis"
 					image:           "\(#config.image.repository):\(#config.image.tag)"
 					imagePullPolicy: #config.image.pullPolicy
 					command: ["sh", "-c", "until getent hosts \(#config.#redis.host) ; do echo waiting for \(#config.#redis.host) ; sleep 2; done;"]
+					if #config.securityContext != _|_ {
+						securityContext: #config.securityContext
+					}
 				},
 			]
 			containers: [{
 				name:  "db-migrate-job"
 				image: "\(#config.image.repository):\(#config.image.tag)"
+				command: ["/bin/sh", "-c"]
 				args: [
-					"bundle",
-					"exec",
-					"rails",
-					"db:chatwoot_prepare",
+					"mkdir -p /tmp/rails-tmp && chmod 700 /tmp/rails-tmp && export TMPDIR=/tmp/rails-tmp && exec docker/entrypoints/rails.sh bundle exec rails db:chatwoot_prepare",
 				]
 				env: [
 					if #config.postgresql.auth.existingSecret != _|_ {
@@ -92,14 +96,30 @@ import (
 				volumeMounts: [{
 					name:      "cache"
 					mountPath: "/app/tmp"
+				}, {
+					name:      "tmp-volume"
+					mountPath: "/tmp"
+				}, {
+					name:      "storage-volume"
+					mountPath: "/app/storage"
 				}]
+				if #config.securityContext != _|_ {
+					securityContext: #config.securityContext
+				}
 			}]
+			automountServiceAccountToken: false
 			serviceAccountName: #config.metadata.name
 			if #config.podSecurityContext != _|_ {
 				securityContext: #config.podSecurityContext
 			}
 			volumes: [{
 				name: "cache"
+				emptyDir: {}
+			}, {
+				name: "tmp-volume"
+				emptyDir: {}
+			}, {
+				name: "storage-volume"
 				emptyDir: {}
 			}]
 			if #config.affinity != _|_ {
