@@ -79,17 +79,68 @@ import (
 					"app.kubernetes.io/component": "postgresql"
 				}
 				template: {
-					metadata: labels: {
-						"app.kubernetes.io/name":      #config.metadata.name
-						"app.kubernetes.io/component": "postgresql"
+					metadata: {
+						labels: {
+							"app.kubernetes.io/name":      #config.metadata.name
+							"app.kubernetes.io/component": "postgresql"
+						}
+						annotations: {
+							"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+							"container.seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+						}
 					}
 					spec: corev1.#PodSpec & {
+						automountServiceAccountToken: false
+						securityContext: {
+							runAsUser:    999
+							runAsGroup:   999
+							fsGroup:      999
+							runAsNonRoot: true
+							seccompProfile: type: "RuntimeDefault"
+						}
+						initContainers: [
+							{
+								name: "volume-permissions"
+								image: "alpine:3.18"
+								command: ["sh", "-c", "chown -R 999:999 /var/lib/postgresql /var/run/postgresql"]
+								securityContext: {
+									runAsUser:                0
+									runAsNonRoot:             false
+									allowPrivilegeEscalation: false
+									capabilities: {
+										drop: ["ALL"]
+										add: ["CHOWN", "FOWNER", "DAC_OVERRIDE"]
+									}
+								}
+								volumeMounts: [
+									{
+										name:      "data"
+										mountPath: "/var/lib/postgresql"
+									},
+									{
+										name:      "postgres-run"
+										mountPath: "/var/run/postgresql"
+									},
+								]
+							}
+						]
 						containers: [
 							{
 								name:            "postgresql"
 								image:           "\(#config.postgresql.primary.image.repository):\(#config.postgresql.primary.image.tag)"
 								imagePullPolicy: #config.postgresql.primary.image.pullPolicy
+								securityContext: {
+									runAsUser:                999
+									runAsGroup:               999
+									allowPrivilegeEscalation: false
+									readOnlyRootFilesystem:   true
+									capabilities: drop: ["ALL"]
+								}
 								env: [
+									{
+										name:  "PGDATA"
+										value: "/var/lib/postgresql"
+									},
 									{
 										name:  "POSTGRES_USER"
 										value: #config.postgresql.auth.username
@@ -115,7 +166,15 @@ import (
 								volumeMounts: [
 									{
 										name:      "data"
-										mountPath: "/var/lib/postgresql/data"
+										mountPath: "/var/lib/postgresql"
+									},
+									{
+										name:      "postgres-run"
+										mountPath: "/var/run/postgresql"
+									},
+									{
+										name:      "tmp-dir"
+										mountPath: "/tmp"
 									},
 								]
 								if #config.postgresql.primary.resources != _|_ {
@@ -142,6 +201,16 @@ import (
 									periodSeconds:       5
 									timeoutSeconds:      1
 								}
+							},
+						]
+						volumes: [
+							{
+								name: "postgres-run"
+								emptyDir: {}
+							},
+							{
+								name: "tmp-dir"
+								emptyDir: {}
 							},
 						]
 					}

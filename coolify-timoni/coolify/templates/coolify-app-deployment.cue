@@ -30,16 +30,48 @@ import (
 				labels: (timoniv1.#Selector & {#Name: #config.metadata.name}).labels & {
 					"app.kubernetes.io/component": "core"
 				}
+				annotations: {
+					"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+					"container.seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+				}
 			}
 			spec: corev1.#PodSpec & {
 				terminationGracePeriodSeconds: #config.coolifyApp.migration.timeout
+				automountServiceAccountToken:  false
 				securityContext: {
 					runAsUser:    #config.securityContext.runAsUser
 					runAsGroup:   #config.securityContext.runAsGroup
 					fsGroup:      #config.securityContext.fsGroup
 					runAsNonRoot: #config.securityContext.runAsNonRoot
+					seccompProfile: type: "RuntimeDefault"
 				}
 				initContainers: [
+					{
+						name:            "populate-config"
+						image:           "\(#config.coolifyApp.image.repository):\(#config.coolifyApp.image.tag)"
+						imagePullPolicy: #config.coolifyApp.image.pullPolicy
+						command: ["/bin/sh"]
+						args: ["-c", #populateConfigScript]
+						volumeMounts: [
+							{
+								name:      "nginx-config"
+								mountPath: "/mnt/nginx"
+							},
+							{
+								name:      "php-fpm-config"
+								mountPath: "/mnt/php-fpm"
+							},
+						]
+						securityContext: {
+							runAsUser:                #config.securityContext.runAsUser
+							runAsGroup:               #config.securityContext.runAsGroup
+							allowPrivilegeEscalation: #config.securityContext.allowPrivilegeEscalation
+							readOnlyRootFilesystem:   #config.securityContext.readOnlyRootFilesystem
+							if #config.securityContext.capabilities != _|_ {
+								capabilities: #config.securityContext.capabilities
+							}
+						}
+					},
 					{
 						name:            "setup-storage"
 						image:           "\(#config.coolifyApp.image.repository):\(#config.coolifyApp.image.tag)"
@@ -62,13 +94,19 @@ import (
 								mountPath: "/var/www/html/bootstrap/cache"
 								subPath:   "coolify/bootstrap-cache"
 							},
+							{
+								name:      "storage-framework"
+								mountPath: "/var/www/html/storage/framework"
+							},
 						]
 						securityContext: {
-							runAsUser:                0
-							runAsGroup:               0
-							allowPrivilegeEscalation: true
-							readOnlyRootFilesystem:   false
-							capabilities: add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER", "SETPCAP"]
+							runAsUser:                #config.securityContext.runAsUser
+							runAsGroup:               #config.securityContext.runAsGroup
+							allowPrivilegeEscalation: #config.securityContext.allowPrivilegeEscalation
+							readOnlyRootFilesystem:   #config.securityContext.readOnlyRootFilesystem
+							if #config.securityContext.capabilities != _|_ {
+								capabilities: #config.securityContext.capabilities
+							}
 						}
 						resources: #config.coolifyApp.initContainers.setupStorage.resources
 					},
@@ -99,11 +137,24 @@ import (
 									mountPath: "/var/www/html/bootstrap/cache"
 									subPath:   "coolify/bootstrap-cache"
 								},
+								{
+									name:      "storage-framework"
+									mountPath: "/var/www/html/storage/framework"
+								},
+								{
+									name:      "tmp-dir"
+									mountPath: "/tmp"
+								},
 							]
 							workingDir: "/var/www/html"
 							securityContext: {
-								runAsUser: 0
-								runAsGroup: 0
+								runAsUser:                #config.securityContext.runAsUser
+								runAsGroup:               #config.securityContext.runAsGroup
+								allowPrivilegeEscalation: #config.securityContext.allowPrivilegeEscalation
+								readOnlyRootFilesystem:   #config.securityContext.readOnlyRootFilesystem
+								if #config.securityContext.capabilities != _|_ {
+									capabilities: #config.securityContext.capabilities
+								}
 							}
 							resources: #config.coolifyApp.initContainers.migration.resources
 						}
@@ -143,14 +194,44 @@ import (
 								mountPath: "/var/www/html/bootstrap/cache"
 								subPath:   "coolify/bootstrap-cache"
 							},
+							{
+								name:      "nginx-config"
+								mountPath: "/etc/nginx"
+							},
+							{
+								name:      "php-fpm-config"
+								mountPath: "/usr/local/etc"
+							},
+							{
+								name:      "var-log"
+								mountPath: "/var/log"
+							},
+							{
+								name:      "var-run"
+								mountPath: "/var/run"
+							},
+							{
+								name:      "var-lib-nginx"
+								mountPath: "/var/lib/nginx"
+							},
+							{
+								name:      "tmp-dir"
+								mountPath: "/tmp"
+							},
+							{
+								name:      "storage-framework"
+								mountPath: "/var/www/html/storage/framework"
+							},
 						]
 						workingDir: #config.coolifyApp.workingDir
 						securityContext: {
-							runAsUser:                0
-							runAsGroup:               0
-							allowPrivilegeEscalation: true
-							readOnlyRootFilesystem:   false
-							capabilities: add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER", "SETPCAP"]
+							runAsUser:                #config.securityContext.runAsUser
+							runAsGroup:               #config.securityContext.runAsGroup
+							allowPrivilegeEscalation: #config.securityContext.allowPrivilegeEscalation
+							readOnlyRootFilesystem:   #config.securityContext.readOnlyRootFilesystem
+							if #config.securityContext.capabilities != _|_ {
+								capabilities: #config.securityContext.capabilities
+							}
 						}
 						readinessProbe: {
 							httpGet: {
@@ -181,10 +262,51 @@ import (
 						name: "shared-data"
 						persistentVolumeClaim: claimName: "\(#config.metadata.name)-shared-data-pvc"
 					},
+					{
+						name: "nginx-config"
+						emptyDir: {}
+					},
+					{
+						name: "php-fpm-config"
+						emptyDir: {}
+					},
+					{
+						name: "var-log"
+						emptyDir: {}
+					},
+					{
+						name: "var-run"
+						emptyDir: {}
+					},
+					{
+						name: "var-lib-nginx"
+						emptyDir: {}
+					},
+					{
+						name: "tmp-dir"
+						emptyDir: {}
+					},
+					{
+						name: "storage-framework"
+						emptyDir: {}
+					},
 				]
 			}
 		}
 	}
+
+	#populateConfigScript: """
+		echo "Initializing default configurations..."
+		if [ -d "/etc/nginx" ]; then
+		  echo "Copying /etc/nginx to /mnt/nginx..."
+		  cp -a /etc/nginx/. /mnt/nginx/
+		fi
+		if [ -d "/usr/local/etc" ]; then
+		  echo "Copying /usr/local/etc to /mnt/php-fpm..."
+		  cp -a /usr/local/etc/. /mnt/php-fpm/
+		fi
+		echo "Configuration initialization complete."
+		"""
 
 	#setupStorageScript: """
 		echo "Setting up storage directories and permissions..."
@@ -199,15 +321,25 @@ import (
 		mkdir -p /var/www/html/storage/framework/sessions
 		mkdir -p /var/www/html/storage/framework/views
 		mkdir -p /var/www/html/bootstrap/cache
-		chmod -R 775 /var/www/html/storage
-		chmod -R 775 /var/www/html/bootstrap/cache
-		chown -R www-data:www-data /var/www/html/storage
-		chown -R www-data:www-data /var/www/html/bootstrap/cache
+		chmod -R 775 /var/www/html/storage/app /var/www/html/storage/framework /var/www/html/storage/logs /var/www/html/bootstrap/cache 2>/dev/null || true
+		if [ "$(id -u)" = "0" ]; then
+		  chown -R www-data:www-data /var/www/html/storage
+		  chown -R www-data:www-data /var/www/html/bootstrap/cache
+		fi
 		echo "Storage setup completed successfully"
 		"""
 
 	#migrationScript: """
 		echo "Starting database migration..."
+		
+		# Define run_cmd helper to handle privilege switching if running as root
+		run_cmd() {
+		  if [ "$(id -u)" = "0" ]; then
+		    su -s /bin/sh www-data -c "$1"
+		  else
+		    sh -c "$1"
+		  fi
+		}
 		
 		# Set maximum wait time (5 minutes)
 		MAX_WAIT_TIME=300
@@ -279,33 +411,34 @@ import (
 		echo "Database is ready, running migrations..."
 		
 		# Ensure proper permissions for Laravel
-		chown -R www-data:www-data /var/www/html/storage
-		chown -R www-data:www-data /var/www/html/bootstrap/cache
+		if [ "$(id -u)" = "0" ]; then
+		  chown -R www-data:www-data /var/www/html/storage
+		  chown -R www-data:www-data /var/www/html/bootstrap/cache
+		fi
 		
-		# Run Laravel cache clear and config cache as www-data
-		su -s /bin/sh www-data -c "php artisan config:clear" || echo "Config clear failed, continuing..."
-		su -s /bin/sh www-data -c "php artisan cache:clear" || echo "Cache clear failed, continuing..."
-		su -s /bin/sh www-data -c "php artisan route:clear" || echo "Route clear failed, continuing..."
-		su -s /bin/sh www-data -c "php artisan view:clear" || echo "View clear failed, continuing..."
+		# Run Laravel cache clear and config cache
+		run_cmd "php artisan config:clear" || echo "Config clear failed, continuing..."
+		run_cmd "php artisan cache:clear" || echo "Cache clear failed, continuing..."
+		run_cmd "php artisan route:clear" || echo "Route clear failed, continuing..."
+		run_cmd "php artisan view:clear" || echo "View clear failed, continuing..."
 		
-		# Run database migrations as www-data
-		su -s /bin/sh www-data -c "php artisan migrate --force --no-interaction"
+		# Run database migrations
+		run_cmd "php artisan migrate --force --no-interaction"
 		
 		# Optimize Laravel application for production
 		echo "Optimizing Laravel application..."
-		su -s /bin/sh www-data -c "php artisan config:cache" || echo "Config cache failed, continuing..."
-		su -s /bin/sh www-data -c "php artisan route:cache" || echo "Route cache failed, continuing..."
-		su -s /bin/sh www-data -c "php artisan view:cache" || echo "View cache failed, continuing..."
+		run_cmd "php artisan config:cache" || echo "Config cache failed, continuing..."
+		run_cmd "php artisan route:cache" || echo "Route cache failed, continuing..."
+		run_cmd "php artisan view:cache" || echo "View cache failed, continuing..."
 		
 		# Create storage link
-		su -s /bin/sh www-data -c "php artisan storage:link" || echo "Storage link failed, continuing..."
+		run_cmd "php artisan storage:link" || echo "Storage link failed, continuing..."
 		
 		if [ "\(#config.coolifyApp.migration.runSeeders)" = "true" ]; then
-			# Run database seeders as www-data
+			# Run database seeders
 			echo "Running database seeders..."
-			su -s /bin/sh www-data -c "php artisan db:seed --force --no-interaction"
+			run_cmd "php artisan db:seed --force --no-interaction"
 		fi
-
 		
 		echo "Database migration completed successfully"
 		"""
@@ -313,15 +446,25 @@ import (
 	#startupScript: """
 		echo "Starting Coolify with PHP-FPM configuration..."
 
-		# Ensure www-data user exists
-		id www-data >/dev/null 2>&1 || {
-		  echo "Creating www-data user..."
-		  addgroup -g 82 -S www-data 2>/dev/null || true
-		  adduser -u 82 -D -S -s /sbin/nologin -G www-data www-data 2>/dev/null || true
+		# Define run_cmd helper to handle privilege switching if running as root
+		run_cmd() {
+		  if [ "$(id -u)" = "0" ]; then
+		    su -s /bin/sh www-data -c "$1"
+		  else
+		    sh -c "$1"
+		  fi
 		}
 
-		echo "www-data user info:"
-		id www-data 2>/dev/null || echo "www-data user not found"
+		# Ensure www-data user exists (only if running as root)
+		if [ "$(id -u)" = "0" ]; then
+		  id www-data >/dev/null 2>&1 || {
+		    echo "Creating www-data user..."
+		    addgroup -g 82 -S www-data 2>/dev/null || true
+		    adduser -u 82 -D -S -s /sbin/nologin -G www-data www-data 2>/dev/null || true
+		  }
+		  echo "www-data user info:"
+		  id www-data 2>/dev/null || echo "www-data user not found"
+		fi
 
 		# Configure PHP-FPM
 		\(#phpFpmConfigScript)
@@ -334,24 +477,25 @@ import (
 		cd /var/www/html
 
 		# Ensure proper ownership and permissions
-		# Only change ownership if needed
-		if [ "$(stat -c %U:%G /var/www/html/storage)" != "www-data:www-data" ]; then
-		  echo "Fixing storage ownership..."
-		  chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+		if [ "$(id -u)" = "0" ]; then
+		  if [ "$(stat -c %U:%G /var/www/html/storage)" != "www-data:www-data" ]; then
+		    echo "Fixing storage ownership..."
+		    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+		  fi
 		fi
-		chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+		chmod -R 775 /var/www/html/storage/app /var/www/html/storage/framework /var/www/html/storage/logs /var/www/html/bootstrap/cache 2>/dev/null || true
 
-		# Run Laravel optimizations as www-data (only if not already cached)
+		# Run Laravel optimizations (only if not already cached)
 		if [ ! -f "/var/www/html/bootstrap/cache/config.php" ]; then
-		  su -s /bin/sh www-data -c "php artisan config:cache" || echo "Config cache failed, continuing..."
+		  run_cmd "php artisan config:cache" || echo "Config cache failed, continuing..."
 		fi
 
 		if [ ! -f "/var/www/html/bootstrap/cache/routes-v7.php" ]; then
-		  su -s /bin/sh www-data -c "php artisan route:cache" || echo "Route cache failed, continuing..."
+		  run_cmd "php artisan route:cache" || echo "Route cache failed, continuing..."
 		fi
 
 		if [ ! -f "/var/www/html/storage/framework/views" ] || [ -z "$(ls -A /var/www/html/storage/framework/views 2>/dev/null)" ]; then
-		  su -s /bin/sh www-data -c "php artisan view:cache" || echo "View cache failed, continuing..."
+		  run_cmd "php artisan view:cache" || echo "View cache failed, continuing..."
 		fi
 
 		# Signal handling for graceful shutdown
@@ -464,11 +608,13 @@ import (
 		      # Create or update pool configuration
 		      echo "Configuring pool: $pool_conf"
 		      echo '[www]' > "$pool_conf"
-		      echo 'user = www-data' >> "$pool_conf"
-		      echo 'group = www-data' >> "$pool_conf"
+		      if [ "$(id -u)" = "0" ]; then
+		        echo 'user = www-data' >> "$pool_conf"
+		        echo 'group = www-data' >> "$pool_conf"
+		        echo 'listen.owner = www-data' >> "$pool_conf"
+		        echo 'listen.group = www-data' >> "$pool_conf"
+		      fi
 		      echo 'listen = 127.0.0.1:9000' >> "$pool_conf"
-		      echo 'listen.owner = www-data' >> "$pool_conf"
-		      echo 'listen.group = www-data' >> "$pool_conf"
 		      echo 'listen.mode = 0660' >> "$pool_conf"
 		      echo 'pm = \(#config.coolifyApp.php.fpmPmControl)' >> "$pool_conf"
 		      echo 'pm.max_children = \(#config.coolifyApp.php.fpmPmMaxChildren)' >> "$pool_conf"
@@ -494,9 +640,11 @@ import (
 		  
 		  # Ensure logs directory exists and is writable
 		  mkdir -p /var/log/php-fpm /var/run/php
-		  chown -R www-data:www-data /var/log/php-fpm /var/run/php 2>/dev/null || {
-		    echo "Warning: Could not set ownership for PHP-FPM directories. This may cause logging issues."
-		  }
+		  if [ "$(id -u)" = "0" ]; then
+		    chown -R www-data:www-data /var/log/php-fpm /var/run/php 2>/dev/null || {
+		      echo "Warning: Could not set ownership for PHP-FPM directories. This may cause logging issues."
+		    }
+		  fi
 		  
 		  echo "=== PHP-FPM Configuration Summary ==="
 		  echo "PHP-FPM configuration files found:"
@@ -509,11 +657,20 @@ import (
 		if command -v nginx >/dev/null 2>&1; then
 		  echo "Configuring Nginx..."
 		  
+		  # Create necessary Nginx directories in the writable emptyDir volumes
+		  mkdir -p /var/log/nginx \\
+		           /var/lib/nginx/logs \\
+		           /var/lib/nginx/tmp \\
+		           /var/lib/nginx/tmp/client_body \\
+		           /var/lib/nginx/tmp/proxy \\
+		           /var/lib/nginx/tmp/fastcgi \\
+		           /var/lib/nginx/tmp/uwsgi \\
+		           /var/lib/nginx/tmp/scgi
+		  
 		  # Create nginx config
 		  cat > /etc/nginx/nginx.conf << 'EOF'
-		user www-data;
 		worker_processes auto;
-		pid /run/nginx.pid;
+		pid /var/run/nginx.pid;
 
 		events {
 		    worker_connections 1024;
@@ -585,3 +742,4 @@ import (
 		fi
 		"""
 }
+

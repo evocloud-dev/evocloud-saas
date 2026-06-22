@@ -30,19 +30,34 @@ import (
 				labels: (timoniv1.#Selector & {#Name: #config.metadata.name}).labels & {
 					"app.kubernetes.io/component": "soketi"
 				}
+				annotations: {
+					"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+					"container.seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				securityContext: {
 					runAsUser:    #config.securityContext.runAsUser
 					runAsGroup:   #config.securityContext.runAsGroup
 					fsGroup:      #config.securityContext.fsGroup
 					runAsNonRoot: #config.securityContext.runAsNonRoot
+					seccompProfile: type: "RuntimeDefault"
 				}
 				containers: [
 					{
 						name:            "soketi"
 						image:           "\(#config.soketi.image.repository):\(#config.soketi.image.tag)"
 						imagePullPolicy: #config.soketi.image.pullPolicy
+						securityContext: {
+							runAsUser:                #config.securityContext.runAsUser
+							runAsGroup:               #config.securityContext.runAsGroup
+							allowPrivilegeEscalation: #config.securityContext.allowPrivilegeEscalation
+							readOnlyRootFilesystem:   #config.securityContext.readOnlyRootFilesystem
+							if #config.securityContext.capabilities != _|_ {
+								capabilities: #config.securityContext.capabilities
+							}
+						}
 						ports: [
 							{
 								name:          "soketi-app"
