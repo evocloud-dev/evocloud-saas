@@ -23,16 +23,22 @@ import (
 				app: "redis"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					fsGroup: 1001
+				if #config.redis.podSecurityContext != _|_ {
+					securityContext: #config.redis.podSecurityContext
 				}
+				serviceAccountName:            #config.metadata.name
+				automountServiceAccountToken: false
 				initContainers: [
 					{
 						name:  "init-redis"
 						image: "busybox:latest"
 						securityContext: {
-							runAsUser:  1001
-							runAsGroup: 1001
+							runAsUser:                1001
+							runAsGroup:               1001
+							runAsNonRoot:             true
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: drop: ["ALL"]
 						}
 						command: ["sh", "-c", "mkdir -p /mnt/etc /mnt/tmp /mnt/logs /mnt/data && if [ -f /config/redis.conf ]; then cp /config/redis.conf /mnt/etc/redis.conf; fi"]
 						volumeMounts: [
@@ -63,9 +69,8 @@ import (
 					{
 						name:  "redis"
 						image: "\(#config.redis.image.registry)/\(#config.redis.image.repository):\(#config.redis.image.tag)"
-						securityContext: {
-							runAsUser:  1001
-							runAsGroup: 1001
+						if #config.redis.securityContext != _|_ {
+							securityContext: #config.redis.securityContext
 						}
 						env: [
 							{
@@ -111,7 +116,14 @@ import (
 								name:      "redis-data"
 								mountPath: "/bitnami/redis/data"
 							},
+							{
+								name:      "redis-tmp"
+								mountPath: "/tmp"
+							},
 						]
+						if #config.redis.resources != _|_ {
+							resources: #config.redis.resources
+						}
 					},
 				]
 				volumes: [

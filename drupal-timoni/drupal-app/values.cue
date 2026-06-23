@@ -21,7 +21,7 @@ values: {
 
 	drupal: {
 		image:                "drupalwxt/site-wxt"
-		tag:                  "6.1.0"
+		tag:                  "6.1.4"
 		initContainerImage:   "alpine:3.10"
 		imagePullPolicy:      "IfNotPresent"
 		replicas:             1
@@ -160,7 +160,20 @@ values: {
 		disableDefaultFilesMount: false
 		volumes:                  []
 		volumeMounts:             []
-		securityContext:          {}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                33
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 33
+			runAsUser: 33
+			runAsGroup: 33
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
 		smtp: {
 			host:     "mail"
 			tls:      true
@@ -175,13 +188,22 @@ values: {
 		configSync: directory: "/private/config/sync"
 		configSplit: enabled:  false
 		podAnnotations:        {}
-		resources:             {}
+		resources: {
+			limits: {
+				cpu:    "1500m"
+				memory: "1536Mi"
+			}
+			requests: {
+				cpu:    "200m"
+				memory: "512Mi"
+			}
+		}
 		volumePermissions:     enabled: false
 		serviceAccount: {
 			create:                       true
 			name:                         ""
 			annotations:                  {}
-			automountServiceAccountToken: true
+			automountServiceAccountToken: false
 		}
 		tolerations:  []
 		nodeSelector: {}
@@ -199,7 +221,7 @@ values: {
 
 	nginx: {
 		image:           "drupalwxt/site-wxt"
-		tag:             "6.1.0-nginx"
+		tag:             "6.1.4-nginx"
 		imagePullPolicy: "IfNotPresent"
 		replicas:        1
 		resolver:        "kube-dns.kube-system.svc.cluster.local"
@@ -232,11 +254,33 @@ values: {
 		customLocations:      ""
 		volumes:              []
 		volumeMounts:         []
-		securityContext:      {}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                33
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 33
+			runAsUser: 33
+			runAsGroup: 33
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
 		gzip:                 "gzip on;\n  gzip_proxied any;\n  gzip_static on;\n  gzip_vary on;\n  gzip_disable \"msie6\";\n  gzip_types application/ecmascript application/javascript application/json application/pdf application/postscript application/x-javascript image/svg+xml text/css text/csv text/javascript text/plain text/xml;",
 		client_max_body_size: "20m"
 		real_ip_header:       "X-Forwarded-For"
-		resources:            {}
+		resources: {
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+			requests: {
+				cpu:    "50m"
+				memory: "128Mi"
+			}
+		}
 		tolerations:         []
 		nodeSelector:        {}
 		autoscaling: {
@@ -389,6 +433,20 @@ values: {
 				tag:        "12-debian-12"
 			}
 		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                1001
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 1001
+			runAsUser: 1001
+			runAsGroup: 1001
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 
 	pgbouncer: {
@@ -446,6 +504,30 @@ values: {
 		// }
 		// replica: replicaCount: 0
 		// queue: enabled: true
+		resources: {
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+			requests: {
+				cpu:    "50m"
+				memory: "128Mi"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                1001
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 1001
+			runAsUser: 1001
+			runAsGroup: 1001
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 
 	solr: {
@@ -470,14 +552,38 @@ values: {
 			size:         "8Gi"
 			storageClass: "standard"
 		}
+		resources: {
+			limits: {
+				cpu:    "1000m"
+				memory: "2Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "512Mi"
+			}
 		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                1001
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 1001
+			runAsUser: 1001
+			runAsGroup: 1001
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
+	}
 
 	varnish: {
 		enabled:      true
 		replicaCount: 1
 		varnishd: {
 			image:           "varnish"
-			tag:             "6.6.2"
+			tag:             "9.0.3"
 			imagePullPolicy: "IfNotPresent"
 		}
 		service: {
@@ -495,7 +601,30 @@ values: {
 			mode:    "DISABLE"
 		}
 		clusterDomain: "cluster.local"
-		resources:     {}
+		resources: {
+			limits: {
+				cpu:    "1000m"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                999
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			fsGroup: 999
+			runAsUser: 999
+			runAsGroup: 999
+			runAsNonRoot: true
+			seccompProfile: type: "RuntimeDefault"
+		}
 		tolerations:   []
 		nodeSelector:  {}
 		affinity:      {}

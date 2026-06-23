@@ -233,8 +233,9 @@ import (
 		}
 		serviceType:      *"ClusterIP" | string
 		podAnnotations?:  timoniv1.#Annotations
-		resources?:       corev1.#ResourceRequirements
-		securityContext?: corev1.#PodSecurityContext
+		resources:        corev1.#ResourceRequirements
+		securityContext:  corev1.#SecurityContext
+		podSecurityContext: corev1.#PodSecurityContext
 		tolerations:      [...corev1.#Toleration]
 		nodeSelector:     [string]: string
 		volumes:          [...corev1.#Volume]
@@ -270,7 +271,8 @@ import (
 			targetMemoryUtilizationPercentage: *80 | int
 		}
 		resources: corev1.#ResourceRequirements
-		securityContext: fsGroup: *33 | int
+		securityContext?: corev1.#SecurityContext
+		podSecurityContext?: corev1.#PodSecurityContext
 		volumeMounts: [...corev1.#VolumeMount]
 		volumes: [...corev1.#Volume]
 		tolerations: [...corev1.#Toleration]
@@ -320,17 +322,9 @@ import (
 	}
 
 	// Workload settings
-	resources: corev1.#ResourceRequirements
-	securityContext: corev1.#SecurityContext & {
-		allowPrivilegeEscalation: *false | bool
-		capabilities: drop: *["ALL"] | [...string]
-		readOnlyRootFilesystem: *true | bool
-		runAsNonRoot:           *true | bool
-		runAsUser:              *33 | int
-	}
-	podSecurityContext: corev1.#PodSecurityContext & {
-		fsGroup: *33 | int
-	}
+	resources:          drupal.resources
+	securityContext:    drupal.securityContext
+	podSecurityContext: drupal.podSecurityContext
 	podAnnotations?: timoniv1.#Annotations
 	service: {
 		annotations?: timoniv1.#Annotations
@@ -429,6 +423,8 @@ import (
 				tag:        *"12-debian-12" | string
 			}
 		}
+		securityContext?: corev1.#SecurityContext
+		podSecurityContext?: corev1.#PodSecurityContext
 	}
 
 	// Redis and Varnish blocks
@@ -461,6 +457,9 @@ import (
 		}
 		replica: replicaCount: *0 | int
 		queue: enabled: *true | bool
+		resources?: corev1.#ResourceRequirements
+		securityContext?: corev1.#SecurityContext
+		podSecurityContext?: corev1.#PodSecurityContext
 	}
 
 	varnish: {
@@ -489,6 +488,8 @@ import (
 		clusterDomain:         *"cluster.local" | string
 		varnishConfigContent?: string
 		resources:             corev1.#ResourceRequirements
+		securityContext?:      corev1.#SecurityContext
+		podSecurityContext?:   corev1.#PodSecurityContext
 		nodeSelector: [string]: string
 		tolerations: [...corev1.#Toleration]
 		affinity: {
@@ -527,6 +528,8 @@ import (
 			size:          *"8Gi" | string
 		}
 		resources: corev1.#ResourceRequirements
+		securityContext?: corev1.#SecurityContext
+		podSecurityContext?: corev1.#PodSecurityContext
 		strategy:  *"Recreate" | "RollingUpdate" | "Recreate"
 		volumePermissions: {
 			enabled: *true | bool

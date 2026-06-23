@@ -30,6 +30,17 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName: [ if #config.drupal.serviceAccount.name != "" { #config.drupal.serviceAccount.name }, #config.metadata.name ][0]
+				automountServiceAccountToken: false
+				securityContext: {
+					runAsUser:    999
+					runAsGroup:   999
+					fsGroup:      999
+					runAsNonRoot: true
+					seccompProfile: {
+						type: "RuntimeDefault"
+					}
+				}
 				if #config.varnish.nodeSelector != _|_ {
 					nodeSelector: #config.varnish.nodeSelector
 				}
@@ -110,9 +121,12 @@ import (
 						]
 						resources: #config.varnish.resources
 						securityContext: {
-							runAsUser:    999
-							runAsGroup:   999
-							runAsNonRoot: true
+							runAsUser:                999
+							runAsGroup:               999
+							runAsNonRoot:             true
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: drop: ["ALL"]
 						}
 					},
 				]

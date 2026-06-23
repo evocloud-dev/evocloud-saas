@@ -36,6 +36,7 @@ import (
 			}
 			spec: corev1.#PodSpec & {
 				serviceAccountName: [ if #config.drupal.serviceAccount.name != "" { #config.drupal.serviceAccount.name }, #config.metadata.name ][0]
+				automountServiceAccountToken: false
 				
 				initContainers: [
 					{
@@ -92,8 +93,12 @@ import (
 							},
 						]
 						securityContext: {
-							runAsUser:  33
-							runAsGroup: 33
+							runAsUser:                33
+							runAsGroup:               33
+							runAsNonRoot:             true
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: drop: ["ALL"]
 						}
 					},
 				]
@@ -143,7 +148,7 @@ import (
 							}
 						}
 
-						securityContext: #config.securityContext
+						securityContext: #config.drupal.securityContext
 						volumeMounts: [
 							{
 								name:      "cm-drupal"
@@ -220,8 +225,8 @@ import (
 								mountPath: "/var/www/html/drush"
 							},
 						]
-						resources:       #config.resources
-						securityContext: #config.securityContext
+						resources:       #config.drupal.resources
+						securityContext: #config.drupal.securityContext
 					},
 					if #config.proxysql.enabled {
 						{
@@ -305,8 +310,8 @@ import (
 					},
 				]
 
-				if #config.podSecurityContext != _|_ {
-					securityContext: #config.podSecurityContext
+				if #config.drupal.podSecurityContext != _|_ {
+					securityContext: #config.drupal.podSecurityContext
 				}
 				if #config.topologySpreadConstraints != _|_ {
 					topologySpreadConstraints: #config.topologySpreadConstraints

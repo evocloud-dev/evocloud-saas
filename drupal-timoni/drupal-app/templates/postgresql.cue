@@ -32,9 +32,32 @@ import (
 				app: "postgresql"
 			}
 			spec: corev1.#PodSpec & {
-				if #config.postgresql.volumePermissions.enabled {
-					securityContext: fsGroup: 1001
+				if #config.postgresql.podSecurityContext != _|_ {
+					securityContext: #config.postgresql.podSecurityContext
 				}
+				serviceAccountName:            #config.metadata.name
+				automountServiceAccountToken: false
+				initContainers: [
+					{
+						name:  "prepare-rw-conf"
+						image: "\(#config.postgresql.image.registry)/\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
+						command: ["sh", "-c", "cp -rT /opt/bitnami/postgresql/conf /opt/bitnami/postgresql/conf-rw"]
+						securityContext: {
+							runAsUser:                1001
+							runAsGroup:               1001
+							runAsNonRoot:             true
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: drop: ["ALL"]
+						}
+						volumeMounts: [
+							{
+								name:      "postgresql-conf"
+								mountPath: "/opt/bitnami/postgresql/conf-rw"
+							},
+						]
+					},
+				]
 				containers: [
 					{
 						name:  "postgresql"
@@ -90,9 +113,24 @@ import (
 									mountPath: "/bitnami/postgresql/conf/conf.d"
 								}
 							},
+							{
+								name:      "postgresql-tmp"
+								mountPath: "/opt/bitnami/postgresql/tmp"
+							},
+							{
+								name:      "postgresql-tmp"
+								mountPath: "/tmp"
+							},
+							{
+								name:      "postgresql-conf"
+								mountPath: "/opt/bitnami/postgresql/conf"
+							},
 						]
 						if #config.postgresql.primary.resources != _|_ {
 							resources: #config.postgresql.primary.resources
+						}
+						if #config.postgresql.securityContext != _|_ {
+							securityContext: #config.postgresql.securityContext
 						}
 					},
 				]
@@ -106,6 +144,14 @@ import (
 							name: "postgresql-config"
 							configMap: name: "\(#config.metadata.name)-postgresql-config"
 						}
+					},
+					{
+						name: "postgresql-tmp"
+						emptyDir: {}
+					},
+					{
+						name: "postgresql-conf"
+						emptyDir: {}
 					},
 				]
 			}
