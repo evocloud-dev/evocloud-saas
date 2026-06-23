@@ -84,15 +84,72 @@ import (
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
 			spec: corev1.#PodSpec & {
+				if #config.serviceAccount.name != "" {
+					serviceAccountName: #config.serviceAccount.name
+				}
+				if #config.serviceAccount.name == "" {
+					if #config.serviceAccount.create {
+						serviceAccountName: #config.metadata.name
+					}
+					if !#config.serviceAccount.create {
+						serviceAccountName: "default"
+					}
+				}
+				securityContext: {
+					runAsUser:    999
+					runAsGroup:   999
+					fsGroup:      999
+					runAsNonRoot: true
+				}
+				initContainers: [
+					{
+						name:  "volume-permissions"
+						image: "docker.io/library/busybox:1.37"
+						command: ["sh", "-c", "chown -R 999:999 /var/lib/postgresql /var/run/postgresql"]
+						securityContext: {
+							runAsUser:                0
+							runAsNonRoot:             false
+							allowPrivilegeEscalation: false
+							capabilities: {
+								drop: ["ALL"]
+								add: ["CHOWN", "FOWNER", "DAC_OVERRIDE"]
+							}
+						}
+						volumeMounts: [
+							{
+								name:      "postgresql-data"
+								mountPath: "/var/lib/postgresql"
+							},
+							{
+								name:      "postgres-run"
+								mountPath: "/var/run/postgresql"
+							},
+						]
+					}
+				]
 				containers: [{
 					name:            "postgresql"
 					image:           "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
 					imagePullPolicy: #config.postgresql.image.pullPolicy
+					securityContext: {
+						runAsUser:                999
+						runAsGroup:               999
+						allowPrivilegeEscalation: false
+						readOnlyRootFilesystem:   true
+						capabilities: drop: ["ALL"]
+					}
+					if #config.postgresql.resources != _|_ {
+						resources: #config.postgresql.resources
+					}
 					ports: [{
 						containerPort: 5432
 						name:          "postgresql"
 					}]
 					env: [
+						{
+							name:  "PGDATA"
+							value: "/var/lib/postgresql/data"
+						},
 						{
 							name:  "POSTGRES_DB"
 							value: #config.postgresql.auth.database
@@ -125,6 +182,14 @@ import (
 						{
 							name:      "init-scripts"
 							mountPath: "/docker-entrypoint-initdb.d"
+						},
+						{
+							name:      "postgres-run"
+							mountPath: "/var/run/postgresql"
+						},
+						{
+							name:      "tmp-dir"
+							mountPath: "/tmp"
 						}
 					]
 				}]
@@ -132,6 +197,14 @@ import (
 					{
 						name: "init-scripts"
 						configMap: name: #initdbCmName
+					},
+					{
+						name: "postgres-run"
+						emptyDir: {}
+					},
+					{
+						name: "tmp-dir"
+						emptyDir: {}
 					}
 				]
 			}

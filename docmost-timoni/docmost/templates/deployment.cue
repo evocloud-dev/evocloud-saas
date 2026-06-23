@@ -142,6 +142,19 @@ import (
 							"echo \"Waiting for \(_redisHost):\(_redisPort) ...\"; until nc -z -w2 \(_redisHost) \(_redisPort); do sleep 2; done; echo \"Redis is reachable.\"",
 						]
 					},
+					{
+						name:  "populate-client-dist"
+						image: #config.image.reference
+						imagePullPolicy: #config.image.pullPolicy
+						command: ["sh", "-c", "cp -r /app/apps/client/dist/. /mnt/client-dist/"]
+						volumeMounts: [
+							{
+								name:      "client-dist"
+								mountPath: "/mnt/client-dist"
+							},
+						]
+						securityContext: #config.securityContext
+					},
 				]
 				containers: [{
 					name:            "docmost"
@@ -326,6 +339,14 @@ import (
 								mountPath: "/app/data/storage"
 							}
 						},
+						{
+							name:      "tmp-dir"
+							mountPath: "/tmp"
+						},
+						{
+							name:      "client-dist"
+							mountPath: "/app/apps/client/dist"
+						},
 					], #config.extraVolumeMounts])
 				}]
 				volumes: list.Concat([[
@@ -344,6 +365,14 @@ import (
 								}
 							}
 						}
+					},
+					{
+						name: "tmp-dir"
+						emptyDir: {}
+					},
+					{
+						name: "client-dist"
+						emptyDir: {}
 					},
 				], #config.extraVolumes])
 

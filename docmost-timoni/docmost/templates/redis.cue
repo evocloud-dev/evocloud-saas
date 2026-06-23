@@ -72,10 +72,37 @@ import (
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
 			spec: corev1.#PodSpec & {
+				if #config.serviceAccount.name != "" {
+					serviceAccountName: #config.serviceAccount.name
+				}
+				if #config.serviceAccount.name == "" {
+					if #config.serviceAccount.create {
+						serviceAccountName: #config.metadata.name
+					}
+					if !#config.serviceAccount.create {
+						serviceAccountName: "default"
+					}
+				}
+				securityContext: {
+					runAsUser:    10001
+					runAsGroup:   10001
+					fsGroup:      10001
+					runAsNonRoot: true
+				}
 				containers: [{
 					name:            "redis"
 					image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
 					imagePullPolicy: #config.redis.image.pullPolicy
+					securityContext: {
+						runAsUser:                10001
+						runAsGroup:               10001
+						allowPrivilegeEscalation: false
+						readOnlyRootFilesystem:   true
+						capabilities: drop: ["ALL"]
+					}
+					if #config.redis.resources != _|_ {
+						resources: #config.redis.resources
+					}
 					ports: [{
 						containerPort: 6379
 						name:          "redis"

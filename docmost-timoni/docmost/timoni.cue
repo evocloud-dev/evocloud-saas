@@ -11,7 +11,7 @@ import (
 // Define the module metadata.
 module: {
 	name:    "evo-docmost"
-	version: "0.1.0"
+	version: "0.1.1"
 }
 
 

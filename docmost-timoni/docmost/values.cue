@@ -45,7 +45,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.3-trixie"
+			tag:        "18.4-trixie"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
@@ -81,6 +81,16 @@ values: {
 				size:    "8Gi"
 			}
 		}
+		resources: {
+			limits: {
+				cpu:    "1000m"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+		}
 	}
 
 	redis: {
@@ -99,6 +109,16 @@ values: {
 			persistence: {
 				enabled: true
 				size:    "1Gi"
+			}
+		}
+		resources: {
+			limits: {
+				cpu:    "500m"
+				memory: "256Mi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "128Mi"
 			}
 		}
 		external: {
@@ -143,7 +163,7 @@ values: {
 		backoffLimit:               1
 		archivePrefix:              "docmost"
 		images: {
-			postgresql: "docker.io/library/postgres:18.3-trixie"
+			postgresql: "docker.io/library/postgres:18.4-trixie"
 			uploader:   "docker.io/helmforge/mc:1.0.0"
 		}
 		resources: {
@@ -227,12 +247,21 @@ values: {
 	}
 
 
-	podSecurityContext: {}
+	podSecurityContext: {
+		fsGroup: 10001
+	}
 
-	securityContext: {}
+	securityContext: {
+		runAsUser:                10001
+		runAsGroup:               10001
+		runAsNonRoot:             true
+		readOnlyRootFilesystem:   true
+		allowPrivilegeEscalation: false
+		capabilities: drop: ["ALL"]
+	}
 
 	serviceAccount: {
-		create:      false
+		create:      true
 		name:        ""
 		annotations: {}
 	}
@@ -258,7 +287,7 @@ values: {
 	extraManifests: []
 
 	gateway: {
-		enabled:     true
+		enabled:     false
 		annotations: {}
 		parentRefs: []
 		hostnames: []

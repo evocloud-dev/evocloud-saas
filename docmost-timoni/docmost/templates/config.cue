@@ -73,6 +73,7 @@ import (
 				size:    *"8Gi" | string
 			}
 		}
+		resources?: corev1.#ResourceRequirements
 	}
 
 	redis: {
@@ -100,6 +101,7 @@ import (
 			existingSecret:            *"" | string
 			existingSecretPasswordKey: *"redis-password" | string
 		}
+		resources?: corev1.#ResourceRequirements
 	}
 
 	storage: {
