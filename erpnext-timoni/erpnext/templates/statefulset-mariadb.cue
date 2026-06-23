@@ -28,17 +28,21 @@ import (
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName: #config.metadata.name
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
-				if #config.podSecurityContext != _|_ {
-					securityContext: #config.podSecurityContext
+				if #config["mariadb-sts"].podSecurityContext != _|_ {
+					securityContext: #config["mariadb-sts"].podSecurityContext
 				}
 				containers: [
 					{
 						name:            "mariadb"
 						image:           "\(#config["mariadb-sts"].image.repository):\(#config["mariadb-sts"].image.tag)"
 						imagePullPolicy: #config["mariadb-sts"].image.pullPolicy
+						if #config["mariadb-sts"].securityContext != _|_ {
+							securityContext: #config["mariadb-sts"].securityContext
+						}
 						env: [
 							{
 								name: "MARIADB_ROOT_PASSWORD"

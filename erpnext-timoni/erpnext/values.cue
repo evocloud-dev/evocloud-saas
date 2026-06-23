@@ -10,7 +10,7 @@ values: {
 
 	image: {
 		repository: "frappe/erpnext"
-		tag:        "v16.10.1"
+		tag:        "v16.21.1"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -52,6 +52,7 @@ values: {
 				memory: "128Mi"
 			}
 			limits: {
+				cpu: "250m"
 				memory: "512Mi"
 			}
 		}
@@ -104,6 +105,7 @@ values: {
 					memory: "128Mi"
 				}
 				limits: {
+					cpu: "500m"
 					memory: "1Gi"
 				}
 			}
@@ -131,6 +133,7 @@ values: {
 					memory: "128Mi"
 				}
 				limits: {
+					cpu: "500m"
 					memory: "1Gi"
 				}
 			}
@@ -165,6 +168,7 @@ values: {
 					memory: "128Mi"
 				}
 				limits: {
+					cpu: "500m"
 					memory: "1Gi"
 				}
 			}
@@ -199,6 +203,7 @@ values: {
 					memory: "128Mi"
 				}
 				limits: {
+					cpu: "500m"
 					memory: "1Gi"
 				}
 			}
@@ -226,6 +231,7 @@ values: {
 					memory: "128Mi"
 				}
 				limits: {
+					cpu: "250m"
 					memory: "512Mi"
 				}
 			}
@@ -325,6 +331,7 @@ values: {
 				memory: "128Mi"
 			}
 			limits: {
+				cpu: "250m"
 				memory: "512Mi"
 			}
 		}
@@ -373,7 +380,7 @@ values: {
 	}
 
 	httproute: {
-		enabled:     true
+		enabled:     false
 		annotations: {}
 		parentRefs: [{
 			gatewayName:      "erpnext-gateway",
@@ -400,6 +407,9 @@ values: {
 			nodeSelector: {}
 			tolerations: []
 			affinity: {}
+			podSecurityContext: {
+				runAsNonRoot: false
+			}
 		}
 		configure: {
 			enabled:      true
@@ -410,6 +420,9 @@ values: {
 			tolerations: []
 			affinity: {}
 			envVars: []
+			podSecurityContext: {
+				runAsNonRoot: false
+			}
 		}
 
 		createSite: {
@@ -543,11 +556,16 @@ values: {
 
 	podSecurityContext: {
 		supplementalGroups: [1000]
+		runAsNonRoot: true
+		runAsUser:    1000
+		runAsGroup:   1000
 	}
 
 	securityContext: {
+		allowPrivilegeEscalation: false
 		capabilities: {
-			add: ["CAP_CHOWN"]
+			drop: ["ALL"]
+			add: ["CHOWN", "NET_BIND_SERVICE", "SETGID", "SETUID"]
 		}
 	}
 
@@ -563,7 +581,16 @@ values: {
 		persistence: {
 			size: "8Gi"
 		}
-		resources: {}
+		resources: {
+			requests: {
+				cpu: "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu: "500m"
+				memory: "512Mi"
+			}
+		}
 		myCnf: """
 			[mysqld]
 			skip-character-set-client-handshake
@@ -571,6 +598,16 @@ values: {
 			character-set-server=utf8mb4
 			collation-server=utf8mb4_unicode_ci
 			"""
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+		}
 	}
 
 	"mariadb-subchart": {
@@ -598,7 +635,7 @@ values: {
 		storage: enabled: true
 		image: {
 			repository: "ghcr.io/dragonflydb/dragonfly"
-			tag:        "v1.37.0"
+			tag:        "v1.39.0"
 		}
 		args: ["--proactor_threads=1"]
 	}
@@ -619,7 +656,7 @@ values: {
 
 		image: {
 			repository: "postgres"
-			tag:        "15"
+			tag:        "17"
 			pullPolicy: "IfNotPresent"
 		}
 		postgresUser:     "postgres"
@@ -627,7 +664,26 @@ values: {
 		persistence: {
 			size: "8Gi"
 		}
-		resources: {}
+		resources: {
+			requests: {
+				cpu: "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu: "500m"
+				memory: "512Mi"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+		}
 	}
 
 	"redis-cache": {
@@ -655,7 +711,30 @@ values: {
 
 		image: {
 			repository: "valkey/valkey"
-			tag:        "7.2"
+			tag:        "7.2.13"
+		}
+		resources: {
+			requests: {
+				cpu: "10m"
+				memory: "32Mi"
+			}
+			limits: {
+				cpu: "100m"
+				memory: "128Mi"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                10001
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			runAsNonRoot:   true
+			runAsUser:      10001
+			runAsGroup:     10001
+			fsGroup:        10001
 		}
 	}
 
@@ -664,7 +743,30 @@ values: {
 
 		image: {
 			repository: "valkey/valkey"
-			tag:        "7.2"
+			tag:        "7.2.13"
+		}
+		resources: {
+			requests: {
+				cpu: "10m"
+				memory: "32Mi"
+			}
+			limits: {
+				cpu: "100m"
+				memory: "128Mi"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			runAsNonRoot:             true
+			runAsUser:                10001
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			runAsNonRoot:   true
+			runAsUser:      10001
+			runAsGroup:     10001
+			fsGroup:        10001
 		}
 	}
 }

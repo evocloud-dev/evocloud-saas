@@ -391,25 +391,27 @@ import (
 
 	jobs: {
 		volumePermissions: {
-			enabled:      *false | bool
-			jobName?:     string
-			backoffLimit: *0 | int
-			resources:    corev1.#ResourceRequirements
-			nodeSelector: {[string]: string}
-			tolerations:  [...corev1.#Toleration]
-			affinity:     corev1.#Affinity
+			enabled:            *false | bool
+			jobName?:           string
+			backoffLimit:       *0 | int
+			resources:          corev1.#ResourceRequirements
+			nodeSelector:       {[string]: string}
+			tolerations:        [...corev1.#Toleration]
+			affinity:           corev1.#Affinity
+			podSecurityContext: corev1.#PodSecurityContext
 		}
 		configure: {
-			enabled:      *true | bool
-			jobName?:     string
-			fixVolume:    *true | bool
-			backoffLimit: *0 | int
-			resources:    corev1.#ResourceRequirements
-			nodeSelector: {[string]: string}
-			tolerations:  [...corev1.#Toleration]
-			affinity:     corev1.#Affinity
-			envVars:         *[] | [...corev1.#EnvVar]
-			initContainers:  *[] | [...corev1.#Container]
+			enabled:            *true | bool
+			jobName?:           string
+			fixVolume:          *true | bool
+			backoffLimit:       *0 | int
+			resources:          corev1.#ResourceRequirements
+			nodeSelector:       {[string]: string}
+			tolerations:        [...corev1.#Toleration]
+			affinity:           corev1.#Affinity
+			podSecurityContext: corev1.#PodSecurityContext
+			envVars:            *[] | [...corev1.#EnvVar]
+			initContainers:     *[] | [...corev1.#Container]
 			command:    [...string] | *["bash", "-c"]
 			args:       [...string] | *[
 				"""
@@ -564,8 +566,10 @@ import (
 			size:         *"8Gi" | string
 			storageClass: *"" | string
 		}
-		resources: corev1.#ResourceRequirements
-		myCnf:     *"" | string
+		resources:          corev1.#ResourceRequirements
+		myCnf:              *"" | string
+		securityContext:    corev1.#SecurityContext
+		podSecurityContext: corev1.#PodSecurityContext
 	}
 
 	"mariadb-subchart": {
@@ -632,7 +636,9 @@ import (
 			size:         *"8Gi" | string
 			storageClass: *"" | string
 		}
-		resources: corev1.#ResourceRequirements
+		resources:          corev1.#ResourceRequirements
+		securityContext:    corev1.#SecurityContext
+		podSecurityContext: corev1.#PodSecurityContext
 	}
 
 	"redis-cache": {
@@ -660,6 +666,9 @@ import (
 			tag:        *"7.2" | string
 			digest?:    string
 		}
+		resources:          corev1.#ResourceRequirements
+		securityContext:    corev1.#SecurityContext
+		podSecurityContext: corev1.#PodSecurityContext
 	}
 
 	"valkey-queue": {
@@ -669,6 +678,9 @@ import (
 			tag:        *"7.2" | string
 			digest?:    string
 		}
+		resources:          corev1.#ResourceRequirements
+		securityContext:    corev1.#SecurityContext
+		podSecurityContext: corev1.#PodSecurityContext
 	}
 
 	test: {
@@ -915,6 +927,14 @@ import (
 
 		if config.httproute.enabled {
 			"httproute": #HTTPRoute & {#config: config}
+		}
+
+		for name, obj in objects {
+			if obj.kind != _|_ {
+				if obj.kind == "Deployment" || obj.kind == "StatefulSet" || obj.kind == "Job" {
+					"\(name)": spec: template: spec: automountServiceAccountToken: false
+				}
+			}
 		}
 	}
 
