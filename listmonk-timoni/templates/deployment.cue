@@ -29,6 +29,7 @@ import (
 				labels: #helpers.selectorLabels
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
@@ -45,6 +46,7 @@ import (
 								key:  #config.database.passwordKey
 							}
 						}]
+						securityContext: #config.securityContext
 					}]
 				}
 				serviceAccountName: #helpers.serviceAccountName
@@ -61,6 +63,11 @@ import (
 					}, {
 						name:      "uploads"
 						mountPath: "/listmonk/uploads"
+					}, if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+						{
+							name:      "tmp"
+							mountPath: "/tmp"
+						}
 					}]
 					ports: [{
 						name:          "http"
@@ -136,6 +143,11 @@ import (
 						if !#config.storage.enabled {
 							emptyDir: {}
 						}
+					}
+				}, if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+					{
+						name: "tmp"
+						emptyDir: {}
 					}
 				}]
 				if #config.nodeSelector != _|_ {

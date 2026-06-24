@@ -29,7 +29,9 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				restartPolicy: "OnFailure"
+				securityContext: #config.podSecurityContext
 				initContainers: [{
 					name:            "db-check"
 					image:           "\(#config.postgres.image.repository):\(#config.postgres.image.tag)"
@@ -71,9 +73,15 @@ import (
 							key:  #config.database.passwordKey
 						}
 					}]
+					securityContext: #config.securityContext
 					volumeMounts: [{
 						name:      "init-flag"
 						mountPath: "/shared"
+					}, if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+						{
+							name:      "tmp"
+							mountPath: "/tmp"
+						}
 					}]
 				}]
 				if #config.imagePullSecrets != _|_ {
@@ -83,10 +91,16 @@ import (
 					name:            "listmonk-init"
 					image:           "\(#config.image.repository):\(#config.image.tag)"
 					imagePullPolicy: #config.image.pullPolicy
+					securityContext: #config.securityContext
 					volumeMounts: [{
 						name:      "listmonk-config"
 						mountPath: "/listmonk/config.toml"
 						subPath:   "config.toml"
+					}, if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+						{
+							name:      "tmp"
+							mountPath: "/tmp"
+						}
 					}]
 					command: [
 						"/bin/sh",
@@ -154,6 +168,11 @@ import (
 							key:  "config.toml"
 							path: "config.toml"
 						}]
+					}
+				}, if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+					{
+						name: "tmp"
+						emptyDir: {}
 					}
 				}]
 			}

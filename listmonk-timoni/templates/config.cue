@@ -32,12 +32,19 @@ import (
 
 	podAnnotations: {[string]: string}
 	podSecurityContext: corev1.#PodSecurityContext | *{
-		fsGroup: 1000
+		runAsUser:           10001
+		runAsGroup:          10001
+		fsGroup:             10001
 	}
 	securityContext: corev1.#SecurityContext | *{
-		runAsUser:                1000
+		runAsUser:                10001
+		runAsGroup:               10001
 		runAsNonRoot:             true
 		allowPrivilegeEscalation: false
+		readOnlyRootFilesystem:   true
+		capabilities: {
+			drop: ["ALL"]
+		}
 	}
 
 	service: {
@@ -176,6 +183,21 @@ import (
 			limits: {
 				cpu:    "500m"
 				memory: "1Gi"
+			}
+		}
+		podSecurityContext: corev1.#PodSecurityContext | *{}
+		securityContext:    corev1.#SecurityContext | *{}
+		volumePermissions: {
+			enabled:   bool | *true
+			resources: corev1.#ResourceRequirements | *{
+				requests: {
+					cpu:    "10m"
+					memory: "32Mi"
+				}
+				limits: {
+					cpu:    "50m"
+					memory: "64Mi"
+				}
 			}
 		}
 	}
