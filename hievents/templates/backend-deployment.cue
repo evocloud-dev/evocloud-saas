@@ -46,16 +46,44 @@ import (
 				if len(#config.backend.podSecurityContext) > 0 {
 					securityContext: #config.backend.podSecurityContext
 				}
-				if #config.initContainers.postgresql.enabled || #config.initContainers.redis.enabled {
-					initContainers: [
-						if #config.initContainers.postgresql.enabled {
-							#config._postgresInitContainer
-						},
-						if #config.initContainers.redis.enabled {
-							#config._redisInitContainer
-						},
-					]
-				}
+				initContainers: [
+					if #config.initContainers.postgresql.enabled {
+						#config._postgresInitContainer
+					},
+					if #config.initContainers.redis.enabled {
+						#config._redisInitContainer
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name:            "init-nginx-config"
+							image:           #config._backendImageRef
+							imagePullPolicy: #config.backend.image.pullPolicy
+							command: ["sh", "-c", "cp -a /etc/nginx/. /mnt/nginx-config/"]
+							if len(#config.backend.securityContext) > 0 {
+								securityContext: #config.backend.securityContext
+							}
+							volumeMounts: [{
+								name:      "nginx-config-dir"
+								mountPath: "/mnt/nginx-config"
+							}]
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name:            "init-public-dir"
+							image:           #config._backendImageRef
+							imagePullPolicy: #config.backend.image.pullPolicy
+							command: ["sh", "-c", "cp -a /var/www/html/public/. /mnt/public-dir/ && ln -sf /var/www/html/storage/app/public /mnt/public-dir/storage"]
+							if len(#config.backend.securityContext) > 0 {
+								securityContext: #config.backend.securityContext
+							}
+							volumeMounts: [{
+								name:      "public-dir"
+								mountPath: "/mnt/public-dir"
+							}]
+						}
+					}
+				]
 				containers: [{
 					name:            "backend"
 					image:           #config._backendImageRef
@@ -64,7 +92,7 @@ import (
 						postStart: exec: command: [
 							"/bin/sh",
 							"-c",
-							"php artisan storage:link || true",
+							"mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions /var/www/html/storage/framework/cache && php artisan storage:link || true",
 						]
 					}
 					if len(#config.backend.command) > 0 {
@@ -123,19 +151,143 @@ import (
 					if len(#config.backend.resources) > 0 {
 						resources: #config.backend.resources
 					}
-					if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
-						volumeMounts: [{
-							name:      "storage"
-							mountPath: #config.backend.persistence.mountPath
-						}]
-					}
+					volumeMounts: [
+						if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
+							{
+								name:      "storage"
+								mountPath: #config.backend.persistence.mountPath
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "public-dir"
+								mountPath: "/var/www/html/public"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "storage-framework"
+								mountPath: "/var/www/html/storage/framework"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "storage-logs"
+								mountPath: "/var/www/html/storage/logs"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "nginx-config-dir"
+								mountPath: "/etc/nginx"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-run"
+								mountPath: "/var/run"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "run"
+								mountPath: "/run"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-lib-nginx"
+								mountPath: "/var/lib/nginx"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-cache-nginx"
+								mountPath: "/var/cache/nginx"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-log-nginx"
+								mountPath: "/var/log/nginx"
+							}
+						},
+					]
 				}]
-				if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
-					volumes: [{
-						name: "storage"
-						persistentVolumeClaim: claimName: #config._storageClaimName
-					}]
-				}
+				volumes: [
+					if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
+						{
+							name: "storage"
+							persistentVolumeClaim: claimName: #config._storageClaimName
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "public-dir"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "storage-framework"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "storage-logs"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "nginx-config-dir"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-run"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "run"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-lib-nginx"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-cache-nginx"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-log-nginx"
+							emptyDir: {}
+						}
+					},
+				]
 				
 				if len(#config.backend.nodeSelector) > 0 {
 					nodeSelector: #config.backend.nodeSelector

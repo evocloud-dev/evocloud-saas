@@ -178,14 +178,20 @@ values: {
 			}
 		}
 		podSecurityContext: {
-			fsGroup: 1000
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
 			seccompProfile: {
 				type: "RuntimeDefault"
 			}
 		}
 		securityContext: {
 			allowPrivilegeEscalation: false
-			readOnlyRootFilesystem:   false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
 		}
 
 		persistence: {
@@ -252,14 +258,20 @@ values: {
 		}
 
 		podSecurityContext: {
-			fsGroup: 1000
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
 			seccompProfile: {
 				type: "RuntimeDefault"
 			}
 		}
 		securityContext: {
 			allowPrivilegeEscalation: false
-			readOnlyRootFilesystem:   false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
 		}
 
 		nodeSelector: {}
@@ -313,13 +325,20 @@ values: {
 			}
 		}
 		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
 			seccompProfile: {
 				type: "RuntimeDefault"
 			}
 		}
 		securityContext: {
 			allowPrivilegeEscalation: false
-			readOnlyRootFilesystem:   false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
 		}
 		nodeSelector: {}
 		tolerations: []
@@ -330,10 +349,19 @@ values: {
 	worker: {
 		enabled:      true
 		replicaCount: 1
-		command: ["php", "artisan", "queue:work"]
-		args: ["--queue=default,webhook-queue", "--sleep=3", "--tries=3", "--timeout=60"]
+		command: ["sh", "-c"]
+		args: ["mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions /var/www/html/storage/framework/cache && php artisan queue:work --queue=default,webhook-queue --sleep=3 --tries=3 --timeout=60"]
 		terminationGracePeriodSeconds: 60
-		resources: {requests: {cpu: "100m", memory: "256Mi"}, limits: {cpu: "500m", memory: "768Mi"}}
+		resources: {
+			requests: {
+				cpu: "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu: "500m"
+				memory: "768Mi"
+			}
+		}
 		podSecurityContext: {}
 		securityContext: {}
 
@@ -356,9 +384,17 @@ values: {
 		concurrencyPolicy:          "Forbid"
 		successfulJobsHistoryLimit: 3
 		failedJobsHistoryLimit:     3
-		command: ["php", "artisan", "schedule:run"]
-		args: ["--no-interaction"]
-		resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "250m", memory: "512Mi"}}
+		command: ["sh", "-c"]
+		args: ["mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions /var/www/html/storage/framework/cache && php artisan schedule:run --no-interaction"]
+		resources: {
+			requests: 
+			{cpu: "50m"
+			memory: "128Mi"}
+			limits: {
+				cpu: "250m"
+				memory: "512Mi"
+			}
+		}
 		podSecurityContext: {}
 		securityContext: {}
 	}
@@ -369,12 +405,13 @@ values: {
 		hookDeletePolicy: "before-hook-creation,hook-succeeded"
 		command: ["sh", "-c"]
 		args: ["""
+			mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions /var/www/html/storage/framework/cache
 			php artisan migrate --force
 			php artisan cache:clear
 			php artisan config:clear
 			php artisan route:clear
-			php artisan view:clear
-			php artisan storage:link
+			php artisan view:clear || true
+			php artisan storage:link || true
 			"""]
 		resources: {
 			requests: {
@@ -417,7 +454,45 @@ values: {
 			storageClass: ""
 		}
 		service: port: 5432
-		resources: {}
+		resources: {
+			requests: {
+				cpu: "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu: "500m"
+				memory: "512Mi"
+			}
+		}
+		volumePermissions: {
+			enabled: true
+			resources: {
+				requests: {
+					cpu:    "10m"
+					memory: "32Mi"
+				}
+				limits: {
+					cpu:    "50m"
+					memory: "64Mi"
+				}
+			}
+		}
+		podSecurityContext: {
+			fsGroup:      10001
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
+		securityContext: {
+			runAsNonRoot:             true
+			runAsUser:                10001
+			runAsGroup:               10001
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
+		}
 	}
 	externalDatabase: host: ""
 
@@ -435,7 +510,32 @@ values: {
 			storageClass: ""
 		}
 		service: port: 6379
-		resources: {}
+		resources: {
+			requests: {
+				cpu: "50m"
+				memory: "64Mi"
+			}
+			limits: {
+				cpu: "200m"
+				memory: "128Mi"
+			}
+		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
+		}
 	}
 	externalRedis: host: ""
 

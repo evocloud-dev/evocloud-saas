@@ -101,7 +101,23 @@ import (
 					if len(#config.frontend.resources) > 0 {
 						resources: #config.frontend.resources
 					}
+					volumeMounts: [
+						if #config.frontend.securityContext.readOnlyRootFilesystem != _|_ && #config.frontend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+					]
 				}]
+				volumes: [
+					if #config.frontend.securityContext.readOnlyRootFilesystem != _|_ && #config.frontend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+				]
 				
 				if len(#config.frontend.nodeSelector) > 0 {
 					nodeSelector: #config.frontend.nodeSelector

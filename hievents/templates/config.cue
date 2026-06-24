@@ -322,6 +322,12 @@ import (
 		persistence: {enabled: *true | bool, size: *"10Gi" | string, storageClass: *"" | string}
 		service: port: *5432 | int
 		resources: *{} | {[string]: _}
+		podSecurityContext: *{} | {[string]: _}
+		securityContext:    *{} | {[string]: _}
+		volumePermissions: {
+			enabled:   *true | bool
+			resources: *{} | {[string]: _}
+		}
 	}
 	externalDatabase: host: *"" | string
 	redis: {
@@ -330,6 +336,8 @@ import (
 		persistence: {enabled: *true | bool, size: *"2Gi" | string, storageClass: *"" | string}
 		service: port: *6379 | int
 		resources: *{} | {[string]: _}
+		podSecurityContext: *{} | {[string]: _}
+		securityContext:    *{} | {[string]: _}
 	}
 	externalRedis: host: *"" | string
 	httpRoute: {
@@ -672,9 +680,13 @@ import (
 			name: "VITE_STRIPE_PUBLISHABLE_KEY"
 			valueFrom: secretKeyRef: {name: _appSecretName, key: secrets.app.stripePublishableKeyKey}
 		},
+		{name: "HOME", value: "/tmp"},
 	]
 
-	_appEnv: list.Concat([_laravelEnv, _dbEnv, _redisEnv, _s3Env])
+	_appEnv: list.Concat([_laravelEnv, _dbEnv, _redisEnv, _s3Env, [
+		{name: "S6_READ_ONLY_ROOT", value: "1"},
+		{name: "S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES", value: "1"},
+	]])
 
 	_backendImageRef: string
 	if backend.image.digest == "" {
