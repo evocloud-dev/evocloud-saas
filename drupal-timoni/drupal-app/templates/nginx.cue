@@ -49,6 +49,8 @@ import (
                 }
             }
             spec: corev1.#PodSpec & {
+                serviceAccountName: [ if #config.drupal.serviceAccount.name != "" { #config.drupal.serviceAccount.name }, #config.metadata.name ][0]
+                automountServiceAccountToken: false
                 if #config.nginx.tolerations != _|_ {
                     tolerations: #config.nginx.tolerations
                 }
@@ -67,9 +69,12 @@ import (
                                 mountPath: "/webroot"
                             }]
                             securityContext: {
-                                runAsUser:    33
-                                runAsGroup:   33
-                                runAsNonRoot: true
+                                runAsUser:                33
+                                runAsGroup:               33
+                                runAsNonRoot:             true
+                                allowPrivilegeEscalation: false
+                                readOnlyRootFilesystem:   true
+                                capabilities: drop: ["ALL"]
                             }
                         }
                     }
@@ -164,9 +169,12 @@ import (
                             },
                         ]
                         securityContext: {
-                            runAsUser:    33
-                            runAsGroup:   33
-                            runAsNonRoot: true
+                            runAsUser:                33
+                            runAsGroup:               33
+                            runAsNonRoot:             true
+                            allowPrivilegeEscalation: false
+                            readOnlyRootFilesystem:   true
+                            capabilities: drop: ["ALL"]
                         }
                     },
                 ]
@@ -174,13 +182,8 @@ import (
                 if #config.nginx.imagePullSecrets != _|_ {
                     imagePullSecrets: #config.nginx.imagePullSecrets
                 }
-                if #config.nginx.securityContext != _|_ {
-                    securityContext: {
-                        runAsUser:    *33 | int
-                        runAsGroup:   *33 | int
-                        runAsNonRoot: *true | bool
-                        fsGroup:      #config.nginx.securityContext.fsGroup
-                    }
+                if #config.nginx.podSecurityContext != _|_ {
+                    securityContext: #config.nginx.podSecurityContext
                 }
 
                 volumes: [

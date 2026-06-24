@@ -28,7 +28,17 @@ import (
 				app: "solr"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: fsGroup: 1001
+				serviceAccountName: [ if #config.drupal.serviceAccount.name != "" { #config.drupal.serviceAccount.name }, #config.metadata.name ][0]
+				automountServiceAccountToken: false
+				securityContext: {
+					runAsUser:    1001
+					runAsGroup:   1001
+					fsGroup:      1001
+					runAsNonRoot: true
+					seccompProfile: {
+						type: "RuntimeDefault"
+					}
+				}
 				if #config.solr.volumePermissions.enabled {
 					initContainers: [
 						{
@@ -58,7 +68,12 @@ import (
 							]
 							securityContext: {
 								runAsUser:                0
-								allowPrivilegeEscalation: true
+								runAsNonRoot:             false
+								allowPrivilegeEscalation: false
+								capabilities: {
+									drop: ["ALL"]
+									add: ["CHOWN", "FOWNER", "DAC_OVERRIDE"]
+								}
 							}
 							volumeMounts: [
 								{
@@ -109,6 +124,10 @@ import (
 								name:      "solr-tmp"
 								mountPath: "/opt/bitnami/solr/tmp"
 							},
+							{
+								name:      "solr-tmp"
+								mountPath: "/tmp"
+							},
 						]
 						env: [
 							if #config.solr.cloudEnabled {
@@ -153,9 +172,12 @@ import (
 							"while ! curl -s http://localhost:8983/solr/admin/info/system > /dev/null; do sleep 2; done; if [ ! -d /opt/bitnami/solr/server/solr/drupal ]; then solr create -c drupal; fi",
 						]
 						securityContext: {
-							runAsUser:    1001
-							runAsGroup:   1001
-							runAsNonRoot: true
+							runAsUser:                1001
+							runAsGroup:               1001
+							runAsNonRoot:             true
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: drop: ["ALL"]
 						}
 					},
 				]
