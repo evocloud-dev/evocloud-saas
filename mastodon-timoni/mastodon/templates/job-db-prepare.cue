@@ -42,7 +42,7 @@ import (
 					securityContext: #config.securityContext
 					image:           #config.image.reference
 					imagePullPolicy: #config.image.pullPolicy
-					command: ["bundle", "exec", "rails", "db:prepare"]
+					command: ["bundle", "exec", "rails", "db:prepare", "db:seed"]
 					envFrom: [
 						{configMapRef: name: "\(#config.metadata.name)-env"},
 						{

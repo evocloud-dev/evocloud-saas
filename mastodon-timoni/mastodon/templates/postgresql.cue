@@ -44,9 +44,39 @@ import (
 			template: {
 				metadata: labels: "app.kubernetes.io/name": #name
 				spec: corev1.#PodSpec & {
+					automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
+					serviceAccountName: #config.metadata.name
+					securityContext: #config.postgresql.podSecurityContext
+
+					if #config.postgresql.volumePermissions.enabled {
+						initContainers: [{
+							name:            "volume-permissions"
+							image:           "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
+							imagePullPolicy: "IfNotPresent"
+							command: ["chown", "-R", "1001:1001", "/bitnami/postgresql"]
+							securityContext: {
+								runAsUser:                0
+								runAsGroup:               0
+								runAsNonRoot:             false
+								allowPrivilegeEscalation: false
+								readOnlyRootFilesystem:   true
+								capabilities: {
+									drop: ["ALL"]
+									add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+								}
+							}
+							volumeMounts: [{
+								name:      "data"
+								mountPath: "/bitnami/postgresql"
+							}]
+						}]
+					}
+
 					containers: [{
-						name:  "postgresql"
-						image: "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
+						name:            "postgresql"
+						securityContext: #config.postgresql.securityContext
+						resources:       #config.postgresql.resources
+						image:           "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
 						imagePullPolicy: #config.postgresql.image.pullPolicy
 						env: [
 							{
@@ -90,11 +120,51 @@ import (
 							successThreshold:     1
 							failureThreshold:     6
 						}
-						volumeMounts: [{
-							name:      "data"
-							mountPath: "/bitnami/postgresql"
-						}]
+						volumeMounts: [
+							{
+								name:      "data"
+								mountPath: "/bitnami/postgresql"
+							},
+							if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "postgresql-conf"
+									mountPath: "/opt/bitnami/postgresql/conf"
+								}
+							},
+							if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "postgresql-tmp"
+									mountPath: "/opt/bitnami/postgresql/tmp"
+								}
+							},
+							if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "tmp"
+									mountPath: "/tmp"
+								}
+							},
+						]
 					}]
+					volumes: [
+						if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "postgresql-conf"
+								emptyDir: {}
+							}
+						},
+						if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "postgresql-tmp"
+								emptyDir: {}
+							}
+						},
+						if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "tmp"
+								emptyDir: {}
+							}
+						},
+					]
 				}
 			}
 			volumeClaimTemplates: [{

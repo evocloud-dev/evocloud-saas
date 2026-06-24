@@ -59,6 +59,7 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
@@ -195,10 +196,24 @@ import (
 									key:  "redis-password"
 								}
 							}
-							if (#config.elasticsearch.enabled || #config.elasticsearch.hostname != "") && #config.elasticsearch.existingSecret != "" {
+							if (#config.elasticsearch.enabled || #config.elasticsearch.hostname != "") {
 								ES_PASS: valueFrom: secretKeyRef: {
-									name: #config.elasticsearch.existingSecret
-									key:  "password"
+									name: {
+										if #config.elasticsearch.existingSecret != "" {
+											#config.elasticsearch.existingSecret
+										}
+										if #config.elasticsearch.existingSecret == "" {
+											"\(#config.metadata.name)-elasticsearch"
+										}
+									}
+									key: {
+										if #config.elasticsearch.existingSecret != "" {
+											"password"
+										}
+										if #config.elasticsearch.existingSecret == "" {
+											"elastic-password"
+										}
+									}
 								}
 							}
 							SMTP_LOGIN: valueFrom: secretKeyRef: {
