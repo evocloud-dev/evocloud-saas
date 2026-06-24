@@ -79,16 +79,37 @@ import (
 					"app.kubernetes.io/component": "redis"
 				}
 				template: {
-					metadata: labels: {
-						"app.kubernetes.io/name":      #config.metadata.name
-						"app.kubernetes.io/component": "redis"
+					metadata: {
+						labels: {
+							"app.kubernetes.io/name":      #config.metadata.name
+							"app.kubernetes.io/component": "redis"
+						}
+						annotations: {
+							"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+							"container.seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+						}
 					}
 					spec: corev1.#PodSpec & {
+						automountServiceAccountToken: false
+						securityContext: {
+							runAsUser:    10001
+							runAsGroup:   10001
+							fsGroup:      10001
+							runAsNonRoot: true
+							seccompProfile: type: "RuntimeDefault"
+						}
 						containers: [
 							{
 								name:            "redis"
 								image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
 								imagePullPolicy: #config.redis.image.pullPolicy
+								securityContext: {
+									runAsUser:                10001
+									runAsGroup:               10001
+									allowPrivilegeEscalation: false
+									readOnlyRootFilesystem:   true
+									capabilities: drop: ["ALL"]
+								}
 								command: ["/bin/sh"]
 								args: [
 									"-c",

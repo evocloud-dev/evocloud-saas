@@ -14,7 +14,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify"
-			tag:        "4.0.0-beta.418"
+			tag:        "4.1.2"
 			pullPolicy: "IfNotPresent"
 		}
 		service: {
@@ -117,7 +117,7 @@ values: {
 		primary: {
 			image: {
 				repository: "postgres"
-				tag:        "15-alpine"
+				tag:        "17-alpine"
 				pullPolicy: "IfNotPresent"
 			}
 			persistence: {
@@ -126,7 +126,16 @@ values: {
 				accessModes: ["ReadWriteOnce"]
 				storageClass: ""
 			}
-			resources: {}
+			resources: {
+				limits: {
+					memory: "1Gi"
+					cpu:    "1000m"
+				}
+				requests: {
+					memory: "256Mi"
+					cpu:    "100m"
+				}
+			}
 			securityContext: {
 				enabled:                true
 				readOnlyRootFilesystem: false
@@ -158,7 +167,16 @@ values: {
 		}
 		master: {
 			persistence: enabled: true
-			resources: {}
+			resources: {
+				limits: {
+					memory: "256Mi"
+					cpu:    "500m"
+				}
+				requests: {
+					memory: "128Mi"
+					cpu:    "100m"
+				}
+			}
 		}
 		replica: {
 			replicaCount: 0
@@ -182,7 +200,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify-realtime"
-			tag:        "1.0.13"
+			tag:        "1.0.15"
 			pullPolicy: "Always"
 		}
 		service: {
@@ -263,15 +281,15 @@ values: {
 
 	securityContext: {
 		enabled:                  true
-		fsGroup:                  0
-		runAsUser:                0
-		runAsGroup:               0
-		runAsNonRoot:             false
-		allowPrivilegeEscalation: true
-		readOnlyRootFilesystem:   false
+		fsGroup:                  10001
+		runAsUser:                10001
+		runAsGroup:               10001
+		runAsNonRoot:             true
+		allowPrivilegeEscalation: false
+		readOnlyRootFilesystem:   true
 		capabilities: {
 			drop: ["ALL"]
-			add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER", "SETPCAP"]
+			add: []
 		}
 	}
 
