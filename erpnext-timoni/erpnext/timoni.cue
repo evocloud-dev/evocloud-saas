@@ -10,7 +10,7 @@ import (
 // Define the module metadata.
 module: {
 	name:        "evo-erpnext"
-	version:     "0.1.0"
+	version:     "0.1.1"
 }
 
 

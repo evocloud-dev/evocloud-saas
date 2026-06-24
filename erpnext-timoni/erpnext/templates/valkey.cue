@@ -21,6 +21,11 @@ import (
 		template: {
 			metadata: labels: "app.kubernetes.io/name": "\(#config.metadata.name)-valkey-cache"
 			spec: corev1.#PodSpec & {
+				serviceAccountName: #config.metadata.name
+				automountServiceAccountToken: false
+				if #config["valkey-cache"].podSecurityContext != _|_ {
+					securityContext: #config["valkey-cache"].podSecurityContext
+				}
 				containers: [
 					{
 						name:            "valkey"
@@ -28,7 +33,31 @@ import (
 						imagePullPolicy: "IfNotPresent"
 						ports: [{containerPort: 6379, name: "redis"}]
 						env: [{name: "ALLOW_EMPTY_PASSWORD", value: "yes"}]
+						if #config["valkey-cache"].securityContext != _|_ {
+							securityContext: #config["valkey-cache"].securityContext
+						}
+						resources: #config["valkey-cache"].resources
+						volumeMounts: [
+							{
+								name: "data"
+								mountPath: "/data"
+							},
+							{
+								name: "tmp"
+								mountPath: "/tmp"
+							}
+						]
 					},
+				]
+				volumes: [
+					{
+						name: "data"
+						emptyDir: {}
+					},
+					{
+						name: "tmp"
+						emptyDir: {}
+					}
 				]
 			}
 		}
@@ -66,6 +95,11 @@ import (
 		template: {
 			metadata: labels: "app.kubernetes.io/name": "\(#config.metadata.name)-valkey-queue"
 			spec: corev1.#PodSpec & {
+				serviceAccountName: #config.metadata.name
+				automountServiceAccountToken: false
+				if #config["valkey-queue"].podSecurityContext != _|_ {
+					securityContext: #config["valkey-queue"].podSecurityContext
+				}
 				containers: [
 					{
 						name:            "valkey"
@@ -73,7 +107,31 @@ import (
 						imagePullPolicy: "IfNotPresent"
 						ports: [{containerPort: 6379, name: "redis"}]
 						env: [{name: "ALLOW_EMPTY_PASSWORD", value: "yes"}]
+						if #config["valkey-queue"].securityContext != _|_ {
+							securityContext: #config["valkey-queue"].securityContext
+						}
+						resources: #config["valkey-queue"].resources
+						volumeMounts: [
+							{
+								name: "data"
+								mountPath: "/data"
+							},
+							{
+								name: "tmp"
+								mountPath: "/tmp"
+							}
+						]
 					},
+				]
+				volumes: [
+					{
+						name: "data"
+						emptyDir: {}
+					},
+					{
+						name: "tmp"
+						emptyDir: {}
+					}
 				]
 			}
 		}

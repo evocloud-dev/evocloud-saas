@@ -30,17 +30,21 @@ import (
 			}
 
 			spec: corev1.#PodSpec & {
+				serviceAccountName: #config.metadata.name
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
-				if #config.podSecurityContext != _|_ {
-					securityContext: #config.podSecurityContext
+				if #config["postgresql-sts"].podSecurityContext != _|_ {
+					securityContext: #config["postgresql-sts"].podSecurityContext
 				}
 				containers: [
 					{
 						name:            "postgresql"
 						image:           "\(#config["postgresql-sts"].image.repository):\(#config["postgresql-sts"].image.tag)"
 						imagePullPolicy: #config["postgresql-sts"].image.pullPolicy
+						if #config["postgresql-sts"].securityContext != _|_ {
+							securityContext: #config["postgresql-sts"].securityContext
+						}
 						env: [
 							{
 								name: "POSTGRES_PASSWORD"

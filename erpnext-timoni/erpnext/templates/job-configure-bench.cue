@@ -42,8 +42,8 @@ import (
 					imagePullSecrets: #config.imagePullSecrets
 				}
 				serviceAccountName: #config.metadata.name
-				if #config.podSecurityContext != _|_ {
-					securityContext: #config.podSecurityContext
+				if #config.jobs.configure.podSecurityContext != _|_ {
+					securityContext: #config.jobs.configure.podSecurityContext
 				}
 				restartPolicy: "Never"
 				if #config.jobs.configure.fixVolume {
