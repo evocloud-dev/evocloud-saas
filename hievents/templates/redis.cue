@@ -84,10 +84,17 @@ import (
 				"app.kubernetes.io/component": "redis"
 			}
 			spec: {
+				serviceAccountName: #config._saName
+				if len(#config.redis.podSecurityContext) > 0 {
+					securityContext: #config.redis.podSecurityContext
+				}
 				containers: [{
 					name:            "redis"
 					image:           #config.redis.image.repository + ":" + #config.redis.image.tag
 					imagePullPolicy: #config.redis.image.pullPolicy
+					if len(#config.redis.securityContext) > 0 {
+						securityContext: #config.redis.securityContext
+					}
 					ports: [{
 						name:          "redis"
 						containerPort: 6379
@@ -123,13 +130,29 @@ import (
 					if len(#config.redis.resources) > 0 {
 						resources: #config.redis.resources
 					}
-					if #config.redis.persistence.enabled {
-						volumeMounts: [{
-							name:      "data"
-							mountPath: "/data"
-						}]
-					}
+					volumeMounts: [
+						if #config.redis.persistence.enabled {
+							{
+								name:      "data"
+								mountPath: "/data"
+							}
+						},
+						if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+					]
 				}]
+				volumes: [
+					if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+				]
 			}
 		}
 		if #config.redis.persistence.enabled {

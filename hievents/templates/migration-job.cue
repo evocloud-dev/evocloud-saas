@@ -73,19 +73,59 @@ import (
 					if len(#config.migration.resources) > 0 {
 						resources: #config.migration.resources
 					}
-					if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
-						volumeMounts: [{
-							name:      "storage"
-							mountPath: #config.backend.persistence.mountPath
-						}]
-					}
+					volumeMounts: [
+						if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
+							{
+								name:      "storage"
+								mountPath: #config.backend.persistence.mountPath
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "storage-framework"
+								mountPath: "/var/www/html/storage/framework"
+							}
+						},
+						if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "storage-logs"
+								mountPath: "/var/www/html/storage/logs"
+							}
+						},
+					]
 				}]
-				if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
-					volumes: [{
-						name: "storage"
-						persistentVolumeClaim: claimName: #config._storageClaimName
-					}]
-				}
+				volumes: [
+					if #config.backend.persistence.enabled && #config.hieventsConfig.storage.driver == "local" {
+						{
+							name: "storage"
+							persistentVolumeClaim: claimName: #config._storageClaimName
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "storage-framework"
+							emptyDir: {}
+						}
+					},
+					if #config.backend.securityContext.readOnlyRootFilesystem != _|_ && #config.backend.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "storage-logs"
+							emptyDir: {}
+						}
+					},
+				]
 			}
 		}
 	}

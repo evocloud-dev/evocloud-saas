@@ -49,11 +49,6 @@ import (
 						name:          "http"
 						containerPort: #config.webProxy.service.targetPort
 					}]
-					volumeMounts: [{
-						name:      "nginx-config"
-						mountPath: "/etc/nginx/conf.d/default.conf"
-						subPath:   "default.conf"
-					}]
 					
 					startupProbe: {
 						tcpSocket: port: "http"
@@ -82,11 +77,56 @@ import (
 					if len(#config.webProxy.resources) > 0 {
 						resources: #config.webProxy.resources
 					}
+					volumeMounts: [
+						{
+							name:      "nginx-config"
+							mountPath: "/etc/nginx/conf.d/default.conf"
+							subPath:   "default.conf"
+						},
+						if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+						if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-cache-nginx"
+								mountPath: "/var/cache/nginx"
+							}
+						},
+						if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "var-run"
+								mountPath: "/var/run"
+							}
+						},
+					]
 				}]
-				volumes: [{
-					name: "nginx-config"
-					configMap: name: #config._nginxConfigName
-				}]
+				volumes: [
+					{
+						name: "nginx-config"
+						configMap: name: #config._nginxConfigName
+					},
+					if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+					if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-cache-nginx"
+							emptyDir: {}
+						}
+					},
+					if #config.webProxy.securityContext.readOnlyRootFilesystem != _|_ && #config.webProxy.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "var-run"
+							emptyDir: {}
+						}
+					},
+				]
 				
 				if len(#config.webProxy.nodeSelector) > 0 {
 					nodeSelector: #config.webProxy.nodeSelector

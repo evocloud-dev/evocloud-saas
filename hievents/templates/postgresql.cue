@@ -84,10 +84,43 @@ import (
 				"app.kubernetes.io/component": "postgresql"
 			}
 			spec: {
+				serviceAccountName: #config._saName
+				if len(#config.postgresql.podSecurityContext) > 0 {
+					securityContext: #config.postgresql.podSecurityContext
+				}
+				if #config.postgresql.persistence.enabled && #config.postgresql.volumePermissions.enabled {
+					initContainers: [{
+						name:            "volume-permissions"
+						image:           #config.postgresql.image.repository + ":" + #config.postgresql.image.tag
+						imagePullPolicy: #config.postgresql.image.pullPolicy
+						command: ["chown", "-R", "10001:10001", "/var/lib/postgresql/data"]
+						if len(#config.postgresql.volumePermissions.resources) > 0 {
+							resources: #config.postgresql.volumePermissions.resources
+						}
+						securityContext: {
+							runAsUser:                0
+							runAsGroup:               0
+							runAsNonRoot:             false
+							allowPrivilegeEscalation: false
+							readOnlyRootFilesystem:   true
+							capabilities: {
+								drop: ["ALL"]
+								add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+							}
+						}
+						volumeMounts: [{
+							name:      "data"
+							mountPath: "/var/lib/postgresql/data"
+						}]
+					}]
+				}
 				containers: [{
 					name:            "postgresql"
 					image:           #config.postgresql.image.repository + ":" + #config.postgresql.image.tag
 					imagePullPolicy: #config.postgresql.image.pullPolicy
+					if len(#config.postgresql.securityContext) > 0 {
+						securityContext: #config.postgresql.securityContext
+					}
 					ports: [{
 						name:          "postgresql"
 						containerPort: 5432
@@ -104,6 +137,9 @@ import (
 							name: #config._postgresSecretName
 							key:  #config.secrets.postgresql.passwordKey
 						}
+					}, {
+						name:  "PGDATA"
+						value: "/var/lib/postgresql/data/pgdata"
 					}]
 					livenessProbe: {
 						exec: command: [
@@ -126,13 +162,41 @@ import (
 					if len(#config.postgresql.resources) > 0 {
 						resources: #config.postgresql.resources
 					}
-					if #config.postgresql.persistence.enabled {
-						volumeMounts: [{
-							name:      "data"
-							mountPath: "/var/lib/postgresql/data"
-						}]
-					}
+					volumeMounts: [
+						if #config.postgresql.persistence.enabled {
+							{
+								name:      "data"
+								mountPath: "/var/lib/postgresql/data"
+							}
+						},
+						if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "postgres-run"
+								mountPath: "/var/run/postgresql"
+							}
+						},
+						if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name:      "tmp"
+								mountPath: "/tmp"
+							}
+						},
+					]
 				}]
+				volumes: [
+					if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "postgres-run"
+							emptyDir: {}
+						}
+					},
+					if #config.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #config.postgresql.securityContext.readOnlyRootFilesystem == true {
+						{
+							name: "tmp"
+							emptyDir: {}
+						}
+					},
+				]
 			}
 		}
 		if #config.postgresql.persistence.enabled {
