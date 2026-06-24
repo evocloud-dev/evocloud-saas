@@ -46,12 +46,9 @@ import (
 					nodeSelector: #config.nodeSelector
 				}
 				containers: [{
+					command: ["/bin/sh", "-c"]
 					args: [
-						"bundle",
-						"exec",
-						"sidekiq",
-						"-C",
-						"config/sidekiq.yml",
+						"mkdir -p /tmp/rails-tmp && chmod 700 /tmp/rails-tmp && export TMPDIR=/tmp/rails-tmp && exec docker/entrypoints/rails.sh bundle exec sidekiq -C config/sidekiq.yml",
 					]
 					env: [
 						if #config.postgresql.auth.existingSecret != _|_ {
@@ -92,14 +89,30 @@ import (
 					volumeMounts: [{
 						name:      "cache"
 						mountPath: "/app/tmp"
+					}, {
+						name:      "tmp-volume"
+						mountPath: "/tmp"
+					}, {
+						name:      "storage-volume"
+						mountPath: "/app/storage"
 					}]
+					if #config.securityContext != _|_ {
+						securityContext: #config.securityContext
+					}
 				}]
+				automountServiceAccountToken: false
 				serviceAccountName: #config.metadata.name
 				if #config.podSecurityContext != _|_ {
 					securityContext: #config.podSecurityContext
 				}
 				volumes: [{
 					name: "cache"
+					emptyDir: {}
+				}, {
+					name: "tmp-volume"
+					emptyDir: {}
+				}, {
+					name: "storage-volume"
 					emptyDir: {}
 				}]
 				if #config.affinity != _|_ {
