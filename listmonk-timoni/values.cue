@@ -26,12 +26,19 @@ values: {
 
 	podAnnotations: {}
 	podSecurityContext: {
-		fsGroup: 1000
+		runAsUser:           10001
+		runAsGroup:          10001
+		fsGroup:             10001
 	}
 	securityContext: {
-		runAsUser:                1000
+		runAsUser:                10001
+		runAsGroup:               10001
 		runAsNonRoot:             true
 		allowPrivilegeEscalation: false
+		readOnlyRootFilesystem:   true
+		capabilities: {
+			drop: ["ALL"]
+		}
 	}
 
 	service: {
@@ -170,6 +177,32 @@ values: {
 			limits: {
 				cpu:    "500m"
 				memory: "1Gi"
+			}
+		}
+		podSecurityContext: {
+			fsGroup: 10001
+		}
+		securityContext: {
+			runAsUser:                10001
+			runAsGroup:               10001
+			runAsNonRoot:             true
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   true
+			capabilities: {
+				drop: ["ALL"]
+			}
+		}
+		volumePermissions: {
+			enabled: true
+			resources: {
+				requests: {
+					cpu:    "10m"
+					memory: "32Mi"
+				}
+				limits: {
+					cpu:    "50m"
+					memory: "64Mi"
+				}
 			}
 		}
 	}

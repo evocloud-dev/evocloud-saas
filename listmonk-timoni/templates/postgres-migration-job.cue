@@ -26,9 +26,11 @@ import (
 				spec: corev1.#PodSpec & {
 					restartPolicy:      "OnFailure"
 					serviceAccountName: "\(#helpers.fullname)-migration"
+					securityContext: #config.podSecurityContext
 					containers: [{
 						name:  "migrate"
 						image: #config.postgres.migration.image
+						securityContext: #config.securityContext
 						args: [
 							"delete",
 							"statefulset",
@@ -39,7 +41,23 @@ import (
 							"--cascade=orphan",
 							"--ignore-not-found",
 						]
+						volumeMounts: [
+							if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "tmp"
+									mountPath: "/tmp"
+								}
+							},
+						]
 					}]
+					volumes: [
+						if #config.securityContext.readOnlyRootFilesystem != _|_ && #config.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "tmp"
+								emptyDir: {}
+							}
+						},
+					]
 				}
 			}
 		}
