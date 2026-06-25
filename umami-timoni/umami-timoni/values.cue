@@ -21,14 +21,18 @@ values: {
 		// -- image pull policy
 		pullPolicy: "Always"
 		// --Overrides the image tag
-		tag: "postgresql-v2.20.1"
+		tag: "postgresql-v2.20.2"
 	}
 
 
 	imagePullSecrets: []
 	podAnnotations: {}
 	podLabels:      {}
-	podSecurityContext: {}
+	podSecurityContext: {
+		fsGroup: 65533
+	}
+	extraVolumes:      []
+	extraVolumeMounts: []
 	replicaCount:         1
 	revisionHistoryLimit: 10
 
@@ -38,18 +42,23 @@ values: {
 			memory: "256Mi"
 		}
 		limits: {
+			cpu:    "1000m"
 			memory: "512Mi"
 		}
 	}
 
 	securityContext: {
-		runAsGroup:   65533
-		runAsNonRoot: true
-		runAsUser:    1001
+		runAsGroup:               65533
+		runAsNonRoot:             true
+		runAsUser:                1001
+		allowPrivilegeEscalation: false
+		capabilities: drop: ["ALL"]
+		readOnlyRootFilesystem:   false
 	}
     
 	serviceAccount: {
-		create: true
+		create:                       true
+		automountServiceAccountToken: false
 		annotations: {}
 		name: ""
 	}
@@ -77,7 +86,7 @@ values: {
 	}
 
 	route: main: {
-		enabled:      true
+		enabled:      false
 		apiVersion:   "gateway.networking.k8s.io/v1"
 		kind:         "HTTPRoute"
 		annotations:  {}
@@ -170,7 +179,7 @@ values: {
 		migration: v1v2: enabled: false
 	}
 
-		postgresql: {
+	postgresql: {
 		enabled: true
 		image: {
 			registry:   "registry-1.docker.io"
@@ -182,6 +191,29 @@ values: {
 			password: "mychart"
 			username: "mychart"
 		}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+		}
+		podSecurityContext: {
+			fsGroup: 1001
+		}
+		securityContext: {
+			runAsNonRoot:             true
+			runAsUser:                1001
+			runAsGroup:               1001
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+			readOnlyRootFilesystem:   false
+		}
+		serviceAccountName:           ""
+		automountServiceAccountToken: false
 	}
 
 	mysql: {
