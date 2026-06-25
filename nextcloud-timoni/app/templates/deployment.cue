@@ -53,15 +53,13 @@ import (
 			}
 
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				// {{- with .Values.image.pullSecrets }}
 				if #in.imagePullSecrets != _|_ {
 					imagePullSecrets: #in.imagePullSecrets
 				}
 
-				// {{- if .Values.rbac.enabled }}
-				if #in.rbac.enabled {
-					serviceAccountName: #in.rbac.serviceAccount.name
-				}
+				serviceAccountName: #in.rbac.serviceAccount.name
 
 				// Init containers — mirrors lines 287-337
 				// {{- if or .Values.mariadb.enabled .Values.postgresql.enabled }}
@@ -91,6 +89,8 @@ import (
 									"sh", "-c",
 									"until mysql --host=\(#in.database.mariadb.primaryHost) --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute=\"SELECT 1;\"; do echo waiting for mysql; sleep 2; done;",
 								]
+								securityContext: #in.database.mariadb.initSecurityContext
+								resources:       #in.database.mariadb.initResources
 							}
 						},
 						if !#in.database.mariadb.enabled && #in.database.postgresql.enabled {
@@ -111,6 +111,8 @@ import (
 									"sh", "-c",
 									"until pg_isready -h ${POSTGRES_HOST} -U ${POSTGRES_USER} ; do sleep 2 ; done",
 								]
+								securityContext: #in.database.postgresql.initSecurityContext
+								resources:       #in.database.postgresql.initResources
 							}
 						},
 					]
@@ -293,6 +295,10 @@ import (
 							_in: #in
 							env:          (#NextcloudEnv & {#in: _in}).out
 							volumeMounts: (#NextcloudVolumeMounts & {#in: _in}).out
+							resources:    #in.resources
+							if #in.securityContext != _|_ {
+								securityContext: #in.securityContext
+							}
 						}
 					},
 				]

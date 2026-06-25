@@ -39,7 +39,14 @@ import (
 									name:          "redis"
 								},
 							]
+							if #in.redis.resources != _|_ {
+								resources: #in.redis.resources
+							}
 							if #in.redis.auth.enabled {
+								args: [
+									"--requirepass",
+									"$(REDIS_PASSWORD)",
+								]
 								env: [
 									{
 										name: "REDIS_PASSWORD"
