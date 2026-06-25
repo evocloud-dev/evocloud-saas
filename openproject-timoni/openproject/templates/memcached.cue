@@ -83,13 +83,16 @@ import (
 							"app.kubernetes.io/instance": #config.metadata.name
 						}
 						spec: corev1.#PodSpec & {
+							serviceAccountName:           #config.memcached.serviceAccountName
+							automountServiceAccountToken: #config.memcached.automountServiceAccountToken
 							if #config.memcached.global.containerSecurityContext.enabled {
-								securityContext: fsGroup: 1001
+								securityContext: fsGroup: #config.memcached.global.containerSecurityContext.fsGroup
 							}
 							containers: [{
 								name:            "memcached"
 								image:           #config.memcached.image.reference
 								imagePullPolicy: #config.memcached.image.imagePullPolicy
+								resources:       #config.memcached.resources
 								command: [
 									"memcached",
 									"-m", "64",

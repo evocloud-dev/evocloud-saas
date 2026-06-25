@@ -46,7 +46,8 @@ import (
 						},
 					]
 				}
-				serviceAccountName: #config.metadata.name
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 				if #config.podSecurityContext.enabled {
 					securityContext: fsGroup: #config.podSecurityContext.fsGroup
 				}

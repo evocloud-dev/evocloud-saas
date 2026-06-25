@@ -97,7 +97,8 @@ import (
 			OPENPROJECT_SEED_ADMIN_USER_LOCKED: "true"
 		}
 
-		OPENPROJECT_HTTPS: "\(#config.openproject.https)"
+		SECRET_KEY_BASE:                            #config.openproject.secretKeyBase
+		OPENPROJECT_HTTPS:                          "\(#config.openproject.https)"
 		if #config.openproject.seed_locale != null {
 			OPENPROJECT_SEED_LOCALE: #config.openproject.seed_locale
 		}

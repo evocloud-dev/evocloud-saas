@@ -177,8 +177,9 @@ import (
 	}
 
 	serviceAccount: {
-		create:      *true | bool
-		annotations: timoniv1.#Annotations
+		create:                       *true | bool
+		automountServiceAccountToken: *false | bool
+		annotations:                  timoniv1.#Annotations
 		openshift: securityContextConstraints: roleBinding: {
 			enable:       *false | bool
 			resourceName: *"nonroot-v2" | string
@@ -295,6 +296,7 @@ import (
 		host:                 *"" | string
 		hsts:                 *true | bool
 		cache: store:         *"memcache" | string
+		secretKeyBase:        *"OVERWRITE_ME" | string
 		extraEnvVarsSecret:   *"" | string
 		extraEnvVars:         { [string]: string | int } | *{}
 		extraVolumes:         [...corev1.#Volume] | *[]
@@ -390,6 +392,9 @@ import (
 
 	postgresql: {
 		bundled: *true | bool
+		persistence: accessModes: *["ReadWriteOnce"] | [...string]
+		serviceAccountName:           *metadata.name | string
+		automountServiceAccountToken: *false | bool
 		image: {
 			repository:      *"bitnamilegacy/postgresql" | string
 			tag:             *"15.4.0-debian-11-r45" | string
@@ -421,6 +426,7 @@ import (
 			seccompProfile: type:     *"RuntimeDefault" | string
 			readOnlyRootFilesystem:   *false | bool
 			runAsNonRoot:             *true | bool
+			fsGroup:                  *1001 | int
 		}
 		commonLabels: timoniv1.#Labels
 		connection: {
@@ -455,10 +461,22 @@ import (
 			sslcrl:                *null | string
 			sslMinProtocolVersion: *null | string
 		}
+		resources: timoniv1.#ResourceRequirements & {
+			requests: {
+				cpu:    *"250m" | timoniv1.#CPUQuantity
+				memory: *"256Mi" | timoniv1.#MemoryQuantity
+			}
+			limits: {
+				cpu:    *"1000m" | timoniv1.#CPUQuantity
+				memory: *"1Gi" | timoniv1.#MemoryQuantity
+			}
+		}
 	}
 
 	memcached: {
 		bundled: *true | bool
+		serviceAccountName:           *metadata.name | string
+		automountServiceAccountToken: *false | bool
 		image: {
 			repository:      *"bitnamilegacy/memcached" | string
 			tag:             *"1.6.24-debian-12-r0" | string
@@ -470,8 +488,9 @@ import (
 			allowPrivilegeEscalation: *false | bool
 			capabilities: drop:       *["ALL"] | [...string]
 			seccompProfile: type:     *"RuntimeDefault" | string
-			readOnlyRootFilesystem:   *false | bool
+			readOnlyRootFilesystem:   *true | bool
 			runAsNonRoot:             *true | bool
+			fsGroup:                  *1001 | int
 		}
 		commonLabels: timoniv1.#Labels
 		connection: {
@@ -481,6 +500,16 @@ import (
 
 		auth: {
 			existingSecret: *"" | string
+		}
+		resources: timoniv1.#ResourceRequirements & {
+			requests: {
+				cpu:    *"50m" | timoniv1.#CPUQuantity
+				memory: *"64Mi" | timoniv1.#MemoryQuantity
+			}
+			limits: {
+				cpu:    *"500m" | timoniv1.#CPUQuantity
+				memory: *"512Mi" | timoniv1.#MemoryQuantity
+			}
 		}
 	}
 
