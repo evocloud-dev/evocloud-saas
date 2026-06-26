@@ -166,9 +166,14 @@ import (
 			subPath?:      string
 		}
 		securityContext: {
-			enabled:   *false | bool
-			runAsUser: *999 | int
-			fsGroup:   *999 | int
+			enabled:                  *false | bool
+			runAsUser:                *999 | int
+			fsGroup:                  *999 | int
+			allowPrivilegeEscalation: *false | bool
+			capabilities:             *{drop: ["ALL"]} | corev1.#Capabilities
+			readOnlyRootFilesystem:   *false | bool
+			runAsNonRoot:             *true | bool
+			seccompProfile:           *{type: "RuntimeDefault"} | corev1.#SeccompProfile
 		}
 		resources: *{requests: {memory: "256Mi", cpu: "100m"}} | corev1.#ResourceRequirements
 		configurationFilesPath: *"/etc/mysql/conf.d/" | string
@@ -330,8 +335,11 @@ import (
 		tls: *[] | [...{secretName?: string, hosts: [...string]}]
 	}
 
-	resources: *{} | corev1.#ResourceRequirements
+	podSecurityContext?:  corev1.#PodSecurityContext
+	securityContext?:     corev1.#SecurityContext
+	podAnnotations?:      {[string]: string}
 	nodeSelector: *{} | {[string]: string}
+	initContainer: resources: *{requests: {memory: "10Mi", cpu: "10m"}} | corev1.#ResourceRequirements
 	tolerations?: [...corev1.#Toleration]
 	affinity?: corev1.#Affinity
 	extraAnnotations: *{} | {[string]: string}

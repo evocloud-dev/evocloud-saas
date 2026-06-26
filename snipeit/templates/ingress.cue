@@ -34,7 +34,7 @@ import (
 							pathType: #config.ingress.pathType
 							backend: service: {
 								name: #config.metadata.name
-								port: number: 80
+								port: number: #config.service.port
 							}
 						}
 					]
