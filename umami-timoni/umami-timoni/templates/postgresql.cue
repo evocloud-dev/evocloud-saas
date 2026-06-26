@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"list"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -63,6 +64,19 @@ import (
 				template: {
 					metadata: labels: "app.kubernetes.io/name": #config.metadata.name + "-postgresql"
 					spec: corev1.#PodSpec & {
+						automountServiceAccountToken: #config.postgresql.automountServiceAccountToken
+						serviceAccountName: *#config.postgresql.serviceAccountName | string
+						if #config.postgresql.serviceAccountName == "" {
+							if #config.serviceAccount.name == "" {
+								serviceAccountName: #config.metadata.name
+							}
+							if #config.serviceAccount.name != "" {
+								serviceAccountName: #config.serviceAccount.name
+							}
+						}
+						if #config.postgresql.podSecurityContext != _|_ {
+							securityContext: #config.postgresql.podSecurityContext
+						}
 						containers: [{
 							name:  "postgresql"
 							image: #config.#pgImageRef
@@ -71,6 +85,12 @@ import (
 								containerPort: 5432
 							}]
 							imagePullPolicy: #config.postgresql.image.pullPolicy
+							if #config.postgresql.resources != _|_ {
+								resources: #config.postgresql.resources
+							}
+							if #config.postgresql.securityContext != _|_ {
+								securityContext: #config.postgresql.securityContext
+							}
 							env: [
 								{
 									name:  "POSTGRESQL_USERNAME"
@@ -87,17 +107,49 @@ import (
 							]
 							livenessProbe:  #config.postgresql.livenessProbe
 							readinessProbe: #config.postgresql.readinessProbe
-							volumeMounts: [{
-								name:      "data"
-								mountPath: "/bitnami/postgresql"
-							}]
+							volumeMounts: [
+								{
+									name:      "data"
+									mountPath: "/bitnami/postgresql"
+								},
+								{
+									name:      "pg-conf"
+									mountPath: "/opt/bitnami/postgresql/conf"
+								},
+								{
+									name:      "pg-tmp"
+									mountPath: "/opt/bitnami/postgresql/tmp"
+								},
+								{
+									name:      "tmp"
+									mountPath: "/tmp"
+								}
+							]
 						}]
-						if !#config.postgresql.persistence.enabled {
-							volumes: [{
-								name: "data"
-								emptyDir: {}
-							}]
-						}
+						volumes: list.Concat([
+							[
+								if !#config.postgresql.persistence.enabled {
+									{
+										name: "data"
+										emptyDir: {}
+									}
+								}
+							],
+							[
+								{
+									name: "pg-conf"
+									emptyDir: {}
+								},
+								{
+									name: "pg-tmp"
+									emptyDir: {}
+								},
+								{
+									name: "tmp"
+									emptyDir: {}
+								}
+							]
+						])
 					}
 				}
 				if #config.postgresql.persistence.enabled {

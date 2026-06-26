@@ -74,15 +74,24 @@ import (
 			memory: *"128Mi" | string
 		}
 		limits: {
+			cpu:    *"500m" | string
 			memory: *"512Mi" | string
 		}
 	}
-	securityContext: corev1.#SecurityContext
+	securityContext: corev1.#SecurityContext & {
+		runAsNonRoot:             *true | bool
+		runAsUser:                *1001 | int
+		runAsGroup:               *65533 | int
+		allowPrivilegeEscalation: *false | bool
+		capabilities: drop:       *["ALL"] | [...string]
+		readOnlyRootFilesystem:   *false | bool
+	}
 
 	serviceAccount: {
-		create:      *true | bool
-		annotations: {[string]: string}
-		name:        *"" | string
+		create:                       *true | bool
+		automountServiceAccountToken: *false | bool
+		annotations:                  {[string]: string}
+		name:                         *"" | string
 	}
 	service: {
 		type: * "ClusterIP" | "NodePort" | "LoadBalancer"
@@ -186,7 +195,11 @@ import (
 	extraEnv:          *[] | [...corev1.#EnvVar]
 	podAnnotations:    {[string]: string}
 	podLabels:         {[string]: string}
-	podSecurityContext: corev1.#PodSecurityContext
+	podSecurityContext: corev1.#PodSecurityContext & {
+		fsGroup: *65533 | int
+	}
+	extraVolumes:      *[] | [...corev1.#Volume]
+	extraVolumeMounts: *[] | [...corev1.#VolumeMount]
 	imagePullSecrets:  *[] | [...timoniv1.#ObjectReference]
 
 	umami: {
@@ -256,6 +269,29 @@ import (
 			successThreshold:    *1 | int
 			failureThreshold:    *6 | int
 		}
+		resources: corev1.#ResourceRequirements & {
+			requests: {
+				cpu:    *"100m" | string
+				memory: *"256Mi" | string
+			}
+			limits: {
+				cpu:    *"500m" | string
+				memory: *"512Mi" | string
+			}
+		}
+		podSecurityContext: corev1.#PodSecurityContext & {
+			fsGroup: *1001 | int
+		}
+		securityContext: corev1.#SecurityContext & {
+			runAsNonRoot:             *true | bool
+			runAsUser:                *1001 | int
+			runAsGroup:               *1001 | int
+			allowPrivilegeEscalation: *false | bool
+			capabilities: drop:       *["ALL"] | [...string]
+			readOnlyRootFilesystem:   *false | bool
+		}
+		serviceAccountName:           *"" | string
+		automountServiceAccountToken: *false | bool
 	}
 
 	mysql: {

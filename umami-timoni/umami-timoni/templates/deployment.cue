@@ -27,6 +27,7 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 				serviceAccountName: *#config.serviceAccount.name | string
 				if #config.serviceAccount.name == "" {
 					serviceAccountName: #config.metadata.name
@@ -172,25 +173,31 @@ import (
 						if #config.securityContext != _|_ {
 							securityContext: #config.securityContext
 						}
-						if #cmName != _|_ {
-							volumeMounts: [
-								{
-									name:      "custom-script"
-									mountPath: #config.umami.customScript.mountPath
-									subPath:   #config.umami.customScript.key
-								},
-							]
-						}
+						volumeMounts: list.Concat([
+							[
+								if #cmName != _|_ {
+									{
+										name:      "custom-script"
+										mountPath: #config.umami.customScript.mountPath
+										subPath:   #config.umami.customScript.key
+									}
+								}
+							],
+							#config.extraVolumeMounts
+						])
 					},
 				]
-				if #cmName != _|_ {
-					volumes: [
-						{
-							name: "custom-script"
-							configMap: name: #cmName
-						},
-					]
-				}
+				volumes: list.Concat([
+					[
+						if #cmName != _|_ {
+							{
+								name: "custom-script"
+								configMap: name: #cmName
+							}
+						}
+					],
+					#config.extraVolumes
+				])
 				if #config.affinity != _|_ {
 					affinity: #config.affinity
 				}
