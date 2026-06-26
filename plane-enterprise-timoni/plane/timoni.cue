@@ -10,8 +10,8 @@ import (
 
 // Define the module metadata.
 module: {
-	name:    "evo-openproject"
-	version: "0.1.0"
+	name:    "evo-plane"
+	version: "0.1.1"
 }
 
 // Define the schema for the user-supplied values.

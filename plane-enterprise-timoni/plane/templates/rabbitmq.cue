@@ -73,6 +73,7 @@ import (
 					name:            "\(#config.metadata.name)-rabbitmq"
 					image:           #config.services.rabbitmq.image
 					imagePullPolicy: "IfNotPresent"
+					resources:       #config.services.rabbitmq.resources
 					ports: [{
 						containerPort: 5672
 						name:          "amqp"
@@ -100,7 +101,7 @@ import (
 					readinessProbe: {
 						exec: command: ["rabbitmq-diagnostics", "-q", "check_running"]
 						initialDelaySeconds: 10
-						timeoutSeconds:      5
+						timeoutSeconds:      15
 					}
 				}]
 			}

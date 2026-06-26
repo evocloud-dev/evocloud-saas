@@ -58,6 +58,7 @@ import (
 					imagePullPolicy: "IfNotPresent"
 					stdin:           true
 					tty:             true
+					resources:       #config.services.redis.resources
 					if #config.extraEnv != [] {
 						env: #config.extraEnv
 					}
