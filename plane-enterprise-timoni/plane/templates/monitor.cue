@@ -55,6 +55,16 @@ import (
 				}
 			}
 			spec: {
+				initContainers: [{
+					name:            "volume-permissions"
+					image:           "busybox"
+					imagePullPolicy: "IfNotPresent"
+					command: ["sh", "-c", "if [ -f /app/monitor.db ] && [ ! -w /app/monitor.db ]; then cp /app/monitor.db /app/monitor.db.tmp && rm /app/monitor.db && mv /app/monitor.db.tmp /app/monitor.db; fi"]
+					volumeMounts: [{
+						mountPath: "/app"
+						name:      "pvc-\(#config.metadata.name)-monitor-vol"
+					}]
+				}]
 				containers: [{
 					name:            "\(#config.metadata.name)-monitor"
 					image:           "\(#config.services.monitor.image):\(#config.planeVersion)"
@@ -66,7 +76,9 @@ import (
 						args: ["start-airgapped"]
 					}
 					resources: #config.services.monitor.resources
-					envFrom: [{configMapRef: name: "\(#config.metadata.name)-monitor-vars"}]
+					envFrom: [
+						{configMapRef: name: "\(#config.metadata.name)-monitor-vars"},
+					]
 					volumeMounts: [{
 						mountPath: "/app"
 						name:      "pvc-\(#config.metadata.name)-monitor-vol"

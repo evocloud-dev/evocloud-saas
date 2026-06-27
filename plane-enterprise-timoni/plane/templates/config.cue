@@ -614,11 +614,157 @@ import (
 		name:  string
 		value: string
 	}] | *[]
+
+	// Global security contexts
+	podSecurityContext?:  corev1.#PodSecurityContext
+	securityContext?:     corev1.#SecurityContext
+	serviceAccount: {
+		automountServiceAccountToken: *false | bool
+	}
 }
 
 // Instance takes the config values and outputs the Kubernetes objects.
 #Instance: {
 	config: #Config
+
+	_hardenApp: {
+		spec: template: spec: {
+			automountServiceAccountToken: config.serviceAccount.automountServiceAccountToken
+			serviceAccount:     "\(config.metadata.name)-srv-account"
+			serviceAccountName: "\(config.metadata.name)-srv-account"
+			if config.podSecurityContext != _|_ {
+				securityContext: config.podSecurityContext
+			}
+			containers: [...{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+			}]
+			initContainers?: [...{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+			}]
+		}
+	}
+
+	_hardenDb: {
+		spec: template: spec: {
+			automountServiceAccountToken: config.serviceAccount.automountServiceAccountToken
+			serviceAccount:     "\(config.metadata.name)-srv-account"
+			serviceAccountName: "\(config.metadata.name)-srv-account"
+			containers: [...{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+			}]
+			initContainers?: [...{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+			}]
+		}
+	}
+
+	_hardenNginx: {
+		spec: template: spec: {
+			automountServiceAccountToken: config.serviceAccount.automountServiceAccountToken
+			serviceAccount:     "\(config.metadata.name)-srv-account"
+			serviceAccountName: "\(config.metadata.name)-srv-account"
+			if config.podSecurityContext != _|_ {
+				securityContext: config.podSecurityContext
+			}
+			containers: [{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+				volumeMounts: [
+					{
+						name:      "nginx-cache"
+						mountPath: "/var/cache/nginx"
+					},
+					{
+						name:      "nginx-run"
+						mountPath: "/var/run"
+					},
+				]
+			}]
+			volumes: [
+				{
+					name: "nginx-cache"
+					emptyDir: {}
+				},
+				{
+					name: "nginx-run"
+					emptyDir: {}
+				},
+			]
+		}
+	}
+
+	_hardenDjango: {
+		spec: template: spec: {
+			automountServiceAccountToken: config.serviceAccount.automountServiceAccountToken
+			serviceAccount:     "\(config.metadata.name)-srv-account"
+			serviceAccountName: "\(config.metadata.name)-srv-account"
+			if config.podSecurityContext != _|_ {
+				securityContext: config.podSecurityContext
+			}
+			containers: [{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+				volumeMounts: [
+					{
+						name:      "static-assets"
+						mountPath: "/code/plane/static-assets"
+					},
+					{
+						name:      "logs"
+						mountPath: "/code/plane/logs"
+					},
+				]
+			}]
+			volumes: [
+				{
+					name: "static-assets"
+					emptyDir: {}
+				},
+				{
+					name: "logs"
+					emptyDir: {}
+				},
+			]
+		}
+	}
+
+	_hardenPiBeat: {
+		spec: template: spec: {
+			automountServiceAccountToken: config.serviceAccount.automountServiceAccountToken
+			serviceAccount:     "\(config.metadata.name)-srv-account"
+			serviceAccountName: "\(config.metadata.name)-srv-account"
+			if config.podSecurityContext != _|_ {
+				securityContext: config.podSecurityContext
+			}
+			containers: [{
+				if config.securityContext != _|_ {
+					securityContext: config.securityContext
+				}
+				volumeMounts: [
+					{
+						name:      "celerybeat-schedule"
+						mountPath: "/app/celerybeat-schedule"
+					},
+				]
+			}]
+			volumes: [
+				{
+					name: "celerybeat-schedule"
+					emptyDir: {}
+				},
+			]
+		}
+	}
 
 	objects: {
 		"app-env": #AppConfigMap & {#config: config}
@@ -658,71 +804,71 @@ import (
 			"silo-secrets": #SiloSecret & {#config: config}
 			"silo-vars":    #SiloConfigMap & {#config: config}
 		}
-		"admin-wl":      #AdminDeployment & {#config: config}
+		"admin-wl":      #AdminDeployment & {#config: config} & _hardenNginx
 		"admin-service": #AdminService & {#config: config}
-		"api-wl":        #ApiDeployment & {#config: config}
+		"api-wl":        #ApiDeployment & {#config: config} & _hardenDjango
 		"api-service":   #ApiService & {#config: config}
 		if config.services.automation_consumer.enabled {
-			"automation-consumer-wl": #AutomationConsumerDeployment & {#config: config}
+			"automation-consumer-wl": #AutomationConsumerDeployment & {#config: config} & _hardenDjango
 		}
-		"beat-worker-wl": #BeatWorkerDeployment & {#config: config}
+		"beat-worker-wl": #BeatWorkerDeployment & {#config: config} & _hardenDjango
 		if config.services.email_service.enabled {
-			"email-wl":      #EmailDeployment & {#config: config}
+			"email-wl":      #EmailDeployment & {#config: config} & _hardenApp
 			"email-service": #EmailService & {#config: config}
 		}
-		"iframely-wl":      #IframelyDeployment & {#config: config}
+		"iframely-wl":      #IframelyDeployment & {#config: config} & _hardenApp
 		"iframely-service": #IframelyService & {#config: config}
-		"live-wl":          #LiveDeployment & {#config: config}
+		"live-wl":          #LiveDeployment & {#config: config} & _hardenApp
 		"live-service":     #LiveService & {#config: config}
-		"api-migrate":      #MigratorJob & {#config: config}
+		"api-migrate":      #MigratorJob & {#config: config} & _hardenDjango
 		if config.services.minio.local_setup {
 			"minio-service": #MinioService & {#config: config}
-			"minio-wl":      #MinioStatefulSet & {#config: config}
-			"minio-bucket":  #MinioBucketJob & {#config: config}
+			"minio-wl":      #MinioStatefulSet & {#config: config} & _hardenApp
+			"minio-bucket":  #MinioBucketJob & {#config: config} & _hardenApp
 		}
 		"monitor-service": #MonitorService & {#config: config}
-		"monitor-wl":      #MonitorDeployment & {#config: config}
+		"monitor-wl":      #MonitorDeployment & {#config: config} & _hardenApp
 		if config.services.opensearch.local_setup {
 			"opensearch-service": #OpensearchService & {#config: config}
-			"opensearch-wl":      #OpensearchStatefulSet & {#config: config}
+			"opensearch-wl":      #OpensearchStatefulSet & {#config: config} & _hardenDb & {spec: template: spec: securityContext: {runAsUser: 1000, runAsGroup: 1000, fsGroup: 1000, runAsNonRoot: true}}
 			"opensearch-secrets": #OpenSearchSecret & {#config: config}
 			"opensearch-vars":    #OpenSearchConfigMap & {#config: config}
 		}
 		if config.services.postgres.local_setup {
 			"postgres-service": #PostgresService & {#config: config}
-			"postgres-wl":      #PostgresStatefulSet & {#config: config}
+			"postgres-wl":      #PostgresStatefulSet & {#config: config} & _hardenDb & {spec: template: spec: securityContext: {runAsUser: 70, runAsGroup: 70, fsGroup: 70, runAsNonRoot: true}}
 		}
 		if config.services.rabbitmq.local_setup {
 			"rabbitmq-service": #RabbitmqService & {#config: config}
-			"rabbitmq-wl":      #RabbitmqStatefulSet & {#config: config}
+			"rabbitmq-wl":      #RabbitmqStatefulSet & {#config: config} & _hardenDb & {spec: template: spec: securityContext: {runAsUser: 999, runAsGroup: 999, fsGroup: 999, runAsNonRoot: true}}
 		}
 		if config.services.redis.assign_cluster_ip || !config.services.redis.assign_cluster_ip {
 			"redis-service": #RedisService & {#config: config}
-			"redis-wl":      #RedisDeployment & {#config: config}
+			"redis-wl":      #RedisDeployment & {#config: config} & _hardenDb & {spec: template: spec: securityContext: {runAsUser: 999, runAsGroup: 999, fsGroup: 999, runAsNonRoot: true}}
 		}
 		if config.services.outbox_poller.enabled {
-			"outbox-poller-wl": #OutboxPollerDeployment & {#config: config}
+			"outbox-poller-wl": #OutboxPollerDeployment & {#config: config} & _hardenDjango
 		}
 		if config.services.pi.enabled {
-			"pi-api-wl":      #PIAPIDeployment & {#config: config}
+			"pi-api-wl":      #PIAPIDeployment & {#config: config} & _hardenApp
 			"pi-api-service": #PIAPIService & {#config: config}
-			"pi-beat-wl":     #PIBeatDeployment & {#config: config}
-			"pi-api-migrate": #PIMigratorJob & {#config: config}
-			"pi-worker-wl":    #PIWorkerDeployment & {#config: config}
+			"pi-beat-wl":     #PIBeatDeployment & {#config: config} & _hardenPiBeat
+			"pi-api-migrate": #PIMigratorJob & {#config: config} & _hardenApp
+			"pi-worker-wl":    #PIWorkerDeployment & {#config: config} & _hardenApp
 		}
 		if config.services.silo.enabled {
-			"silo-wl":      #SiloDeployment & {#config: config}
+			"silo-wl":      #SiloDeployment & {#config: config} & _hardenDjango
 			"silo-service": #SiloService & {#config: config}
 		}
 		if config.services.space.replicas > 0 {
-			"space-wl":      #SpaceDeployment & {#config: config}
+			"space-wl":      #SpaceDeployment & {#config: config} & _hardenApp
 			"space-service": #SpaceService & {#config: config}
 		}
 		if config.services.web.replicas > 0 {
-			"web-wl":      #WebDeployment & {#config: config}
+			"web-wl":      #WebDeployment & {#config: config} & _hardenNginx
 			"web-service": #WebService & {#config: config}
 		}
-		"worker-wl": #WorkerDeployment & {#config: config}
+		"worker-wl": #WorkerDeployment & {#config: config} & _hardenDjango
 		if config.ingress.enabled && config.license.licenseDomain != "" && config.ingress.ingressClass != "traefik" && config.ingress.ingressClass != "traefik-ingress" {
 			"ingress": #PlaneIngress & {#config: config}
 		}

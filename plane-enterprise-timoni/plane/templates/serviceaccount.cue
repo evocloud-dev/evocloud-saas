@@ -9,7 +9,7 @@ import (
 
 	apiVersion: "v1"
 	kind:       "ServiceAccount"
-	automountServiceAccountToken: true
+	automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 	metadata: {
 		namespace: #config.#namespace
 		name:      "\(#config.metadata.name)-srv-account"

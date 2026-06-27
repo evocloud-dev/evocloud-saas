@@ -1,7 +1,7 @@
 package main
 
 values: {
-	planeVersion: "v2.5.3"
+	planeVersion: "v2.6.3"
 	
 
 dockerRegistry: {
@@ -68,10 +68,14 @@ ssl: {
 services: {
 	redis: {
 		local_setup:       true
-		image:             "valkey/valkey:7.2.11-alpine"
+		image:             "valkey/valkey:7.2.13-alpine"
 		servicePort:       6379
 		volumeSize:        "500Mi"
 		pullPolicy:        "IfNotPresent"
+		memoryLimit:       "256Mi"
+		cpuLimit:          "100m"
+		memoryRequest:     "128Mi"
+		cpuRequest:        "20m"
 		assign_cluster_ip: false
 		nodeSelector:      {}
 		tolerations:       []
@@ -82,10 +86,14 @@ services: {
 
 	postgres: {
 		local_setup:       true
-		image:             "postgres:15.7-alpine"
+		image:             "postgres:15.18-alpine"
 		servicePort:       5432
 		volumeSize:        "2Gi"
 		pullPolicy:        "IfNotPresent"
+		memoryLimit:       "512Mi"
+		cpuLimit:          "200m"
+		memoryRequest:     "256Mi"
+		cpuRequest:        "50m"
 		assign_cluster_ip: false
 		nodeSelector:      {}
 		tolerations:       []
@@ -96,7 +104,7 @@ services: {
 
 	rabbitmq: {
 		local_setup:           true
-		image:                 "rabbitmq:3.13.6-management-alpine"
+		image:                 "rabbitmq:4.3.2-management-alpine"
 		servicePort:           5672
 		managementPort:        15672
 		volumeSize:            "100Mi"
@@ -104,6 +112,10 @@ services: {
 		default_user:          "plane"
 		default_password:      "plane"
 		external_rabbitmq_url: ""
+		memoryLimit:       "512Mi"
+		cpuLimit:          "200m"
+		memoryRequest:     "256Mi"
+		cpuRequest:        "50m"
 		assign_cluster_ip:     false
 		nodeSelector:      {}
 		tolerations:       []
@@ -114,7 +126,7 @@ services: {
 
 	opensearch: {
 		local_setup:       true
-		image:             "opensearchproject/opensearch:3.3.2"
+		image:             "opensearchproject/opensearch:3.7.0"
 		servicePort:       9200
 		volumeSize:        "5Gi"
 		pullPolicy:        "IfNotPresent"
@@ -140,6 +152,10 @@ services: {
 		pullPolicy:        "IfNotPresent"
 		root_user:         "admin"
 		root_password:     "password"
+		memoryLimit:       "512Mi"
+		cpuLimit:          "200m"
+		memoryRequest:     "256Mi"
+		cpuRequest:        "50m"
 		assign_cluster_ip: false
 		env: {
 			minio_endpoint_ssl: false
@@ -595,10 +611,18 @@ env: {
 
 // Global extra environment variables that will be applied to all workloads
 extraEnv: []
-// - name: HTTP_PROXY
-//   value: "http://proxy.example.com:8080"
-// - name: HTTPS_PROXY
-//   value: "http://proxy.example.com:8080"
-// - name: NO_PROXY
-//   value: "plane.local,127.0.0.1,.example.com"
+
+// Global pod-level security context
+podSecurityContext: {
+	runAsNonRoot: true
+	runAsUser:    10001
+	runAsGroup:   10001
+	fsGroup:      10001
+}
+
+// Global container-level security context
+securityContext: {
+	allowPrivilegeEscalation: false
+	capabilities: drop: ["ALL"]
+}
 }
