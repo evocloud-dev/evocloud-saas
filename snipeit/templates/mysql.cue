@@ -94,7 +94,8 @@ import (
 						runAsUser: #config.mysql.securityContext.runAsUser
 					}
 				}
-				serviceAccountName: #config.mysql.serviceAccountName
+				serviceAccountName:           #config.mysql.serviceAccountName
+				automountServiceAccountToken: false
 				initContainers: [
 					{
 						name:            "remove-lost-found"
@@ -109,6 +110,16 @@ import (
 								subPath: #config.mysql.persistence.subPath
 							}
 						}]
+						if #config.mysql.securityContext.enabled {
+							securityContext: {
+								allowPrivilegeEscalation: #config.mysql.securityContext.allowPrivilegeEscalation
+								capabilities:             #config.mysql.securityContext.capabilities
+								readOnlyRootFilesystem:   #config.mysql.securityContext.readOnlyRootFilesystem
+								runAsNonRoot:             #config.mysql.securityContext.runAsNonRoot
+								runAsUser:                #config.mysql.securityContext.runAsUser
+								seccompProfile:           #config.mysql.securityContext.seccompProfile
+							}
+						}
 					},
 					for c in #config.mysql.extraInitContainers {c},
 				]
@@ -117,6 +128,16 @@ import (
 						name:            "\(#config.metadata.name)-mysql"
 						image:           "\(#config.mysql.image):\(#config.mysql.imageTag)"
 						imagePullPolicy: #config.mysql.imagePullPolicy
+						if #config.mysql.securityContext.enabled {
+							securityContext: {
+								allowPrivilegeEscalation: #config.mysql.securityContext.allowPrivilegeEscalation
+								capabilities:             #config.mysql.securityContext.capabilities
+								readOnlyRootFilesystem:   #config.mysql.securityContext.readOnlyRootFilesystem
+								runAsNonRoot:             #config.mysql.securityContext.runAsNonRoot
+								runAsUser:                #config.mysql.securityContext.runAsUser
+								seccompProfile:           #config.mysql.securityContext.seccompProfile
+							}
+						}
 						if len(#config.mysql.args) > 0 {
 							args: #config.mysql.args
 						}
@@ -218,6 +239,16 @@ import (
 							name:            "metrics"
 							image:           "\(#config.mysql.metrics.image):\(#config.mysql.metrics.imageTag)"
 							imagePullPolicy: #config.mysql.metrics.imagePullPolicy
+							if #config.mysql.securityContext.enabled {
+								securityContext: {
+									allowPrivilegeEscalation: #config.mysql.securityContext.allowPrivilegeEscalation
+									capabilities:             #config.mysql.securityContext.capabilities
+									readOnlyRootFilesystem:   true // metrics exporter has no state and is safe to be read-only
+									runAsNonRoot:             #config.mysql.securityContext.runAsNonRoot
+									runAsUser:                #config.mysql.securityContext.runAsUser
+									seccompProfile:           #config.mysql.securityContext.seccompProfile
+								}
+							}
 							if !#config.mysql.mysqlAllowEmptyPassword {
 								env: [{
 									name: "MYSQL_ROOT_PASSWORD"

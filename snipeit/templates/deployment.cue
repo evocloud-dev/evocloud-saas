@@ -72,18 +72,29 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           "default"
+				automountServiceAccountToken: false
 				initContainers: [
 					{
-						name: "config-data"
-						image: "busybox"
-						command: ["sh", "-c", "find \(#config.persistence.sessions.mountPath) -not -user 1000 -exec chown 1000 {} \\+"]
+						name: "init-configs"
+						image: #config.image.reference
+						command: ["sh", "-c", "mkdir -p /tmp/bin && echo '#!/bin/sh' > /tmp/bin/chown && echo 'exit 0' >> /tmp/bin/chown && chmod +x /tmp/bin/chown && echo '#!/bin/sh' > /tmp/bin/chgrp && echo 'exit 0' >> /tmp/bin/chgrp && chmod +x /tmp/bin/chgrp && cp -R /etc/apache2/. /etc/apache2-new/ && sed -i 's/Listen 80/Listen 8080/g' /etc/apache2-new/ports.conf && sed -i 's/:80/:8080/g' /etc/apache2-new/sites-enabled/000-default.conf"]
 						volumeMounts: [
 							{
-								name: "data"
-								mountPath: #config.persistence.sessions.mountPath
-								subPath: #config.persistence.sessions.subPath
+								name: "bin-dir"
+								mountPath: "/tmp/bin"
+							},
+							{
+								name: "apache-dir"
+								mountPath: "/etc/apache2-new"
 							}
 						]
+						if #config.securityContext != _|_ {
+							securityContext: #config.securityContext
+						}
+						if #config.initContainer.resources != _|_ {
+							resources: #config.initContainer.resources
+						}
 					}
 				]
 
@@ -92,6 +103,9 @@ import (
 						name:            #config.metadata.name
 						image:           #config.image.reference
 						imagePullPolicy: #config.image.pullPolicy
+						if #config.securityContext != _|_ {
+							securityContext: #config.securityContext
+						}
 						env: [
 							{
 								name:  "APP_ENV"
@@ -117,6 +131,10 @@ import (
 								name : "APP_KEY"
 								value: #config.config.snipeit.key
 							},
+							{
+								name:  "PATH"
+								value: "/tmp/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+							},
 						]
 						envFrom: [
 							{
@@ -133,14 +151,14 @@ import (
 						ports: [
 							{
 								name:          "http"
-								containerPort: 80
+								containerPort: 8080
 								protocol:      "TCP"
 							},
 						]
 						livenessProbe: {
 							httpGet: {
 								path: "/health"
-								port: 80
+								port: "http"
 							}
 							periodSeconds:  15
 							timeoutSeconds: 3
@@ -148,7 +166,7 @@ import (
 						readinessProbe: {
 							httpGet: {
 								path: "/health"
-								port: 80
+								port: "http"
 							}
 							periodSeconds:  15
 							timeoutSeconds: 3
@@ -158,6 +176,22 @@ import (
 						}
 						volumeMounts: list.Concat([
 							[
+								{
+									name:      "bin-dir"
+									mountPath: "/tmp/bin"
+								},
+								{
+									name:      "apache-dir"
+									mountPath: "/etc/apache2"
+								},
+								{
+									name:      "apache-logs"
+									mountPath: "/var/log/apache2"
+								},
+								{
+									name:      "apache-run"
+									mountPath: "/var/run/apache2"
+								},
 								{
 									name:      "data"
 									mountPath: #config.persistence.www.mountPath
@@ -192,6 +226,22 @@ import (
 							if !#config.persistence.enabled {
 								emptyDir: {}
 							}
+						},
+						{
+							name: "bin-dir"
+							emptyDir: {}
+						},
+						{
+							name: "apache-dir"
+							emptyDir: {}
+						},
+						{
+							name: "apache-logs"
+							emptyDir: {}
+						},
+						{
+							name: "apache-run"
+							emptyDir: {}
 						},
 					],
 					#config.extraVolumes,

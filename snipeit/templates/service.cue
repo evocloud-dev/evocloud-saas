@@ -33,7 +33,7 @@ import (
 				name:       "http"
 				port:       #config.service.port
 				protocol:   "TCP"
-				targetPort: 80
+				targetPort: "http"
 			},
 		]
 		selector: {

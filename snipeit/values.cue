@@ -21,7 +21,7 @@ values: {
 	image: {
 		repository: "snipe/snipe-it"
 		pullPolicy: "IfNotPresent"
-		tag:        "v8.6.1"
+		tag:        "v8.6.3"
 	}
 
 	service: {
@@ -57,7 +57,7 @@ values: {
 	mysql: {
 		enabled:       true
 		image:  "mysql"
-		imageTag:        "9.7.0"
+		imageTag:        "9.7.1"
 		imagePullPolicy: "IfNotPresent" 
 		mysqlUser:     "snipeit"
 		mysqlPassword: "snipeit"
@@ -68,6 +68,38 @@ values: {
 			accessMode: "ReadWriteOnce"
 			size:       "8Gi"
 		}
+
+		securityContext: {
+			enabled:   true
+			runAsUser: 999
+			fsGroup:   999
+		}
+
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "1000m"
+				memory: "1024Mi"
+			}
+		}
+	}
+
+	podSecurityContext: {
+		runAsUser:  10000
+		runAsGroup: 50
+		fsGroup:    50
+	}
+
+	securityContext: {
+		allowPrivilegeEscalation: false
+		readOnlyRootFilesystem:   false
+		runAsNonRoot:             true
+		runAsUser:                10000
+		capabilities: drop: ["ALL"]
+		seccompProfile: type: "RuntimeDefault"
 	}
 
 	persistence: {
@@ -103,7 +135,29 @@ values: {
 		enabled: false
 	}
 
-	resources: {}
+	resources: {
+		requests: {
+			cpu:    "100m"
+			memory: "128Mi"
+		}
+		limits: {
+			cpu:    "500m"
+			memory: "512Mi"
+		}
+	}
+
+	initContainer: {
+		resources: {
+			requests: {
+				cpu:    "10m"
+				memory: "10Mi"
+			}
+			limits: {
+				cpu:    "50m"
+				memory: "32Mi"
+			}
+		}
+	}
 
 	nodeSelector: {}
 
