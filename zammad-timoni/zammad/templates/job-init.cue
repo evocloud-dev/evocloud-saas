@@ -40,11 +40,10 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
+				serviceAccountName:           #config._serviceAccountName
 				if #config.image.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.image.imagePullSecrets
-				}
-				if #config.serviceAccount.create {
-					serviceAccountName: #config.serviceAccount.name
 				}
 				if #config.nodeSelector != _|_ {
 					nodeSelector: #config.nodeSelector

@@ -10,9 +10,18 @@ import (
 	apiVersion: "v1"
 	kind:       "ServiceAccount"
 	metadata: {
-		name:        #config.serviceAccount.name
+		name:        #config._serviceAccountName
 		namespace:   #config.metadata.namespace
 		labels:      #config.metadata.labels
-		annotations: #config.metadata.annotations & #config.serviceAccount.annotations
+		if #config.metadata.annotations != _|_ || #config.serviceAccount.annotations != _|_ {
+			annotations: {
+				if #config.metadata.annotations != _|_ {
+					#config.metadata.annotations
+				}
+				if #config.serviceAccount.annotations != _|_ {
+					#config.serviceAccount.annotations
+				}
+			}
+		}
 	}
 }

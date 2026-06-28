@@ -5,7 +5,7 @@ package main
 values: {
 	image: {
 		repository: "ghcr.io/zammad/zammad"
-		tag:        ""
+		tag:        "7.1"
 		digest:     ""
 		pullPolicy: "IfNotPresent"
 	}
@@ -363,9 +363,9 @@ values: {
 				securityContext: {
 					readOnlyRootFilesystem: true
 					capabilities: drop: ["ALL"]
-					privileged:    true
-					runAsNonRoot: false
-					runAsUser:    0
+					privileged:             false
+					runAsNonRoot:           false
+					runAsUser:              0
 				}
 			}
 			zammad: {
@@ -430,7 +430,7 @@ values: {
 	topologySpreadConstraints: []
 
 	serviceAccount: {
-		create:      false
+		create:      true
 		annotations: {}
 		name:        ""
 	}
@@ -503,6 +503,16 @@ values: {
 		}
 		defaultBuckets: "zammad"
 		disableWebUI:   true
+		resources: {
+			requests: {
+				cpu:    "50m"
+				memory: "128Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "256Mi"
+			}
+		}
 	}
 
 	// settings for the postgres subchart

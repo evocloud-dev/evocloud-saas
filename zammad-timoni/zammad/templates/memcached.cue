@@ -45,7 +45,10 @@ import (
 				automountServiceAccountToken: false
 				serviceAccountName:           "\(#config.metadata.name)-memcached"
 				securityContext: {
-					fsGroup: 11211
+					fsGroup:             11211
+					runAsUser:           11211
+					runAsGroup:          11211
+					runAsNonRoot:        true
 				}
 				containers: [{
 					name:            "memcached"
@@ -55,6 +58,9 @@ import (
 						allowPrivilegeEscalation: false
 						runAsNonRoot:             true
 						runAsUser:                11211
+						runAsGroup:               11211
+						readOnlyRootFilesystem:  true
+						capabilities: drop: ["ALL"]
 					}
 					args: ["-m", "64", "-c", "1024"]
 					ports: [{
