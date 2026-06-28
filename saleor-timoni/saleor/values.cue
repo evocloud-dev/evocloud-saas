@@ -12,7 +12,7 @@ values: {
 		celeryRedisUrl:   ""
 		image: {
 			repository: "ghcr.io/saleor/saleor"
-			tag:        "3.23.3"
+			tag:        "3.23.12"
 			pullPolicy: "IfNotPresent"
 		}
 		database: {
@@ -26,6 +26,15 @@ values: {
 			enabled:    false
 			secretName: ""
 		}
+	}
+
+	// Local media storage persistence.
+	// Set to true for local development/testing to persist image uploads without
+	// setting up cloud storage. For scaling/production environments, set to false
+	// and configure S3 or GCS storage under the storage block instead.
+	persistence: {
+		enabled: true
+		size:    "2Gi"
 	}
 
 	serviceMesh: {
@@ -66,7 +75,7 @@ values: {
 			}
 			limits: {
 				// cpu:    "500m"
-				memory: "1024Mi"
+				memory: "2048Mi"
 			}
 		}
 		autoscaling: {
@@ -76,7 +85,16 @@ values: {
 			targetCPUUtilizationPercentage: 80
 			//
 		}
-		securityContext: {}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
 		podAnnotations: {}
 		imagePullSecrets: []
 	}
@@ -86,7 +104,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/saleor/saleor-dashboard"
-			tag:        "3.23.3"
+			tag:        "3.23.10"
 			pullPolicy: "IfNotPresent"
 		}
 		appsMarketplaceApiUrl: "https://apps.saleor.io/api/v2/saleor-apps"
@@ -115,9 +133,20 @@ values: {
 			targetCPUUtilizationPercentage:    80
 			// targetMemoryUtilizationPercentage: 80
 		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    10001
+			runAsGroup:   10001
+			fsGroup:      10001
+		}
 		securityContext: {
-			runAsUser:  0
-			runAsGroup: 0
+			allowPrivilegeEscalation: false
+			capabilities: {
+				drop: ["ALL"]
+				add: ["NET_BIND_SERVICE"]
+			}
+			runAsUser:  10001
+			runAsGroup: 10001
 		}
 	}
 
@@ -133,7 +162,7 @@ values: {
 			}
 			limits: {
 				//cpu:    "500m"
-				memory: "1431Mi"
+				memory: "2048Mi"
 			}
 		}
 		autoscaling: {
@@ -213,8 +242,18 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "postgres"
-			tag:        "15-alpine"
+			tag:        "17-alpine"
 			pullPolicy: "IfNotPresent"
+		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
 		}
 		auth: {
 			database:            "postgres"
@@ -229,9 +268,15 @@ values: {
 		}
 		primary: {
 			persistence: size: "8Gi"
-			resources: requests: {
-				cpu:    "500m"
-				memory: "2Gi"
+			resources: {
+				requests: {
+					cpu:    "500m"
+					memory: "2Gi"
+				}
+				limits: {
+					cpu:    "1000m"
+					memory: "2Gi"
+				}
 			}
 			extendedConfiguration: """
 				work_mem = 64MB
@@ -266,6 +311,16 @@ values: {
 			tag:        "8.1-alpine"
 			pullPolicy: "IfNotPresent"
 		}
+		podSecurityContext: {
+			runAsNonRoot: true
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
 		auth: {
 			enabled:                   true
 			password:                  "saleor"
@@ -274,9 +329,15 @@ values: {
 		}
 		master: {
 			persistence: size: "8Gi"
-			resources: requests: {
-				cpu:    "100m"
-				memory: "128Mi"
+			resources: {
+				requests: {
+					cpu:    "100m"
+					memory: "128Mi"
+				}
+				limits: {
+					cpu:    "200m"
+					memory: "256Mi"
+				}
 			}
 		}
 	}
@@ -296,6 +357,7 @@ values: {
 					paths: [
 						{path: "/graphql/", pathType:    "Prefix"},
 						{path: "/thumbnail/", pathType:  "Prefix"},
+						{path: "/media/", pathType:      "Prefix"},
 						{path: "/.well-known/jwks.json", pathType: "ImplementationSpecific"},
 					]
 				},
@@ -323,8 +385,16 @@ values: {
 		name:        ""
 	}
 
-	podSecurityContext: {}
-	securityContext:    {}
+	podSecurityContext: {
+		runAsNonRoot: true
+		runAsUser:    10001
+		runAsGroup:   10001
+		fsGroup:      10001
+	}
+	securityContext: {
+		allowPrivilegeEscalation: false
+		capabilities: drop: ["ALL"]
+	}
 	nodeSelector:       {}
 	tolerations:        []
 	affinity:           {}

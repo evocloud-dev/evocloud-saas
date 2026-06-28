@@ -38,7 +38,8 @@ import (
 				if #config.api.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.api.imagePullSecrets
 				}
-				serviceAccountName: #config.metadata.name
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: false
 				if #config.api.podSecurityContext != _|_ {
 					securityContext: #config.api.podSecurityContext
 				}
@@ -106,6 +107,10 @@ import (
 						}
 						resources: #config.api.resources
 						volumeMounts: [
+							{
+								name:      "media"
+								mountPath: "/app/media"
+							},
 							if #config.#internal.readReplicaEnabled {
 								{
 									name:      "settings"
@@ -206,6 +211,18 @@ import (
 					},
 				]
 				volumes: [
+					if #config.persistence.enabled {
+						{
+							name: "media"
+							persistentVolumeClaim: claimName: "\(#config.metadata.name)-media"
+						}
+					},
+					if !#config.persistence.enabled {
+						{
+							name: "media"
+							emptyDir: {}
+						}
+					},
 					if #config.#internal.readReplicaEnabled {
 						{
 							name: "settings"

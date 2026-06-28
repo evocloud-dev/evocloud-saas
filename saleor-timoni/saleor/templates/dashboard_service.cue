@@ -25,7 +25,7 @@ import (
 			{
 				name:       "http"
 				port:       #config.dashboard.service.port
-				targetPort: 80
+				targetPort: "http"
 				protocol:   "TCP"
 			},
 		]

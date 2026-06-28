@@ -38,7 +38,8 @@ import (
 				if #config.dashboard.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.dashboard.imagePullSecrets
 				}
-				serviceAccountName: #config.metadata.name
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: false
 				if #config.dashboard.podSecurityContext != _|_ {
 					securityContext: #config.dashboard.podSecurityContext
 				}
@@ -59,6 +60,31 @@ import (
 						},
 					]
 				}
+				initContainers: [
+					{
+						name: "copy-dashboard-files"
+						image:           "\(#config.dashboard.image.repository):\(#config.dashboard.image.tag)"
+						imagePullPolicy: #config.dashboard.image.pullPolicy
+						command: ["sh", "-c", "cp -a /app/dashboard/. /mnt/dashboard/ && cp -a /etc/nginx/conf.d/. /mnt/nginx-conf/ && find /mnt/nginx-conf/ -type f -name '*.conf' -exec sed -i 's/80;/8080;/g' {} +"]
+						securityContext: {
+							allowPrivilegeEscalation: false
+							capabilities: drop: ["ALL"]
+							runAsNonRoot: true
+							runAsUser:    10001
+							runAsGroup:   10001
+						}
+						volumeMounts: [
+							{
+								name:      "dashboard-dir"
+								mountPath: "/mnt/dashboard"
+							},
+							{
+								name:      "nginx-conf"
+								mountPath: "/mnt/nginx-conf"
+							},
+						]
+					},
+				]
 				containers: [
 					{
 						name: "dashboard"
@@ -69,7 +95,7 @@ import (
 						imagePullPolicy: #config.dashboard.image.pullPolicy
 						ports: [{
 							name:          "http"
-							containerPort: 80
+							containerPort: 8080
 							protocol:      "TCP"
 						}]
 						livenessProbe: {
@@ -115,14 +141,58 @@ import (
 							],
 							#config.dashboard.extraEnv,
 						])
-						if #config.dashboard.volumeMounts != [] {
-							volumeMounts: #config.dashboard.volumeMounts
-						}
+						volumeMounts: list.Concat([
+							[
+								{
+									name:      "cache-dir"
+									mountPath: "/var/cache/nginx"
+								},
+								{
+									name:      "run-dir"
+									mountPath: "/var/run"
+								},
+								{
+									name:      "tmp-dir"
+									mountPath: "/tmp"
+								},
+								{
+									name:      "dashboard-dir"
+									mountPath: "/app/dashboard"
+								},
+								{
+									name:      "nginx-conf"
+									mountPath: "/etc/nginx/conf.d"
+								},
+							],
+							#config.dashboard.volumeMounts,
+						])
 					},
 				]
-				if #config.dashboard.volumes != [] {
-					volumes: #config.dashboard.volumes
-				}
+				volumes: list.Concat([
+					[
+						{
+							name: "cache-dir"
+							emptyDir: {}
+						},
+						{
+							name: "run-dir"
+							emptyDir: {}
+						},
+						{
+							name: "tmp-dir"
+							emptyDir: {}
+						},
+						{
+							name: "dashboard-dir"
+							emptyDir: {}
+						},
+						{
+							name: "nginx-conf"
+							emptyDir: {}
+						},
+					],
+					#config.dashboard.volumes,
+				])
 				if #config.dashboard.nodeSelector != _|_ {
 					nodeSelector: #config.dashboard.nodeSelector
 				}
