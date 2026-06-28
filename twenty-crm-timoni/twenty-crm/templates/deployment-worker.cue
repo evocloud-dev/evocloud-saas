@@ -32,14 +32,13 @@ import (
 				"app.kubernetes.io/component": "worker"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					runAsUser: #config.securityContext.runAsUser
-					fsGroup:   #config.securityContext.fsGroup
-				}
+				automountServiceAccountToken: false
+				securityContext:              #config.worker.podSecurityContext
 				initContainers: [
 					{
 						name:  "wait-for-db"
 						image: #config.utilityImages.postgres
+						securityContext: #config.worker.securityContext
 						command: [
 							"sh",
 							"-c",
@@ -58,6 +57,7 @@ import (
 						name:            "worker"
 						image:           #config.worker.image.reference
 						imagePullPolicy: #config.worker.image.pullPolicy
+						securityContext: #config.worker.securityContext
 						command:         #config.worker.command
 						stdin:           #config.worker.stdin
 						tty:             #config.worker.tty
@@ -153,6 +153,18 @@ import (
 							},
 						]
 						resources: #config.worker.resources
+						volumeMounts: [
+							{
+								name:      "empty-dir"
+								mountPath: "/tmp"
+							},
+						]
+					},
+				]
+				volumes: [
+					{
+						name: "empty-dir"
+						emptyDir: {}
 					},
 				]
 			}

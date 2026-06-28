@@ -50,9 +50,11 @@ import (
 
 	// Global security context
 	securityContext: {
-		runAsUser: *1000 | int
-		fsGroup:   *1000 | int
+		runAsUser: *10001 | int
+		fsGroup:   *10001 | int
 	}
+
+
 
 	// Storage configuration
 	storage: {
@@ -88,9 +90,31 @@ import (
 			maxUnavailable: *1 | int | string
 		}
 	}
+
+	#PodSecurityContext: {
+		runAsUser:           *10001 | int
+		runAsGroup:          *10001 | int
+		runAsNonRoot:        *true | bool
+		fsGroup:             *10001 | int
+		fsGroupChangePolicy: *"Always" | string
+	}
+
+	#ContainerSecurityContext: {
+		allowPrivilegeEscalation: *false | bool
+		capabilities: {
+			drop: *["ALL"] | [...string]
+		}
+		readOnlyRootFilesystem: *true | bool
+		runAsNonRoot:            *true | bool
+		runAsUser:               *10001 | int
+		runAsGroup:              *10001 | int
+	}
+
 	server: {
 		enabled:      *true | bool
 		replicaCount: *1 | int & >0
+		podSecurityContext: #PodSecurityContext
+		securityContext:    #ContainerSecurityContext
 		image: {
 			repository: *_image.repository | string
 			tag:        *_image.tag | string
@@ -166,6 +190,8 @@ import (
 	worker: {
 		enabled:      *true | bool
 		replicaCount: *1 | int & >0
+		podSecurityContext: #PodSecurityContext
+		securityContext:    #ContainerSecurityContext
 		image: {
 			repository: *_image.repository | string
 			tag:        *_image.tag | string
@@ -196,6 +222,15 @@ import (
 		internal: {
 			enabled:  *true | bool
 			database: *"twenty" | string
+			podSecurityContext: #PodSecurityContext & {
+				runAsUser:           *10001 | int
+				runAsGroup:          *10001 | int
+				fsGroup:             *10001 | int
+			}
+			securityContext:    #ContainerSecurityContext & {
+				runAsUser:               *10001 | int
+				runAsGroup:              *10001 | int
+			}
 			appUser:  *"twenty_app_user" | string
 			appPassword: *"twenty" | string
 			strategy: #Strategy & {
@@ -247,6 +282,8 @@ import (
 	redis: {
 		internal: {
 			enabled: *true | bool
+			podSecurityContext: #PodSecurityContext
+			securityContext:    #ContainerSecurityContext
 			strategy: #Strategy & {
 				type: *"Recreate" | "RollingUpdate"
 			}
@@ -337,5 +374,6 @@ import (
 		if config.secrets.tokens.create {
 			"tokens-secret": #TokensSecret & {#config: config}
 		}
+
 	}
 }

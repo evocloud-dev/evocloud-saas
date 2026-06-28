@@ -28,6 +28,7 @@ import (
 				"app.kubernetes.io/component": "db"
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				containers: [
 					{
 						name:            "db"
