@@ -102,7 +102,7 @@ values: {
 		registry:        "docker.io"
 		repository:      "openproject/openproject"
 		imagePullPolicy: "Always"
-		tag:             "17.2.3-slim"
+		tag:             "17.5.1-slim"
 	}
 
 	imagePullSecrets: []
@@ -233,7 +233,7 @@ values: {
 		image: {
 			repository: "docker.io/openproject/hocuspocus"
 			imagePullPolicy: "Always"
-			tag: "release-338001b2"
+			tag: "release-749fb715"
 	
 		}
 		strategy: type: "Recreate"
@@ -260,6 +260,7 @@ values: {
 		host: "localhost:8080"
 		hsts: true
 		cache: store: "memcache"
+		secretKeyBase: "a809f447de3654b9f298da7c1cfbc332f14371b86e08c8a1cfbc332f14371b86e08c8a1cfbc332f14371b65e903a491f09c2e0b3c4d5e"
 		extraEnvVarsSecret: ""
 		// seed_locale: "en"
 		railsRelativeUrlRoot: ""

@@ -63,7 +63,8 @@ import (
 				if #config.runtimeClassName != "" {
 					runtimeClassName: #config.runtimeClassName
 				}
-				serviceAccountName: #config.metadata.name
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 				volumes: [
 					{
 						name: "tmp"

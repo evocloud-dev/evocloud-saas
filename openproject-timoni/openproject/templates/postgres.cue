@@ -79,13 +79,16 @@ import (
 							"app.kubernetes.io/instance": #config.metadata.name
 						}
 						spec: corev1.#PodSpec & {
+							serviceAccountName:           #config.postgresql.serviceAccountName
+							automountServiceAccountToken: #config.postgresql.automountServiceAccountToken
 							if #config.postgresql.global.containerSecurityContext.enabled {
-								securityContext: fsGroup: 1001
+								securityContext: fsGroup: #config.postgresql.global.containerSecurityContext.fsGroup
 							}
 							containers: [{
 								name:            "postgresql"
 								image:           #config.postgresql.image.reference
 								imagePullPolicy: #config.postgresql.image.imagePullPolicy
+								resources:       #config.postgresql.resources
 								env: [
 									{name: "POSTGRESQL_PORT_NUMBER", value: "5432"},
 									{name: "POSTGRESQL_VOLUME_DIR", value:  "/bitnami/postgresql"},
@@ -140,7 +143,7 @@ import (
 					volumeClaimTemplates: [{
 						metadata: name: "data"
 						spec: corev1.#PersistentVolumeClaimSpec & {
-							accessModes: #config.persistence.accessModes
+							accessModes: #config.postgresql.persistence.accessModes
 							storageClassName: #config.persistence.storageClassName
 							resources: requests: storage: "8Gi"
 						}

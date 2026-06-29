@@ -35,7 +35,8 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
-				serviceAccountName: #config.metadata.name
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
 				if len(#config.imagePullSecrets) > 0 {
 					imagePullSecrets: #config.imagePullSecrets
 				}
