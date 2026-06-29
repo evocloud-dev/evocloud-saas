@@ -37,14 +37,107 @@ import (
 				"app.kubernetes.io/component": "server"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					runAsUser: #config.securityContext.runAsUser
-					fsGroup:   #config.securityContext.fsGroup
-				}
+				automountServiceAccountToken: false
+				securityContext:              #config.server.podSecurityContext
+				_serverEnv: [
+					{
+						name:  "SERVER_URL"
+						value: #config.server.env.SERVER_URL
+					},
+					{
+						name:  "FRONTEND_URL"
+						value: #config.server.env.FRONTEND_URL
+					},
+					{
+						name:  "REDIS_URL"
+						value: "redis://\(#config.metadata.name)-redis:\(#config.redis.internal.service.port)"
+					},
+					{
+						name: "PG_DATABASE_URL"
+						valueFrom: secretKeyRef: {
+							name: "\(#config.metadata.name)-db-url"
+							key:  "url"
+						}
+					},
+					{
+						name:  "STORAGE_TYPE"
+						value: #config.storage.type
+					},
+					{
+						name:  "SIGN_IN_PREFILLED"
+						value: #config.server.env.SIGN_IN_PREFILLED
+					},
+					{
+						name:  "ACCESS_TOKEN_EXPIRES_IN"
+						value: #config.server.env.ACCESS_TOKEN_EXPIRES_IN
+					},
+					{
+						name:  "LOGIN_TOKEN_EXPIRES_IN"
+						value: #config.server.env.LOGIN_TOKEN_EXPIRES_IN
+					},
+					{
+						name:  "API_RATE_LIMITING_SHORT_LIMIT"
+						value: "\(#config.server.env.API_RATE_LIMITING_SHORT_LIMIT)"
+					},
+					{
+						name:  "API_RATE_LIMITING_SHORT_TTL_IN_MS"
+						value: "\(#config.server.env.API_RATE_LIMITING_SHORT_TTL_IN_MS)"
+					},
+					{
+						name:  "IS_MULTIWORKSPACE_ENABLED"
+						value: #config.server.env.IS_MULTIWORKSPACE_ENABLED
+					},
+					{
+						name:  "DEFAULT_SUBDOMAIN"
+						value: #config.server.env.DEFAULT_SUBDOMAIN
+					},
+					{
+						name:  "IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS"
+						value: #config.server.env.IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS
+					},
+					{
+						name: "APP_SECRET"
+						valueFrom: secretKeyRef: {
+							name: "\(#config.metadata.name)-tokens"
+							key:  "accessToken"
+						}
+					},
+					if #config.storage.type == "s3" {
+						{
+							name:  "STORAGE_S3_NAME"
+							value: #config.storage.s3.bucket
+						}
+					},
+					if #config.storage.type == "s3" {
+						{
+							name:  "STORAGE_S3_REGION"
+							value: #config.storage.s3.region
+						}
+					},
+					if #config.storage.type == "s3" {
+						{
+							name:  "STORAGE_S3_ENDPOINT"
+							value: #config.storage.s3.endpoint
+						}
+					},
+					if #config.storage.type == "s3" {
+						{
+							name:  "STORAGE_S3_ACCESS_KEY_ID"
+							value: #config.storage.s3.accessKeyId
+						}
+					},
+					if #config.storage.type == "s3" {
+						{
+							name:  "STORAGE_S3_SECRET_ACCESS_KEY"
+							value: #config.storage.s3.secretAccessKey
+						}
+					},
+				]
 				initContainers: [
 					{
 						name:  "wait-for-db"
 						image: #config.utilityImages.postgres
+						securityContext: #config.server.securityContext
 						command: [
 							"sh",
 							"-c",
@@ -60,6 +153,7 @@ import (
 					{
 						name:  "ensure-database-exists"
 						image: #config.utilityImages.postgres
+						securityContext: #config.server.securityContext
 						env: [
 							{
 								name: "PGPASSWORD"
@@ -107,41 +201,19 @@ import (
 						name:            "run-migrations"
 						image:           #config.server.image.reference
 						imagePullPolicy: #config.server.image.pullPolicy
+						securityContext: #config.server.securityContext
 						command: [
 							"sh",
 							"-c",
-							"npx -y typeorm migration:run -d dist/database/typeorm/core/core.datasource",
+							"node dist/database/scripts/setup-db.js && node dist/command/command run-instance-commands --force --include-slow",
 						]
-						env: [
-							if #config.db.internal.enabled {
-								{
-									name: "PG_DATABASE_URL"
-									valueFrom: secretKeyRef: {
-										name: "\(#config.metadata.name)-db-url"
-										key:  "url"
-									}
-								}
-							},
-							if !#config.db.internal.enabled && #config.db.external != _|_ && #config.db.external.secretName != "" {
-								{
-									name: "DB_PASSWORD"
-									valueFrom: secretKeyRef: {
-										name: #config.db.external.secretName
-										key:  #config.db.external.passwordKey
-									}
-								}
-							},
-							if !#config.db.internal.enabled && #config.db.external != _|_ && #config.db.external.secretName != "" {
-								{
-									name: "PG_DATABASE_URL"
-									_ssl: *"" | string
-									if #config.db.external.ssl {
-										_ssl: "?sslmode=require"
-									}
-									value: "postgres://\(#config.db.external.user):$(DB_PASSWORD)@\(#config.db.external.host):\(#config.db.external.port)/\(#config.db.external.database)\(_ssl)"
-								}
+						volumeMounts: [
+							{
+								name:      "empty-dir"
+								mountPath: "/tmp"
 							},
 						]
+						env: _serverEnv
 					},
 				]
 				containers: [
@@ -149,6 +221,7 @@ import (
 						name:            "server"
 						image:           #config.server.image.reference
 						imagePullPolicy: #config.server.image.pullPolicy
+						securityContext: #config.server.securityContext
 						stdin:           #config.server.stdin
 						tty:             #config.server.tty
 						ports: [
@@ -178,102 +251,13 @@ import (
 							timeoutSeconds:      5
 							failureThreshold:    5
 						}
-						env: [
-							{
-								name:  "SERVER_URL"
-								value: #config.server.env.SERVER_URL
-							},
-							{
-								name:  "FRONTEND_URL"
-								value: #config.server.env.FRONTEND_URL
-							},
-							{
-								name:  "REDIS_URL"
-								value: "redis://\(#config.metadata.name)-redis:\(#config.redis.internal.service.port)"
-							},
-							{
-								name: "PG_DATABASE_URL"
-								valueFrom: secretKeyRef: {
-									name: "\(#config.metadata.name)-db-url"
-									key:  "url"
-								}
-							},
-							{
-								name:  "STORAGE_TYPE"
-								value: #config.storage.type
-							},
-							{
-								name:  "SIGN_IN_PREFILLED"
-								value: #config.server.env.SIGN_IN_PREFILLED
-							},
-							{
-								name:  "ACCESS_TOKEN_EXPIRES_IN"
-								value: #config.server.env.ACCESS_TOKEN_EXPIRES_IN
-							},
-							{
-								name:  "LOGIN_TOKEN_EXPIRES_IN"
-								value: #config.server.env.LOGIN_TOKEN_EXPIRES_IN
-							},
-							{
-								name:  "API_RATE_LIMITING_SHORT_LIMIT"
-								value: "\(#config.server.env.API_RATE_LIMITING_SHORT_LIMIT)"
-							},
-							{
-								name:  "API_RATE_LIMITING_SHORT_TTL_IN_MS"
-								value: "\(#config.server.env.API_RATE_LIMITING_SHORT_TTL_IN_MS)"
-							},
-							{
-								name:  "IS_MULTIWORKSPACE_ENABLED"
-								value: #config.server.env.IS_MULTIWORKSPACE_ENABLED
-							},
-							{
-								name:  "DEFAULT_SUBDOMAIN"
-								value: #config.server.env.DEFAULT_SUBDOMAIN
-							},
-							{
-								name:  "IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS"
-								value: #config.server.env.IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS
-							},
-							{
-								name: "APP_SECRET"
-								valueFrom: secretKeyRef: {
-									name: "\(#config.metadata.name)-tokens"
-									key:  "accessToken"
-								}
-							},
-							if #config.storage.type == "s3" {
-								{
-									name:  "STORAGE_S3_NAME"
-									value: #config.storage.s3.bucket
-								}
-							},
-							if #config.storage.type == "s3" {
-								{
-									name:  "STORAGE_S3_REGION"
-									value: #config.storage.s3.region
-								}
-							},
-							if #config.storage.type == "s3" {
-								{
-									name:  "STORAGE_S3_ENDPOINT"
-									value: #config.storage.s3.endpoint
-								}
-							},
-							if #config.storage.type == "s3" {
-								{
-									name:  "STORAGE_S3_ACCESS_KEY_ID"
-									value: #config.storage.s3.accessKeyId
-								}
-							},
-							if #config.storage.type == "s3" {
-								{
-									name:  "STORAGE_S3_SECRET_ACCESS_KEY"
-									value: #config.storage.s3.secretAccessKey
-								}
-							},
-						]
+						env: _serverEnv
 						resources: #config.server.resources
 						volumeMounts: [
+							{
+								name:      "empty-dir"
+								mountPath: "/tmp"
+							},
 							if #config.server.persistence.enabled {
 								{
 									name:      "server-data"
@@ -290,6 +274,10 @@ import (
 					},
 				]
 				volumes: [
+					{
+						name: "empty-dir"
+						emptyDir: {}
+					},
 					if #config.server.persistence.enabled {
 						{
 							name: "server-data"

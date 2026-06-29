@@ -1,0 +1,678 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-server
+  namespace: tc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: server
+      app.kubernetes.io/name: tc
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: server
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: tc
+        app.kubernetes.io/version: 0.0.0-devel
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: SERVER_URL
+          value: http://localhost:8080
+        - name: FRONTEND_URL
+          value: http://localhost:8080
+        - name: REDIS_URL
+          value: redis://tc-redis:6379
+        - name: PG_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: url
+              name: tc-db-url
+        - name: STORAGE_TYPE
+          value: local
+        - name: SIGN_IN_PREFILLED
+          value: "false"
+        - name: ACCESS_TOKEN_EXPIRES_IN
+          value: 7d
+        - name: LOGIN_TOKEN_EXPIRES_IN
+          value: 1h
+        - name: API_RATE_LIMITING_SHORT_LIMIT
+          value: "100"
+        - name: API_RATE_LIMITING_SHORT_TTL_IN_MS
+          value: "1000"
+        - name: IS_MULTIWORKSPACE_ENABLED
+          value: "false"
+        - name: DEFAULT_SUBDOMAIN
+          value: app
+        - name: IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS
+          value: "true"
+        - name: APP_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: accessToken
+              name: tc-tokens
+        image: twentycrm/twenty:v2.17.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 180
+          periodSeconds: 10
+          timeoutSeconds: 5
+        name: server
+        ports:
+        - containerPort: 3000
+          name: http-tcp
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        stdin: true
+        tty: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: empty-dir
+        - mountPath: /app/packages/twenty-server/.local-storage
+          name: server-data
+        - mountPath: /app/docker-data
+          name: docker-data
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |-
+          until pg_isready -h tc-db -p 5432 -U postgres; do
+            echo "Waiting for database socket..."
+            sleep 2
+          done
+          echo "Database socket is ready!"
+        image: postgres:16-alpine
+        name: wait-for-db
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      - command:
+        - sh
+        - -c
+        - |-
+          DBNAME=twenty
+          APP_USER=twenty_app_user
+          export PGPASSWORD
+          export APP_PASSWORD
+          echo "Creating database ${DBNAME} if it doesn't exist..."
+          psql -h tc-db -p 5432 -U postgres -d postgres -Atc "SELECT 1 FROM pg_database WHERE datname = '${DBNAME}'" | grep -q 1 || psql -h tc-db -p 5432 -U postgres -d postgres -c "CREATE DATABASE ${DBNAME};"
+          echo "Creating app user ${APP_USER} if it doesn't exist..."
+          psql -h tc-db -p 5432 -U postgres -d postgres -c "DO \$do$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${APP_USER}') THEN EXECUTE format('CREATE USER %I WITH PASSWORD %L', '${APP_USER}', '${APP_PASSWORD}'); ELSE EXECUTE format('ALTER USER %I WITH PASSWORD %L', '${APP_USER}', '${APP_PASSWORD}'); END IF; END \$do$;"
+          echo "Creating core schema and granting permissions..."
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "CREATE SCHEMA IF NOT EXISTS core"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "GRANT ALL PRIVILEGES ON DATABASE ${DBNAME} TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "GRANT ALL PRIVILEGES ON SCHEMA core TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA core TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA core GRANT ALL ON TABLES TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA core GRANT ALL ON SEQUENCES TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${APP_USER};"
+          psql -h tc-db -p 5432 -U postgres -d "${DBNAME}" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${APP_USER};"
+          echo "Database ${DBNAME} is ready."
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: tc-db-superuser
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: appPassword
+              name: tc-db-url
+        image: postgres:16-alpine
+        name: ensure-database-exists
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      - command:
+        - sh
+        - -c
+        - node dist/database/scripts/setup-db.js && node dist/command/command run-instance-commands
+          --force --include-slow
+        env:
+        - name: SERVER_URL
+          value: http://localhost:8080
+        - name: FRONTEND_URL
+          value: http://localhost:8080
+        - name: REDIS_URL
+          value: redis://tc-redis:6379
+        - name: PG_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: url
+              name: tc-db-url
+        - name: STORAGE_TYPE
+          value: local
+        - name: SIGN_IN_PREFILLED
+          value: "false"
+        - name: ACCESS_TOKEN_EXPIRES_IN
+          value: 7d
+        - name: LOGIN_TOKEN_EXPIRES_IN
+          value: 1h
+        - name: API_RATE_LIMITING_SHORT_LIMIT
+          value: "100"
+        - name: API_RATE_LIMITING_SHORT_TTL_IN_MS
+          value: "1000"
+        - name: IS_MULTIWORKSPACE_ENABLED
+          value: "false"
+        - name: DEFAULT_SUBDOMAIN
+          value: app
+        - name: IS_WORKSPACE_CREATION_LIMITED_TO_SERVER_ADMINS
+          value: "true"
+        - name: APP_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: accessToken
+              name: tc-tokens
+        image: twentycrm/twenty:v2.17.0
+        imagePullPolicy: IfNotPresent
+        name: run-migrations
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /tmp
+          name: empty-dir
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: Always
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      volumes:
+      - emptyDir: {}
+        name: empty-dir
+      - name: server-data
+        persistentVolumeClaim:
+          claimName: tc-server
+      - name: docker-data
+        persistentVolumeClaim:
+          claimName: tc-docker-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-server
+  namespace: tc
+spec:
+  ports:
+  - name: http-tcp
+    port: 3000
+    protocol: TCP
+    targetPort: http-tcp
+  selector:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: tc
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-worker
+  namespace: tc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/name: tc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: tc
+        app.kubernetes.io/version: 0.0.0-devel
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - yarn
+        - worker:prod
+        env:
+        - name: SERVER_URL
+          value: http://localhost:8080
+        - name: FRONTEND_URL
+          value: http://localhost:8080
+        - name: REDIS_URL
+          value: redis://tc-redis:6379
+        - name: PG_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: url
+              name: tc-db-url
+        - name: STORAGE_TYPE
+          value: local
+        - name: IS_MULTIWORKSPACE_ENABLED
+          value: "false"
+        - name: DEFAULT_SUBDOMAIN
+          value: app
+        - name: APP_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: accessToken
+              name: tc-tokens
+        image: twentycrm/twenty:v2.17.0
+        imagePullPolicy: IfNotPresent
+        name: worker
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 10001
+          runAsNonRoot: true
+          runAsUser: 10001
+        stdin: true
+        tty: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: empty-dir
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |-
+          until pg_isready -h tc-db -p 5432 -U postgres; do
+            echo "Waiting for database socket..."
+            sleep 2
+          done
+          echo "Database socket is ready!"
+        image: postgres:16-alpine
+        name: wait-for-db
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 10001
+          runAsNonRoot: true
+          runAsUser: 10001
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: Always
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+      volumes:
+      - emptyDir: {}
+        name: empty-dir
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-db
+  namespace: tc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: db
+      app.kubernetes.io/name: tc
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: db
+        app.kubernetes.io/instance: tc
+        app.kubernetes.io/name: tc
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PGUSER_SUPERUSER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: tc-db-superuser
+        - name: PGPASSWORD_SUPERUSER
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: tc-db-superuser
+        - name: SPILO_PROVIDER
+          value: local
+        - name: ALLOW_NOSSL
+          value: "true"
+        image: ghcr.io/zalando/spilo-16:3.3-p2
+        imagePullPolicy: IfNotPresent
+        name: db
+        ports:
+        - containerPort: 5432
+          name: tcp-db
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /home/postgres/pgdata
+          name: db-data
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: tc-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-db
+  namespace: tc
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/name: tc
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-db-url
+  namespace: tc
+stringData:
+  appPassword: twenty
+  url: postgres://twenty_app_user:twenty@tc-db:5432/twenty
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-db-superuser
+  namespace: tc
+stringData:
+  password: postgres
+  username: postgres
+type: Opaque
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-redis
+  namespace: tc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+      app.kubernetes.io/name: tc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: redis
+        app.kubernetes.io/instance: tc
+        app.kubernetes.io/name: tc
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - --port
+        - "6379"
+        - --maxmemory-policy
+        - noeviction
+        - --dir
+        - /data
+        command:
+        - redis-stack-server
+        image: redis/redis-stack-server:7.2.0-v10
+        imagePullPolicy: IfNotPresent
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+          requests:
+            cpu: 250m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 10001
+          runAsNonRoot: true
+          runAsUser: 10001
+        volumeMounts:
+        - mountPath: /tmp
+          name: empty-dir
+        - mountPath: /data
+          name: redis-data
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: Always
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+      volumes:
+      - emptyDir: {}
+        name: empty-dir
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: tc-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-redis
+  namespace: tc
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/name: tc
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: secrets
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-tokens
+  namespace: tc
+stringData:
+  accessToken: twenty-secret-token-change-me
+type: Opaque
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-server
+  namespace: tc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-docker-data
+  namespace: tc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: db
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-db
+  namespace: tc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: tc
+    app.kubernetes.io/version: 0.0.0-devel
+  name: tc-redis
+  namespace: tc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---

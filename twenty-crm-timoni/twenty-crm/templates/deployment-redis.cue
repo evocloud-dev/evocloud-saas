@@ -35,15 +35,14 @@ import (
 				"app.kubernetes.io/component": "redis"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					runAsUser: #config.securityContext.runAsUser
-					fsGroup:   #config.securityContext.fsGroup
-				}
+				automountServiceAccountToken: false
+				securityContext:              #config.redis.internal.podSecurityContext
 				containers: [
 					{
 						name:            "redis"
 						image:           #config.redis.internal.image.reference
 						imagePullPolicy: #config.redis.internal.image.pullPolicy
+						securityContext: #config.redis.internal.securityContext
 						command: ["redis-stack-server"]
 						args: [
 							"--port",
@@ -62,6 +61,10 @@ import (
 						resources: #config.redis.internal.resources
 						volumeMounts: [
 							{
+								name:      "empty-dir"
+								mountPath: "/tmp"
+							},
+							{
 								name:      "redis-data"
 								mountPath: "/data"
 							},
@@ -69,6 +72,10 @@ import (
 					},
 				]
 				volumes: [
+					{
+						name: "empty-dir"
+						emptyDir: {}
+					},
 					{
 						name: "redis-data"
 						if #config.redis.internal.persistence.enabled {

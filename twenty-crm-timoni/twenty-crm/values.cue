@@ -9,7 +9,7 @@ package main
 values: {
 	image: {
 		repository: "twentycrm/twenty"
-		tag:        "v1.20.0"
+		tag:        "v2.17.0"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -18,8 +18,8 @@ values: {
 
 	// Global security context (uid/gid for all pods)
 	securityContext: {
-		runAsUser: 1000
-		fsGroup:   1000
+		runAsUser: 10001
+		fsGroup:   10001
 	}
 
 
@@ -51,6 +51,23 @@ values: {
 	server: {
 		enabled:      true
 		replicaCount: 2
+		podSecurityContext: {
+			runAsUser:           1000
+			runAsGroup:          1000
+			runAsNonRoot:        true
+			fsGroup:             1000
+			fsGroupChangePolicy: "Always"
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: {
+				drop: ["ALL"]
+			}
+			readOnlyRootFilesystem: false
+			runAsNonRoot:            true
+			runAsUser:               1000
+			runAsGroup:              1000
+		}
 		image: {} // override repository/tag/pullPolicy per component
 
 		
@@ -132,6 +149,23 @@ values: {
 	worker: {
 		enabled:      true
 		replicaCount: 1
+		podSecurityContext: {
+			runAsUser:           10001
+			runAsGroup:          10001
+			runAsNonRoot:        true
+			fsGroup:             10001
+			fsGroupChangePolicy: "Always"
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: {
+				drop: ["ALL"]
+			}
+			readOnlyRootFilesystem: true
+			runAsNonRoot:            true
+			runAsUser:               10001
+			runAsGroup:              10001
+		}
 		image: {}
 		command: ["yarn", "worker:prod"]
 
@@ -153,6 +187,23 @@ values: {
 		internal: {
 			enabled:     true
 			database:    "twenty"
+			podSecurityContext: {
+				runAsUser:           10001
+				runAsGroup:          10001
+				runAsNonRoot:        true
+				fsGroup:             10001
+				fsGroupChangePolicy: "Always"
+			}
+			securityContext: {
+				allowPrivilegeEscalation: false
+				capabilities: {
+					drop: ["ALL"]
+				}
+				readOnlyRootFilesystem: true
+				runAsNonRoot:            true
+				runAsUser:               10001
+				runAsGroup:              10001
+			}
 			appUser:     "twenty_app_user"
 			appPassword: "twenty"
 			image: {
@@ -203,6 +254,23 @@ values: {
 	redis: {
 		internal: {
 			enabled: true
+			podSecurityContext: {
+				runAsUser:           10001
+				runAsGroup:          10001
+				runAsNonRoot:        true
+				fsGroup:             10001
+				fsGroupChangePolicy: "Always"
+			}
+			securityContext: {
+				allowPrivilegeEscalation: false
+				capabilities: {
+					drop: ["ALL"]
+				}
+				readOnlyRootFilesystem: true
+				runAsNonRoot:            true
+				runAsUser:               10001
+				runAsGroup:              10001
+			}
 			image: {
 				repository: "redis/redis-stack-server"
 				tag:        "7.2.0-v10"
