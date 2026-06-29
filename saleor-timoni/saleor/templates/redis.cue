@@ -87,14 +87,22 @@ import (
 		}
 		template: {
 			metadata: labels: {
-				"app.kubernetes.io/name": "redis"
+				"app.kubernetes.io/name":     "redis"
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
-			spec: {
+			spec: corev1.#PodSpec & {
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: false
+				if #config.redis.podSecurityContext != _|_ {
+					securityContext: #config.redis.podSecurityContext
+				}
 				containers: [{
 					name:            "redis"
 					image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
 					imagePullPolicy: #config.redis.image.pullPolicy
+					if #config.redis.securityContext != _|_ {
+						securityContext: #config.redis.securityContext
+					}
 					if len(#config.redis.image.command) > 0 {
 						command: #config.redis.image.command
 					}
@@ -126,6 +134,7 @@ import (
 						name:          "redis"
 						containerPort: 6379
 					}]
+					resources: #config.redis.master.resources
 					volumeMounts: [{
 						name:      "redis-data"
 						mountPath: #config.redis.persistence.mountPath

@@ -261,6 +261,15 @@ import (
 		}
 	}
 
+	// Local media storage persistence.
+	// Used to persist media locally (without cloud storage) for dev/testing.
+	// If enabled, mounts a PVC to API and worker pods. Disable when using S3/GCS.
+	persistence: {
+		enabled:      bool | *true
+		size:         string | *"2Gi"
+		storageClass: string | *""
+	}
+
 	postgresql: {
 		enabled:      bool | *true
 		architecture: "standalone" | "replication" | *"standalone"
@@ -272,6 +281,8 @@ import (
 			args: [...string] | *[]
 		}
 		persistence: mountPath: string | *"/var/lib/postgresql/data"
+		podSecurityContext?: corev1.#PodSecurityContext
+		securityContext?:    corev1.#SecurityContext
 		auth: {
 			database:            string | *"postgres"
 			postgresPassword:    string | *""
@@ -317,6 +328,8 @@ import (
 			args: [...string] | *["--requirepass", "$(REDIS_PASSWORD)"]
 		}
 		persistence: mountPath: string | *"/data"
+		podSecurityContext?: corev1.#PodSecurityContext
+		securityContext?:    corev1.#SecurityContext
 		auth: {
 			enabled:                   bool | *true
 			password:                  string | *""
@@ -656,6 +669,9 @@ import (
 		if config.api.enabled {
 			"api-svc": #APIService & {#config: config}
 			"api-deploy": #APIDeployment & {#config: config}
+			if config.persistence.enabled {
+				"media-pvc": #MediaPVC & {#config: config}
+			}
 			if config.api.autoscaling.enabled {
 				"api-hpa": #APIHPA & {#config: config}
 			}

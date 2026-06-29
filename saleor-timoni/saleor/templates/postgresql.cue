@@ -90,14 +90,22 @@ import (
 		}
 		template: {
 			metadata: labels: {
-				"app.kubernetes.io/name": "postgresql"
+				"app.kubernetes.io/name":     "postgresql"
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
-			spec: {
+			spec: corev1.#PodSpec & {
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: false
+				if #config.postgresql.podSecurityContext != _|_ {
+					securityContext: #config.postgresql.podSecurityContext
+				}
 				containers: [{
 					name:  "postgresql"
 					image: "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
 					imagePullPolicy: #config.postgresql.image.pullPolicy
+					if #config.postgresql.securityContext != _|_ {
+						securityContext: #config.postgresql.securityContext
+					}
 					if len(#config.postgresql.image.command) > 0 {
 						command: #config.postgresql.image.command
 					}
@@ -116,11 +124,15 @@ import (
 					}, {
 						name:  "POSTGRES_USER"
 						value: "postgres"
+					}, {
+						name:  "PGDATA"
+						value: "/var/lib/postgresql/data/pgdata"
 					}]
 					ports: [{
 						name:          "postgresql"
 						containerPort: 5432
 					}]
+					resources: #config.postgresql.primary.resources
 					volumeMounts: [{
 						name:      "data"
 						mountPath: #config.postgresql.persistence.mountPath

@@ -40,10 +40,10 @@ import (
 				if #config.global.imagePullSecrets != [] {
 					imagePullSecrets: #config.global.imagePullSecrets
 				}
-				serviceAccountName: #config.metadata.name
-				securityContext: {
-					runAsUser:  0
-					runAsGroup: 0
+				serviceAccountName:           #config.metadata.name
+				automountServiceAccountToken: false
+				if #config.podSecurityContext != _|_ {
+					securityContext: #config.podSecurityContext
 				}
 				containers: [
 					{
