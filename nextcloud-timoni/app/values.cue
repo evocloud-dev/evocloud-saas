@@ -5,7 +5,7 @@ values: {
 	image: {
 		repository: "docker.io/library/nextcloud"
 		digest:     ""
-		tag:        "apache"
+		tag:        "34.0.0-apache"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -14,6 +14,17 @@ values: {
 	deploymentAnnotations: {}
 	deploymentLabels: {}
 	
+	resources: {
+		requests: {
+			cpu:    "10m"
+			memory: "128Mi"
+		}
+		limits: {
+			cpu:    "1000m"
+			memory: "1Gi"
+		}
+	}
+
 	lifecycle: {}
 
 	nextcloud: {
@@ -21,7 +32,7 @@ values: {
 		trustedDomains: ["nextcloud.kube.home", "localhost"]
 		trustedProxies: ["127.0.0.1", "10.0.0.0/8"]
 		maintenanceWindowStart: 1
-		forceSTSSet: true
+		forceSTSSet: false
 		bruteForceProtection: false
 		bruteForceWhitelistedIps: ["127.0.0.1", "::1"]
 		datadir: "/var/www/html/data"
@@ -54,7 +65,7 @@ values: {
 
 		// Admin credentials
 		username: "admin"
-		password: "changeme"
+		password: "EvoCloudNextcloud2026!"
 
 		existingSecret: {
 			enabled:         false
@@ -150,16 +161,78 @@ values: {
 				database:     "nextcloud"
 			}
 			persistence: enabled: true
+			initResources: {
+				requests: {
+					cpu:    "50m"
+					memory: "64Mi"
+				}
+				limits: {
+					cpu:    "100m"
+					memory: "128Mi"
+				}
+			}
+			initSecurityContext: {
+				allowPrivilegeEscalation: false
+				privileged:               false
+				runAsNonRoot:             true
+				runAsUser:                1001
+				runAsGroup:               1001
+				readOnlyRootFilesystem:   true
+				capabilities: drop: ["ALL"]
+			}
 		}
 		postgresql: {
 			enabled:     true
-			image:       "docker.io/bitnami/postgresql:latest"
+			image:       "docker.io/library/postgres:18"
 			auth: {
 				username: "nextcloud"
 				password: "changeme"
 				database: "nextcloud"
 			}
 			persistence: enabled: true
+			resources: {
+				requests: {
+					cpu:    "100m"
+					memory: "256Mi"
+				}
+				limits: {
+					cpu:    "1000m"
+					memory: "512Mi"
+				}
+			}
+			podSecurityContext: {
+				runAsUser:  999
+				runAsGroup: 999
+				fsGroup:    999
+			}
+			securityContext: {
+				allowPrivilegeEscalation: false
+				privileged:               false
+				runAsNonRoot:             true
+				runAsUser:                999
+				runAsGroup:               999
+				readOnlyRootFilesystem:   true
+				capabilities: drop: ["ALL"]
+			}
+			initResources: {
+				requests: {
+					cpu:    "50m"
+					memory: "64Mi"
+				}
+				limits: {
+					cpu:    "100m"
+					memory: "128Mi"
+				}
+			}
+			initSecurityContext: {
+				allowPrivilegeEscalation: false
+				privileged:               false
+				runAsNonRoot:             true
+				runAsUser:                1001
+				runAsGroup:               1001
+				readOnlyRootFilesystem:   true
+				capabilities: drop: ["ALL"]
+			}
 		}
 		externalDatabase: {
 			enabled:  false
@@ -192,7 +265,7 @@ values: {
 
 
 	rbac: {
-		enabled: false
+		enabled: true
 		serviceAccount: {
 			create: true
 			name:   "nextcloud-serviceaccount"
@@ -226,7 +299,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "xperimental/nextcloud-exporter"
-			tag:        "0.8.0"
+			tag:        "0.9.1"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -384,8 +457,8 @@ values: {
 		enabled: true
 		image: {
 			registry:   "docker.io"
-			repository: "bitnamilegacy/redis"
-			tag:        "latest"
+			repository: "valkey/valkey"
+			tag:        "9.1.0-alpine"
 		}
 		auth: {
 			enabled:  true
@@ -394,6 +467,16 @@ values: {
 		master: persistence: {
 			enabled: true
 			size:    "1Gi"
+		}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "128Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "256Mi"
+			}
 		}
 	}
 

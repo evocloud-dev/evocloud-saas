@@ -164,20 +164,21 @@ import (
 	}
 
 	// The resources allows setting the container resource requirements.
-	// By default, the container requests 10m CPU and 32Mi memory.
-	resources: timoniv1.#ResourceRequirements & {
-		requests: {
-			cpu:    *"10m" | timoniv1.#CPUQuantity
-			memory: *"32Mi" | timoniv1.#MemoryQuantity
-		}
-	}
+	resources: timoniv1.#ResourceRequirements
 
 	// The number of pods replicas.
 	// By default, the number of replicas is 1.
 	replicas: *1 | int & >0
 
 	// The securityContext allows setting the container security context.
-	securityContext?: corev1.#SecurityContext
+	securityContext: corev1.#SecurityContext | *{
+		allowPrivilegeEscalation: false
+		privileged:               false
+		capabilities: {
+			drop: ["ALL"]
+			add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "NET_BIND_SERVICE"]
+		}
+	}
 
 	// The podSecurityContext allows setting the pod security context.
 	podSecurityContext?: corev1.#PodSecurityContext
@@ -319,10 +320,12 @@ import (
 				accessMode:   *"ReadWriteOnce" | corev1.#PersistentVolumeAccessMode
 				size:         *"8Gi" | timoniv1.#MemoryQuantity
 			}
+			initResources: corev1.#ResourceRequirements
+			initSecurityContext: corev1.#SecurityContext
 		}
 		postgresql: {
 			enabled:     *false | bool
-			image:       *"docker.io/bitnami/postgresql:latest" | string
+			image:       *"docker.io/library/postgres:18" | string
 			primaryHost: string | *(metadata.name + "-postgresql")
 			auth: {
 				username:     *"nextcloud" | string
@@ -337,6 +340,23 @@ import (
 				accessMode:   *"ReadWriteOnce" | corev1.#PersistentVolumeAccessMode
 				size:         *"8Gi" | timoniv1.#MemoryQuantity
 			}
+			resources: corev1.#ResourceRequirements
+			podSecurityContext: corev1.#PodSecurityContext & {
+				runAsUser:  *999 | int
+				runAsGroup: *999 | int
+				fsGroup:    *999 | int
+			}
+			securityContext: corev1.#SecurityContext & {
+				allowPrivilegeEscalation: *false | bool
+				privileged:               *false | bool
+				runAsNonRoot:             *true | bool
+				runAsUser:                *999 | int
+				runAsGroup:               *999 | int
+				readOnlyRootFilesystem:   *true | bool
+				capabilities: drop: ["ALL"]
+			}
+			initResources: corev1.#ResourceRequirements
+			initSecurityContext: corev1.#SecurityContext
 		}
 		if database.mariadb.enabled || database.postgresql.enabled || database.externalDatabase.enabled {
 			internalDatabase: enabled: false
@@ -382,8 +402,10 @@ import (
 			accessMode:   corev1.#PersistentVolumeAccessMode | *"ReadWriteOnce"
 		}
 		port: *6379 | int
+		resources?: corev1.#ResourceRequirements
 		_name: metadata.name + "-redis"
 		primaryHost: string | *(_name + "-master")
+
 	}
 
 	// External Redis — use when Redis is not deployed via sub-chart

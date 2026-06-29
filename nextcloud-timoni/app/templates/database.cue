@@ -24,26 +24,33 @@ import (
 				"app.kubernetes.io/component": "database"
 			}
 			template: {
-				metadata: labels: {
-					"app.kubernetes.io/name":      #in.metadata.name
-					"app.kubernetes.io/component": "database"
+				metadata: {
+					labels: {
+						"app.kubernetes.io/name":      #in.metadata.name
+						"app.kubernetes.io/component": "database"
+					}
 				}
 				spec: corev1.#PodSpec & {
+					automountServiceAccountToken: false
+					serviceAccountName: #in.rbac.serviceAccount.name
+					securityContext: #in.database.postgresql.podSecurityContext
 					containers: [
 						{
-							name:  "postgresql"
-							image: #in.database.postgresql.image
+							name:            "postgresql"
+							image:           #in.database.postgresql.image
+							securityContext: #in.database.postgresql.securityContext
+							resources:       #in.database.postgresql.resources
 							env: [
 								{
-									name:  "POSTGRESQL_USERNAME"
+									name:  "POSTGRES_USER"
 									value: #in.database.postgresql.auth.username
 								},
 								{
-									name:  "POSTGRESQL_PASSWORD"
+									name:  "POSTGRES_PASSWORD"
 									value: #in.database.postgresql.auth.password
 								},
 								{
-									name:  "POSTGRESQL_DATABASE"
+									name:  "POSTGRES_DB"
 									value: #in.database.postgresql.auth.database
 								},
 							]
@@ -53,24 +60,48 @@ import (
 									name:          "tcp-postgresql"
 								},
 							]
-							if #in.database.postgresql.persistence.enabled {
-								volumeMounts: [
+							volumeMounts: [
+								if #in.database.postgresql.persistence.enabled {
 									{
 										name:      "data"
-										mountPath: "/bitnami/postgresql"
-									},
-								]
-							}
+										mountPath: "/var/lib/postgresql"
+									}
+								},
+								if #in.database.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #in.database.postgresql.securityContext.readOnlyRootFilesystem == true {
+									{
+										name:      "var-run-postgresql"
+										mountPath: "/var/run/postgresql"
+									}
+								},
+								if #in.database.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #in.database.postgresql.securityContext.readOnlyRootFilesystem == true {
+									{
+										name:      "tmp"
+										mountPath: "/tmp"
+									}
+								},
+							]
 						},
 					]
-					if #in.database.postgresql.persistence.enabled {
-						volumes: [
+					volumes: [
+						if #in.database.postgresql.persistence.enabled {
 							{
 								name: "data"
 								persistentVolumeClaim: claimName: #in.database.postgresql.primaryHost
-							},
-						]
-					}
+							}
+						},
+						if #in.database.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #in.database.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "var-run-postgresql"
+								emptyDir: {}
+							}
+						},
+						if #in.database.postgresql.securityContext.readOnlyRootFilesystem != _|_ && #in.database.postgresql.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "tmp"
+								emptyDir: {}
+							}
+						},
+					]
 				}
 			}
 		}
