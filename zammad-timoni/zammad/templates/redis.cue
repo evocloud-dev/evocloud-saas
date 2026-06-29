@@ -50,8 +50,12 @@ import (
 			}
 			spec: {
 				automountServiceAccountToken: false
+				serviceAccountName:           #config._serviceAccountName
 				securityContext: {
-					fsGroup: 999
+					fsGroup:             999
+					runAsUser:           999
+					runAsGroup:          999
+					runAsNonRoot:        true
 				}
 				containers: [
 					{
@@ -69,6 +73,7 @@ import (
 							runAsGroup:               999
 							runAsNonRoot:            true
 							readOnlyRootFilesystem:  true
+							capabilities: drop: ["ALL"]
 						}
 						ports: [{
 							name:          "redis"
@@ -120,6 +125,25 @@ import (
 								"-c",
 								"cat > /tmp/sentinel.conf <<EOF\nport 26379\nsentinel monitor mymaster ${MY_POD_IP} 6379 1\nsentinel down-after-milliseconds mymaster 5000\nsentinel failover-timeout mymaster 60000\nsentinel parallel-syncs mymaster 1\nsentinel auth-pass mymaster ${REDIS_PASSWORD}\nrequirepass ${REDIS_PASSWORD}\nprotected-mode no\nEOF\nredis-sentinel /tmp/sentinel.conf\n"
 							]
+							securityContext: {
+								allowPrivilegeEscalation: false
+								privileged:              false
+								runAsUser:                999
+								runAsGroup:               999
+								runAsNonRoot:            true
+								readOnlyRootFilesystem:  true
+								capabilities: drop: ["ALL"]
+							}
+							resources: {
+								requests: {
+									cpu:    "10m"
+									memory: "16Mi"
+								}
+								limits: {
+									cpu:    "50m"
+									memory: "32Mi"
+								}
+							}
 							ports: [{
 								name:          "sentinel"
 								containerPort: 26379

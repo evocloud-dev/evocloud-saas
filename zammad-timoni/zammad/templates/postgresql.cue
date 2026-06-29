@@ -30,8 +30,12 @@ import (
 			}
 			spec: {
 				automountServiceAccountToken: false
+				serviceAccountName:           #config._serviceAccountName
 				securityContext: {
-					fsGroup: 1001
+					fsGroup:             1001
+					runAsUser:           1001
+					runAsGroup:          1001
+					runAsNonRoot:        true
 				}
 				containers: [{
 					name:            "postgresql"
@@ -43,6 +47,7 @@ import (
 						runAsGroup:               1001
 						runAsNonRoot:            true
 						readOnlyRootFilesystem:  true
+						capabilities: drop: ["ALL"]
 					}
 					env: [{
 						name:  "POSTGRESQL_PORT_NUMBER"

@@ -39,8 +39,12 @@ import (
 			}
 			spec: {
 				automountServiceAccountToken: false
+				serviceAccountName:           #config._serviceAccountName
 				securityContext: {
-					fsGroup: 1001
+					fsGroup:             1001
+					runAsUser:           1001
+					runAsGroup:          1001
+					runAsNonRoot:        true
 				}
 				initContainers: [{
 					name:            "sysctl"
@@ -48,8 +52,9 @@ import (
 					imagePullPolicy: "IfNotPresent"
 					command: ["/bin/bash", "-ec", "CURRENT=`sysctl -n vm.max_map_count`; DESIRED=\"262144\"; if [ \"$DESIRED\" -gt \"$CURRENT\" ]; then sysctl -w vm.max_map_count=262144; fi; CURRENT=`sysctl -n fs.file-max`; DESIRED=\"65536\"; if [ \"$DESIRED\" -gt \"$CURRENT\" ]; then sysctl -w fs.file-max=65536; fi;\n"]
 					securityContext: {
-						privileged: true
-						runAsUser:  0
+						privileged:   true
+						runAsUser:    0
+						runAsNonRoot: false
 					}
 				}, {
 					name:            "copy-default-plugins"
@@ -58,6 +63,7 @@ import (
 					securityContext: {
 						allowPrivilegeEscalation: false
 						runAsNonRoot:            true
+						capabilities: drop: ["ALL"]
 						if !strings.Contains(#config.elasticsearch.image.repository, "opensearch") {
 							runAsUser:              1001
 							runAsGroup:             1001
@@ -87,6 +93,7 @@ import (
 					securityContext: {
 						allowPrivilegeEscalation: false
 						runAsNonRoot:            true
+						capabilities: drop: ["ALL"]
 						if !strings.Contains(#config.elasticsearch.image.repository, "opensearch") {
 							runAsUser:              1001
 							runAsGroup:             1001

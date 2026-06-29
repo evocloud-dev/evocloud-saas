@@ -479,6 +479,14 @@ import (
 		_redisSentinelSecretName: "\(metadata.name)-redis-sentinel"
 	}
 
+	_serviceAccountName: string
+	if serviceAccount.name != "" {
+		_serviceAccountName: serviceAccount.name
+	}
+	if serviceAccount.name == "" {
+		_serviceAccountName: metadata.name
+	}
+
 	_redisImageRef: string
 	if redis.image.digest != "" {
 		if redis.image.registry != "" && !strings.HasPrefix(redis.image.repository, redis.image.registry) {
@@ -886,6 +894,7 @@ import (
 	// Computed helper: Common pod spec for all Zammad Deployments
 	// -------------------------------------------------------------------------
 	_zammadPodSpecDeployment: corev1.#PodSpec & {
+		automountServiceAccountToken: false
 		securityContext: {
 			fsGroup:             _podSecurityContext.fsGroup
 			fsGroupChangePolicy: _podSecurityContext.fsGroupChangePolicy
@@ -899,9 +908,7 @@ import (
 		if len(imagePullSecrets) > 0 {
 			imagePullSecrets: imagePullSecrets
 		}
-		if serviceAccount.create {
-			serviceAccountName: serviceAccount.name
-		}
+		serviceAccountName: _serviceAccountName
 
 		if zammadConfig.initContainers.volumePermissions.enabled {
 			initContainers: [

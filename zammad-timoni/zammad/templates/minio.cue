@@ -99,35 +99,22 @@ import (
 			}
 			spec: {
 				automountServiceAccountToken: false
+				serviceAccountName:           #config._serviceAccountName
 				securityContext: {
 					fsGroup:             1001
-					fsGroupChangePolicy: "OnRootMismatch"
+					fsGroupChangePolicy: "Always"
+					runAsUser:           1001
+					runAsGroup:          1001
+					runAsNonRoot:        true
 				}
-				initContainers: [
-					{
-						name:            "volume-permissions"
-						image:           "docker.io/bitnamilegacy/os-shell:12-debian-12-r43"
-						imagePullPolicy: "IfNotPresent"
-						command: [
-							"/bin/bash",
-							"-ec",
-							"chown -R 1001:1001 /bitnami/minio/data"
-						]
-						securityContext: {
-							runAsUser: 0
-						}
-						volumeMounts: [
-							{
-								name:      "data"
-								mountPath: "/bitnami/minio/data"
-							}
-						]
-					}
-				]
+
 				containers: [{
 					name:            "minio"
 					image:           #config._minioImageRef
 					imagePullPolicy: #config.minio.image.pullPolicy
+					if #config.minio.resources != _|_ {
+						resources: #config.minio.resources
+					}
 					securityContext: {
 						allowPrivilegeEscalation: false
 						runAsUser:                1001
@@ -135,7 +122,6 @@ import (
 						runAsNonRoot:            true
 						readOnlyRootFilesystem:  true
 						capabilities: drop: ["ALL"]
-						seccompProfile: type: "RuntimeDefault"
 					}
 					env: [
 						{
