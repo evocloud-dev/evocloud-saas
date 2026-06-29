@@ -195,11 +195,9 @@ import (
 		allowPrivilegeEscalation: *false | bool
 		privileged:               *false | bool
 		runAsNonRoot:             *true | bool
+		readOnlyRootFilesystem:   *false | bool
 		capabilities: {
 			drop: *["ALL"] | [...string]
-		}
-		seccompProfile: {
-			type: *"RuntimeDefault" | string
 		}
 		runAsUser: *991 | int
 	}
@@ -278,6 +276,7 @@ import (
 		}
 		locale:            *"" | string
 		local_domain:      *"mastodon.local" | string
+		local_https:       *true | bool
 		web_domain:        *null | string | null
 		alternate_domains: *[] | [...string]
 		singleUserMode:    *false | bool
@@ -641,8 +640,25 @@ import (
 				memory: *"512Mi" | corev1.#ResourceQuantity
 			}
 			limits: {
+				cpu:    *"1" | corev1.#ResourceQuantity
 				memory: *"2048Mi" | corev1.#ResourceQuantity
 			}
+		}
+		podSecurityContext: corev1.#PodSecurityContext & {
+			runAsUser:  *1000 | int
+			runAsGroup: *1000 | int
+			fsGroup:    *1000 | int
+		}
+		securityContext: corev1.#SecurityContext & {
+			allowPrivilegeEscalation: *false | bool
+			privileged:               *false | bool
+			runAsNonRoot:             *true | bool
+			capabilities: drop: *["ALL"] | [...string]
+			readOnlyRootFilesystem: *false | bool
+			runAsUser: *1000 | int
+		}
+		volumePermissions: {
+			enabled: *true | bool
 		}
 		master: nodeSelector: *_nodeSelector | {[string]:       string}
 		data: nodeSelector: *_nodeSelector | {[string]:         string}
@@ -662,6 +678,32 @@ import (
 			repository: *"bitnamilegacy/postgresql" | string
 			tag:        *"14.2.3" | string
 			pullPolicy: *"IfNotPresent" | string
+		}
+		resources: corev1.#ResourceRequirements & {
+			requests: {
+				cpu:    *"100m" | corev1.#ResourceQuantity
+				memory: *"256Mi" | corev1.#ResourceQuantity
+			}
+			limits: {
+				cpu:    *"500m" | corev1.#ResourceQuantity
+				memory: *"512Mi" | corev1.#ResourceQuantity
+			}
+		}
+		podSecurityContext: corev1.#PodSecurityContext & {
+			runAsUser:  *1001 | int
+			runAsGroup: *0 | int
+			fsGroup:    *0 | int
+		}
+		securityContext: corev1.#SecurityContext & {
+			allowPrivilegeEscalation: *false | bool
+			privileged:               *false | bool
+			runAsNonRoot:             *true | bool
+			capabilities: drop: *["ALL"] | [...string]
+			readOnlyRootFilesystem: *false | bool
+			runAsUser: *1001 | int
+		}
+		volumePermissions: {
+			enabled: *true | bool
 		}
 		postgresqlHostname: *"" | string
 		postgresqlPort:     *5432 | int
@@ -697,6 +739,32 @@ import (
 			repository: *"bitnamilegacy/redis" | string
 			tag:        *"22.0.7" | string
 			pullPolicy: *"IfNotPresent" | string
+		}
+		resources: corev1.#ResourceRequirements & {
+			requests: {
+				cpu:    *"100m" | corev1.#ResourceQuantity
+				memory: *"128Mi" | corev1.#ResourceQuantity
+			}
+			limits: {
+				cpu:    *"500m" | corev1.#ResourceQuantity
+				memory: *"256Mi" | corev1.#ResourceQuantity
+			}
+		}
+		podSecurityContext: corev1.#PodSecurityContext & {
+			runAsUser:  *999 | int
+			runAsGroup: *999 | int
+			fsGroup:    *999 | int
+		}
+		securityContext: corev1.#SecurityContext & {
+			allowPrivilegeEscalation: *false | bool
+			privileged:               *false | bool
+			runAsNonRoot:             *true | bool
+			capabilities: drop: *["ALL"] | [...string]
+			readOnlyRootFilesystem: *false | bool
+			runAsUser: *999 | int
+		}
+		volumePermissions: {
+			enabled: *true | bool
 		}
 		hostname: *"" | string
 		port:     *6379 | int
@@ -734,6 +802,7 @@ import (
 		create:      *true | bool
 		annotations: *{} | {[string]: string}
 		name:        *"" | string
+		automountServiceAccountToken: *false | bool
 	}
 
 

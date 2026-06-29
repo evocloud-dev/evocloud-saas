@@ -5,7 +5,7 @@ package main
 values: {
 	image: {
 		repository: "ghcr.io/mastodon/mastodon"
-		tag:        "v4.5.9"
+		tag:        "v4.6.1"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -75,7 +75,8 @@ values: {
 
 		locale:            ""
 		local_domain:      "localhost"
-		web_domain:        null
+		local_https:       false
+		web_domain:        "localhost:8080"
 		alternate_domains: []
 		singleUserMode:    false
 		authorizedFetch:   false
@@ -150,7 +151,16 @@ values: {
 		sidekiq: {
 			podSecurityContext: {}
 			securityContext:    {}
-			resources:          {}
+			resources: {
+				requests: {
+					cpu:    "100m"
+					memory: "256Mi"
+				}
+				limits: {
+					cpu:    "1"
+					memory: "1024Mi"
+				}
+			}
 			affinity:           {}
 			nodeSelector:       {}
 			annotations:        {}
@@ -178,7 +188,16 @@ values: {
 					name:        "all-queues"
 					concurrency: 25
 					replicas:    1
-					resources:   {}
+					resources: {
+						requests: {
+							cpu:    "100m"
+							memory: "256Mi"
+						}
+						limits: {
+							cpu:    "1"
+							memory: "1024Mi"
+						}
+					}
 					affinity:    {}
 					nodeSelector: {}
 					topologySpreadConstraints: []
@@ -193,7 +212,7 @@ values: {
 					]
 					image: {
 						repository: "ghcr.io/mastodon/mastodon"
-						tag:        "v4.5.9"
+						tag:        "v4.6.1"
 					}
 					customDatabaseConfigYml: configMapRef: {
 						name: ""
@@ -239,7 +258,7 @@ values: {
 		streaming: {
 			image: {
 				repository: "ghcr.io/mastodon/mastodon-streaming"
-				tag:        "v4.3.22"
+				tag:        "v4.6.1"
 			}
 			port:     4000
 			workers:  1
@@ -261,7 +280,16 @@ values: {
 			topologySpreadConstraints: []
 			podSecurityContext:         {}
 			securityContext:            {}
-			resources:                  {}
+			resources: {
+				requests: {
+					cpu:    "100m"
+					memory: "256Mi"
+				}
+				limits: {
+					cpu:    "500m"
+					memory: "512Mi"
+				}
+			}
 			
 			pdb: {
 			   enable:   true
@@ -292,7 +320,16 @@ values: {
 			topologySpreadConstraints: []
 			podSecurityContext:         {}
 			securityContext:            {}
-			resources:                  {}
+			resources: {
+				requests: {
+					cpu:    "100m"
+					memory: "512Mi"
+				}
+				limits: {
+					cpu:    "1"
+					memory: "1536Mi"
+				}
+			}
 			
 			pdb: {
 			    enable:     true
@@ -302,11 +339,11 @@ values: {
 
 			minThreads:                 "5"
 			maxThreads:                 "5"
-			workers:                    "2"
+			workers:                    "1"
 			persistentTimeout:          "20"
 			image: {
 				repository: "ghcr.io/mastodon/mastodon"
-				tag:        "v4.5.9"
+				tag:        "v4.6.1"
 			}
 			customDatabaseConfigYml: configMapRef: {
 				name: ""
@@ -401,7 +438,7 @@ values: {
 	}
 
 	httproute: {
-		enabled:     true
+		enabled:     false
 		labels:      {}
 		annotations: {}
 		parentRefs: [
@@ -450,7 +487,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "opensearchproject/opensearch"
-			tag:        "3.6.0"
+			tag:        "3.7.0"
 		}
 		resources: {
 			requests: {
@@ -458,6 +495,7 @@ values: {
 				memory: "512Mi"
 			}
 			limits: {
+				cpu:    "1"
 				memory: "2048Mi"
 			}
 		}
@@ -507,7 +545,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "valkey/valkey"
-			tag:        "7.2.11-alpine"
+			tag:        "7.2.13-alpine"
 		}
 		hostname: ""
 		port:     6379
@@ -573,12 +611,22 @@ values: {
 		fsGroup:    991
 	}
 
-	securityContext: {}
+	securityContext: {
+		allowPrivilegeEscalation: false
+		privileged:               false
+		runAsNonRoot:             true
+		readOnlyRootFilesystem:   false
+		capabilities: drop: [
+			"ALL",
+		]
+		runAsUser: 991
+	}
 
 	serviceAccount: {
 		create:      true
 		annotations: {}
 		name:        ""
+		automountServiceAccountToken: false
 	}
 
 	deploymentAnnotations: {}
