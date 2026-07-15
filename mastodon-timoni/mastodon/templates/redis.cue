@@ -44,9 +44,39 @@ import (
 			template: {
 				metadata: labels: "app.kubernetes.io/name": #name
 				spec: corev1.#PodSpec & {
+					automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
+					serviceAccountName: #config.metadata.name
+					securityContext: #config.redis.podSecurityContext
+
+					if #config.redis.volumePermissions.enabled {
+						initContainers: [{
+							name:            "volume-permissions"
+							image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
+							imagePullPolicy: "IfNotPresent"
+							command: ["chown", "-R", "999:999", "/bitnami/redis/data"]
+							securityContext: {
+								runAsUser:                0
+								runAsGroup:               0
+								runAsNonRoot:             false
+								allowPrivilegeEscalation: false
+								readOnlyRootFilesystem:   true
+								capabilities: {
+									drop: ["ALL"]
+									add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+								}
+							}
+							volumeMounts: [{
+								name:      "redis-data"
+								mountPath: "/bitnami/redis/data"
+							}]
+						}]
+					}
+
 					containers: [{
-						name:  "redis"
-						image: "\(#config.redis.image.repository):\(#config.redis.image.tag)"
+						name:            "redis"
+						securityContext: #config.redis.securityContext
+						resources:       #config.redis.resources
+						image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
 						imagePullPolicy: #config.redis.image.pullPolicy
 						args: [
 							"--requirepass",
@@ -86,11 +116,51 @@ import (
 							successThreshold:     1
 							failureThreshold:     6
 						}
-						volumeMounts: [{
-							name:      "redis-data"
-							mountPath: "/bitnami/redis/data"
-						}]
+						volumeMounts: [
+							{
+								name:      "redis-data"
+								mountPath: "/bitnami/redis/data"
+							},
+							if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "redis-etc"
+									mountPath: "/opt/bitnami/redis/etc"
+								}
+							},
+							if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "redis-tmp"
+									mountPath: "/opt/bitnami/redis/tmp"
+								}
+							},
+							if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "tmp"
+									mountPath: "/tmp"
+								}
+							},
+						]
 					}]
+					volumes: [
+						if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "redis-etc"
+								emptyDir: {}
+							}
+						},
+						if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "redis-tmp"
+								emptyDir: {}
+							}
+						},
+						if #config.redis.securityContext.readOnlyRootFilesystem != _|_ && #config.redis.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "tmp"
+								emptyDir: {}
+							}
+						},
+					]
 				}
 			}
 			volumeClaimTemplates: [{

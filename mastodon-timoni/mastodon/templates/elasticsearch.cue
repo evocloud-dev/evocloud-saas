@@ -72,13 +72,39 @@ import (
 			template: {
 				metadata: labels: "app.kubernetes.io/name": #name
 				spec: corev1.#PodSpec & {
-					securityContext: {
-						runAsUser: 1000
-						fsGroup:   1000
+					automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
+					serviceAccountName: #config.metadata.name
+					securityContext: #config.elasticsearch.podSecurityContext
+
+					if #config.elasticsearch.volumePermissions.enabled {
+						initContainers: [{
+							name:            "volume-permissions"
+							image:           "\(#config.elasticsearch.image.repository):\(#config.elasticsearch.image.tag)"
+							imagePullPolicy: "IfNotPresent"
+							command: ["chown", "-R", "1000:1000", "/usr/share/opensearch/data"]
+							securityContext: {
+								runAsUser:                0
+								runAsGroup:               0
+								runAsNonRoot:             false
+								allowPrivilegeEscalation: false
+								readOnlyRootFilesystem:   true
+								capabilities: {
+									drop: ["ALL"]
+									add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+								}
+							}
+							volumeMounts: [{
+								name:      "data"
+								mountPath: "/usr/share/opensearch/data"
+							}]
+						}]
 					}
+
 					containers: [{
-						name:  "opensearch"
-						image: "\(#config.elasticsearch.image.repository):\(#config.elasticsearch.image.tag)"
+						name:            "opensearch"
+						securityContext: #config.elasticsearch.securityContext
+						resources:       #config.elasticsearch.resources
+						image:           "\(#config.elasticsearch.image.repository):\(#config.elasticsearch.image.tag)"
 						imagePullPolicy: #config.elasticsearch.image.pullPolicy
 						env: [
 							{
@@ -123,12 +149,39 @@ import (
 							successThreshold:     1
 							failureThreshold:     6
 						}
-						volumeMounts: [{
-							name:      "data"
-							mountPath: "/usr/share/opensearch/data"
-						}]
-						resources: #config.elasticsearch.resources
+						volumeMounts: [
+							{
+								name:      "data"
+								mountPath: "/usr/share/opensearch/data"
+							},
+							if #config.elasticsearch.securityContext.readOnlyRootFilesystem != _|_ && #config.elasticsearch.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "opensearch-logs"
+									mountPath: "/usr/share/opensearch/logs"
+								}
+							},
+							if #config.elasticsearch.securityContext.readOnlyRootFilesystem != _|_ && #config.elasticsearch.securityContext.readOnlyRootFilesystem == true {
+								{
+									name:      "tmp"
+									mountPath: "/tmp"
+								}
+							},
+						]
 					}]
+					volumes: [
+						if #config.elasticsearch.securityContext.readOnlyRootFilesystem != _|_ && #config.elasticsearch.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "opensearch-logs"
+								emptyDir: {}
+							}
+						},
+						if #config.elasticsearch.securityContext.readOnlyRootFilesystem != _|_ && #config.elasticsearch.securityContext.readOnlyRootFilesystem == true {
+							{
+								name: "tmp"
+								emptyDir: {}
+							}
+						},
+					]
 				}
 			}
 			volumeClaimTemplates: [{

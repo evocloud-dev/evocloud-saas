@@ -20,6 +20,10 @@ import (
 		"zzz_disable_ssl.rb": """
 			Rails.application.configure do
 			  config.force_ssl = false
+			  protocol = ENV['LOCAL_HTTPS'] == 'true' ? 'https' : 'http'
+			  host_domain = ENV['WEB_DOMAIN'] || ENV['LOCAL_DOMAIN'] || 'localhost'
+			  config.action_controller.asset_host = "#{protocol}://#{host_domain}"
+			  config.action_mailer.default_url_options = { host: host_domain, protocol: protocol }
 			end
 			"""
 	}

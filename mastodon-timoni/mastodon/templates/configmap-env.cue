@@ -76,6 +76,7 @@ import (
 		}
 
 		PREPARED_STATEMENTS: "\(#config.mastodon.preparedStatements)"
+		LOCAL_HTTPS:         "\(#config.mastodon.local_https)"
 
 		if #config.mastodon.locale != "" {
 			DEFAULT_LOCALE: #config.mastodon.locale
