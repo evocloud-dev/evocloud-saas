@@ -1,0 +1,46 @@
+package templates
+
+import (
+	corev1 "k8s.io/api/core/v1"
+)
+
+#BackupConfigMap: corev1.#ConfigMap & {
+	#config:    #Config
+	apiVersion: "v1"
+	kind:       "ConfigMap"
+	metadata: {
+		name:      "\(#config.fullname)-backup-scripts"
+		namespace: #config.metadata.namespace
+		labels:    #config.metadata.labels
+	}
+	data: {
+		"postgres-backup.sh": """
+			#!/bin/sh
+			set -eu
+			timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+			archive="/backup/out/${BACKUP_ARCHIVE_PREFIX}-postgresql-${timestamp}.sql.gz"
+			mkdir -p /backup/out
+			export PGPASSWORD="${DB_PASSWORD}"
+			pg_dump ${PG_DUMP_EXTRA_ARGS:-} \\
+			  --host="${DB_HOST}" \\
+			  --port="${DB_PORT}" \\
+			  --username="${DB_USERNAME}" \\
+			  --dbname="${DB_NAME}" | gzip -c > "${archive}"
+			printf "%s" "${archive}" > /backup/out/backup-file
+			"""
+		"upload-backup.sh": """
+			#!/bin/sh
+			set -eu
+			archive="$(cat /backup/out/backup-file)"
+			target="backup/${S3_BUCKET}"
+			if [ -n "${S3_PREFIX:-}" ]; then
+			  target="${target}/${S3_PREFIX}"
+			fi
+			mc alias set backup "${S3_ENDPOINT}" "${S3_ACCESS_KEY}" "${S3_SECRET_KEY}"
+			if [ "${S3_CREATE_BUCKET_IF_NOT_EXISTS}" = "true" ]; then
+			  mc mb --ignore-existing "backup/${S3_BUCKET}"
+			fi
+			mc cp "${archive}" "${target}/"
+			"""
+	}
+}
