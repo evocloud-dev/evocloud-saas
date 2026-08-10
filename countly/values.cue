@@ -141,7 +141,8 @@ values: {
 		enabled:          true
 		architecture:     "standalone"
 		// WARNING: MongoDB versions are strictly incompatible with Linux kernel 
-	    // versions 6.19 through 7.0.13 
+	    // versions 6.19 through 7.0.13 due to an upstream TCMalloc bug clashing 
+	    // with CET Shadow Stack, resulting in an immediate startup crash loop.
         // SOLUTION: To fix this permanently on modern host systems without runtime hacks, 
 	    // we downgraded the image tag to MongoDB 7.0. Alternatively, the host Linux 
 	    // kernel can be upgraded to version 7.0.14 or later to resolve the bug natively.

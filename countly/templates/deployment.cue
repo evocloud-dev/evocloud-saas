@@ -63,8 +63,13 @@ import (
 					image:           #config.image.reference
 					imagePullPolicy: #config.image.pullPolicy
 					command: ["/bin/sh", "-c"]
-					args: ["touch /etc/service/mongodb/down && exec /sbin/my_init"]
+					args: ["mkdir -p /etc/nginx/sites-enabled && touch /etc/service/mongodb/down && rm -f /etc/nginx/conf.d/default.conf && exec /sbin/my_init"]
 					ports: [
+						{
+							name:          "web"
+							containerPort: 80
+							protocol:      "TCP"
+						},
 						{
 							name:          "api"
 							containerPort: #config.countly.apiPort
