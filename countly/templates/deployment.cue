@@ -32,6 +32,7 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
 				if len(#config.imagePullSecrets) > 0 {
 					imagePullSecrets: #config.imagePullSecrets
 				}

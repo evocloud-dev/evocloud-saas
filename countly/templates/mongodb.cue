@@ -1,6 +1,8 @@
 package templates
 
 import (
+	"struct"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -30,12 +32,22 @@ import (
 			"app.kubernetes.io/component": "mongodb"
 		}
 		template: {
-			metadata: labels: {
-				"app.kubernetes.io/name":      "\(#config.metadata.name)-mongodb"
-				"app.kubernetes.io/instance":  #config.metadata.name
-				"app.kubernetes.io/component": "mongodb"
+			metadata: {
+				labels: {
+					"app.kubernetes.io/name":      "\(#config.metadata.name)-mongodb"
+					"app.kubernetes.io/instance":  #config.metadata.name
+					"app.kubernetes.io/component": "mongodb"
+				}
+				if struct.MinFields(#config.mongodb.podAnnotations, 1) {
+					annotations: #config.mongodb.podAnnotations
+				}
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName: #config.serviceAccountName
+				automountServiceAccountToken: false
+				if struct.MinFields(#config.mongodb.podSecurityContext, 1) {
+					securityContext: #config.mongodb.podSecurityContext
+				}
 				containers: [{
 					name:  "mongodb"
 					image: #config.mongodb.image.reference
@@ -65,6 +77,12 @@ import (
 							envVar
 						},
 					]
+					if struct.MinFields(#config.mongodb.resources, 1) {
+						resources: #config.mongodb.resources
+					}
+					if struct.MinFields(#config.mongodb.securityContext, 1) {
+						securityContext: #config.mongodb.securityContext
+					}
 					volumeMounts: [{
 						name:      "data"
 						mountPath: "/data/db"

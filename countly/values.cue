@@ -91,7 +91,21 @@ values: {
 		}
 	}
 	podSecurityContext: {}
-	securityContext: {}
+	securityContext: {
+		capabilities: {
+			drop: [
+				"ALL",
+			]
+			add: [
+				"CHOWN",
+				"SETUID",
+				"SETGID",
+				"NET_BIND_SERVICE",
+				"DAC_OVERRIDE",
+				"SYS_CHROOT",
+			]
+		}
+	}
 
 	backup: {
 		enabled:                    false
@@ -131,7 +145,9 @@ values: {
 	priorityClassName:             ""
 	terminationGracePeriodSeconds: 30
 	podLabels: {}
-	podAnnotations: {}
+	podAnnotations: {
+		"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
+	}
 
 	extraVolumes: []
 	extraVolumeMounts: []
@@ -156,6 +172,28 @@ values: {
 			enabled:           true
 			rootUser:          "root"
 			rootPassword:      ""
+		}
+		podSecurityContext: {
+			runAsUser:           65510
+			runAsGroup:          65510
+			fsGroup:             65510
+		}
+		securityContext: {
+			capabilities: {
+				drop: [
+					"ALL",
+				]
+			}
+		}
+		resources: {
+			limits: {
+				cpu:    "1000m"
+				memory: "2Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "512Mi"
+			}
 		}
 	}
 

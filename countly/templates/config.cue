@@ -172,6 +172,10 @@ import (
 			pullPolicy: *"IfNotPresent" | string
 		}
 		extraEnvVars: [...corev1.#EnvVar] | *[]
+		podSecurityContext: {} | {...}
+		securityContext: {} | {...}
+		podAnnotations: {[string]: string} | *{}
+		resources: timoniv1.#ResourceRequirements | *{}
 		...
 	}
 
