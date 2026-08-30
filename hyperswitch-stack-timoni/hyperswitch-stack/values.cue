@@ -1,0 +1,446 @@
+@if(!debug)
+
+package main
+
+values: {
+	// loadbalancer security group
+	// @ignored
+	loadBalancer: {
+		targetSecurityGroup: "lg-security-group"
+	}
+
+	// @ignored
+	service: {
+		type: "ClusterIP"
+		port: 80
+	}
+
+	// @ignored
+	services: {
+		router: {
+			host: "http://localhost:8080"
+		}
+		sdk: {
+			host: "http://localhost:9050"
+		}
+	}
+
+	global: {
+		// Global image registry to override all container image registries
+		// If set, all container images will be pulled from this registry
+		// If not set, each service will use its default registry
+		// Example: "my-registry.com" or "localhost:5000"
+		imageRegistry: ""
+		image: {
+			registry: values.global.imageRegistry
+		}
+
+		tolerations: []
+		// @ignored
+		// Eg.
+		// affinity:
+		//   nodeAffinity:
+		//     requiredDuringSchedulingIgnoredDuringExecution:
+		//       nodeSelectorTerms:
+		//         - matchExpressions:
+		//             - key: node-type
+		//               operator: In
+		//               values:
+		//                 - generic-compute
+		affinity: {}
+	}
+
+	// @ignored
+	"hyperswitch-web": {
+		fullnameOverride: "hyperswitch-web"
+		enabled:          true
+		sdkDemo: {
+			enabled: false
+		}
+		image: {
+			pullPolicy: "IfNotPresent"
+		}
+		podAnnotations: {
+			"helm.sh/hook":               "post-install,post-upgrade"
+			"helm.sh/hook-weight":        "-5"
+			"helm.sh/hook-delete-policy": "hook-succeeded"
+		}
+		autoBuild: {
+			enable:     true
+			forceBuild: true
+			gitCloneParam: {
+				gitVersion: "0.129.0"
+			}
+			nginxConfig: {
+				extraPath: "v1"
+			}
+			buildParam: {
+				envSdkUrl:     "http://localhost:9050"
+				envBackendUrl: "http://localhost:8080"
+				envLogsUrl:    "http://localhost:3103"
+			}
+		}
+		service: {
+			port: 9050
+		}
+		loadBalancer: {
+			targetSecurityGroup: "loadbalancer-sg"
+		}
+		tolerations: []
+		ingress: {
+			enabled:    true
+			className:  "alb"
+			apiVersion: "networking.k8s.io/v1"
+			annotations: {
+				"alb.ingress.kubernetes.io/backend-protocol":         "HTTP"
+				"alb.ingress.kubernetes.io/backend-protocol-version": "HTTP1"
+				"alb.ingress.kubernetes.io/group.name":               "hyperswitch-web-alb-ingress-group"
+				"alb.ingress.kubernetes.io/ip-address-type":          "ipv4"
+				"alb.ingress.kubernetes.io/listen-ports":             "[{\"HTTP\": 80}]"
+				"alb.ingress.kubernetes.io/load-balancer-name":       "hyperswitch-web"
+				"alb.ingress.kubernetes.io/scheme":                   "internet-facing"
+				"alb.ingress.kubernetes.io/security-groups":          values.loadBalancer.targetSecurityGroup
+				"alb.ingress.kubernetes.io/tags":                     "stack=hyperswitch-lb"
+				"alb.ingress.kubernetes.io/target-type":              "ip"
+			}
+			hosts: [
+				{
+					http: paths: [
+						{
+							path:     "/"
+							pathType: "Prefix"
+							backend: service: {
+								name: "hyperswitch-web"
+								port: number: 80
+							}
+						},
+					]
+				},
+			]
+		}
+	}
+
+	// @ignored
+	"hyperswitch-app": {
+		initDB: {
+			enable: true
+		}
+		loadBalancer: {
+			targetSecurityGroup: values.loadBalancer.targetSecurityGroup
+		}
+		services: {
+			router: {
+				version:       "v1.121.1"
+				imageRegistry: "docker.juspay.io"
+				image:         "juspaydotin/hyperswitch-router"
+				host:          "http://localhost:8080"
+			}
+			consumer: {
+				version:       "v1.121.1"
+				imageRegistry: "docker.juspay.io"
+				image:         "juspaydotin/hyperswitch-consumer"
+			}
+			producer: {
+				version:       "v1.121.1"
+				imageRegistry: "docker.juspay.io"
+				image:         "juspaydotin/hyperswitch-producer"
+			}
+			drainer: {
+				imageRegistry: "docker.juspay.io"
+				image:         "juspaydotin/hyperswitch-drainer"
+				version:       "v1.121.1"
+			}
+			sdk: {
+				host:       "local"
+				version:    "0.129.0"
+				subversion: "v1"
+			}
+		}
+		server: {
+			replicas: 1
+			secrets: {
+				// Follow https://github.com/juspay/hyperswitch/tree/main/crates/analytics#setting-up-forex-apis to get the forex api key
+				forex_api_key:          "forex_api_key"
+				forex_fallback_api_key: "forex_fallback_api_key"
+			}
+			locker: {
+				locker_enabled: true
+			}
+			run_env: "sandbox"
+			email: {
+				active_email_client: "SMTP"
+			}
+			configs: {
+				proxy: {
+					enabled: false
+				}
+			}
+		}
+		controlCenter: {
+			env: {
+				default__features__email:           "true"
+				default__features__totp:            "true"
+				default__features__test_processors: "true"
+			}
+		}
+		autoscaling: {
+			enabled:                        false
+			minReplicas:                    1
+			maxReplicas:                    4
+			targetCPUUtilizationPercentage: 80
+		}
+
+		"hyperswitch-card-vault": {
+			enabled: true
+			server: {
+				imageRegistry: "docker.juspay.io"
+				image:         "juspaydotin/hyperswitch-card-vault:v0.6.5-dev"
+				tenant_secrets: {
+					hyperswitch: {
+						master_key: "8283d68fdbd89a78aef9bed8285ed1cd9310012f660eefbad865f20a3f3dd9498f06147da6a7d9b84677cafca95024990b3d2296fbafc55e10dd76df"
+						public_key: ""
+						schema:     "public"
+					}
+				}
+			}
+
+			initDB: {
+				enable: true
+			}
+			postgresql: {
+				primary: {
+					tolerations: []
+				}
+			}
+		}
+		redis: {
+			master: {
+				tolerations: []
+			}
+		}
+		postgresql: {
+			primary: {
+				tolerations: []
+			}
+			readReplicas: {
+				tolerations: []
+			}
+		}
+		kafka: {
+			controller: {
+				tolerations: []
+			}
+			broker: {
+				tolerations: []
+			}
+			zookeeper: {
+				tolerations: []
+			}
+			provisioning: {
+				tolerations: []
+			}
+		}
+		clickhouse: {
+			tolerations: []
+			zookeeper: {
+				tolerations: []
+			}
+		}
+		mailhog: {
+			tolerations: []
+		}
+		vector: {
+			tolerations: []
+		}
+	}
+
+	"hyperswitch-monitoring": {
+		enabled: true
+		// Pass global imageRegistry to monitoring subcharts
+		global: {
+			tolerations: []
+		}
+		// Component-specific tolerations
+		"kube-prometheus-stack": {
+			prometheus: {
+				prometheusSpec: {
+					tolerations: []
+				}
+			}
+			grafana: {
+				tolerations: []
+			}
+			alertmanager: {
+				alertmanagerSpec: {
+					tolerations: []
+				}
+			}
+		}
+		loki: {
+			singleBinary: {
+				tolerations: []
+			}
+		}
+		promtail: {
+			tolerations: []
+		}
+		"opentelemetry-collector": {
+			tolerations: []
+		}
+	}
+
+	// @ignored
+	"hyperswitch-ucs": {
+		enabled:          false
+		fullnameOverride: "hyperswitch-ucs"
+		image: {
+			imageRegistry: "ghcr.io"
+			repository:    "juspay/connector-service"
+			pullPolicy:    "IfNotPresent"
+			tag:           "main-b1487cb"
+		}
+		imagePullSecrets: []
+		nameOverride: ""
+
+		serviceAccount: {
+			create: true
+			annotations: {}
+			name: ""
+		}
+
+		podAnnotations: {}
+		podSecurityContext: {}
+		securityContext: {}
+
+		service: {
+			type: "ClusterIP"
+			grpc: {
+				port:       8000
+				targetPort: 8000
+			}
+			metrics: {
+				port:       8080
+				targetPort: 8080
+			}
+		}
+
+		ingress: {
+			enabled:   false
+			className: ""
+			annotations: {}
+			hosts: [
+				{
+					host: "hyperswitch-ucs.local"
+					paths: [
+						{
+							path:     "/"
+							pathType: "ImplementationSpecific"
+						},
+					]
+				},
+			]
+			tls: []
+		}
+
+		autoscaling: {
+			enabled:                        false
+			minReplicas:                    1
+			maxReplicas:                    100
+			targetCPUUtilizationPercentage: 80
+			// targetMemoryUtilizationPercentage: 80
+		}
+
+		nodeSelector: {}
+		tolerations: []
+		affinity: {}
+
+		// Configuration via ConfigMap
+		config: {
+			log: {
+				console: {
+					enabled:    true
+					level:      "DEBUG"
+					log_format: "json"
+				}
+			}
+			server: {
+				host: "0.0.0.0"
+				port: 8000
+				type: "grpc"
+			}
+			metrics: {
+				host: "0.0.0.0"
+				port: 8080
+			}
+			connectors: {
+				adyen: {
+					base_url:         "https://{{merchant_endpoint_prefix}}-checkout-live.adyenpayments.com/checkout/"
+					dispute_base_url: "https://{{merchant_endpoint_prefix}}-ca-live.adyen.com/"
+				}
+				razorpay: {
+					base_url: "https://api.razorpay.com/"
+				}
+				fiserv: {
+					base_url: "https://cert.api.fiservapps.com/"
+				}
+				elavon: {
+					base_url: "https://api.convergepay.com/VirtualMerchant/"
+				}
+				xendit: {
+					base_url: "https://api.xendit.co/"
+				}
+				razorpayv2: {
+					base_url: "https://api.razorpay.com/"
+				}
+				checkout: {
+					base_url: "https://api.checkout.com/"
+				}
+				authorizedotnet: {
+					base_url: "https://api.authorize.net/xml/v1/request.api/"
+				}
+			}
+			proxy: {
+				https_url:                    ""
+				http_url:                     ""
+				idle_pool_connection_timeout: 90
+				bypass_proxy_urls: ["localhost", "local"]
+			}
+		}
+	}
+
+	"hyperswitch-control-center": {
+		enabled:          true
+		fullnameOverride: "hyperswitch-control-center"
+		// Dependencies - connect to hyperswitch services
+		dependencies: {
+			router: {
+				host: "http://localhost:9050"
+			}
+			sdk: {
+				host:       "http://localhost:9050"
+				version:    "0.129.0"
+				subversion: "v1"
+			}
+		}
+		// Image configuration
+		image: {
+			registry:   "docker.juspay.io"
+			repository: "juspaydotin/hyperswitch-control-center"
+			pullPolicy: "IfNotPresent"
+			tag:        "v1.38.2"
+		}
+		// Service configuration
+		service: {
+			type: "ClusterIP"
+			port: 9000
+		}
+		// Resource requests
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "100Mi"
+			}
+		}
+		tolerations: []
+	}
+}
