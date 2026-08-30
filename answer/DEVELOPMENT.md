@@ -1,0 +1,143 @@
+# Development & Publishing Guide
+
+This guide explains how to work with the CUE files in this module, how to publish it to a registry, and how to deploy it.
+
+## 1. Local Development (From CUE Files)
+
+### Validate Configuration
+To ensure your `values.cue` and templates are correct:
+```bash
+timoni mod vet .
+```
+
+### Build (Generate Kubernetes YAML)
+If you want to see the "built" Kubernetes resources without applying them:
+```bash
+timoni build -n <namespace> <instance-name> .
+```
+*Note: This "builds" the YAML from your CUE files.*
+
+### Test Apply
+
+**Direct Apply (Standard):**
+```bash
+timoni apply -n <namespace> <instance-name> .
+```
+
+To apply directly from your local files with runtime secret injection (without storing passwords in CUE files):
+
+**PostgreSQL:**
+```bash
+echo '
+values: {
+  admin: password: "MySecurePassword123!"
+  postgresql: {
+    enabled: true
+    auth: password: "PostgresPassword123!"
+  }
+}' | timoni apply -n <namespace> <instance-name> . -f -
+```
+
+**MySQL:**
+```bash
+echo '
+values: {
+  admin: password: "MySecurePassword123!"
+  mysql: {
+    enabled: true
+    auth: {
+      password: "MysqlUserPassword123!"
+      rootPassword: "MysqlRootPassword123!"
+    }
+  }
+}' | timoni apply -n <namespace> <instance-name> . -f -
+```
+
+---
+
+## 2. Publishing (Building an OCI Artifact)
+
+"Building an OCI artifact" means packaging your CUE files into a versioned image that lives in a container registry.
+
+### Login to Registry
+
+#### For GitHub Container Registry (GHCR)
+1.  **Generate a Token**: Go to GitHub **Settings** -> **Developer settings** -> **Personal access tokens** (Tokens classic).
+2.  **Permissions**: Select `write:packages` and `read:packages`.
+3.  **Login via CLI**:
+    ```bash
+    echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u <username> --password-stdin
+    ```
+
+4. **Push the module to GHCR**:
+    ```bash
+    timoni mod push . oci://ghcr.io/<username>/modules/<app-name> --version <version>
+    ```
+
+#### For Docker Hub (Docker.io)
+Docker Hub typically uses your standard password or a Personal Access Token:
+1. **Login to docker registry**:
+   ```bash
+   docker login docker.io -u <username>
+   ```
+2. **Push the module to Docker Hub**:
+This command **builds** the artifact from your files and **pushes** it in one step:
+```bash
+timoni mod push . oci://<registry-url>/<username>/erpnext-timoni --version <version>
+```
+
+### Offline / CI Workflow (Pre-built OCI Archive)
+
+Instead of pushing directly from the source directory, you can build a self-contained `.tar` archive offline (perfect for CI/CD pipelines or transferring across air-gaps) and push it to a registry later.
+
+1. **Build the self-contained tarball:**
+   ```bash
+   timoni mod build . --version <version> --output ./builds/<app-name>-<version>.tar
+   ```
+
+2. **Push the pre-built tarball:**
+   *(Note: This requires Timoni v0.30.0+ or a build from the `main` branch)*
+   ```bash
+   timoni mod push ./builds/<app-name>-<version>.tar oci://<registry-url>/<username>/<app-name> -v <version>
+   ```
+
+---
+
+## 3. Deployment (From OCI Registry)
+
+Once published, anyone can deploy the module without needing the source files:
+
+**PostgreSQL:**
+```bash
+echo '
+values: {
+  admin: password: "MySecurePassword123!"
+  postgresql: {
+    enabled: true
+    auth: password: "PostgresPassword123!"
+  }
+}' | timoni apply -n <namespace> <instance-name> oci://<registry-url>/<username>/modules/<app-name> --version <version> -f -
+```
+
+**MySQL:**
+```bash
+echo '
+values: {
+  admin: password: "MySecurePassword123!"
+  mysql: {
+    enabled: true
+    auth: {
+      password: "MysqlUserPassword123!"
+      rootPassword: "MysqlRootPassword123!"
+    }
+  }
+}' | timoni apply -n <namespace> <instance-name> oci://<registry-url>/<username>/modules/<app-name> --version <version> -f -
+```
+
+## 4. Pull (From OCI Registry)
+From GHCR Registry
+timoni mod pull oci://<registry-url>/<org-name>/modules/<app-name> --version <version> -o .
+
+From Docker Registry
+timoni mod  pull oci://<registry-url>/<org-name>/<app-name> --version <version> -o .
+
