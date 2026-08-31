@@ -1,0 +1,230 @@
+// Reference: https://github.com/helmforgedev/charts/blob/main/charts/langflow/values.yaml
+package main
+
+// Default values for the Langflow Timoni module mirroring values.yaml.
+values: {
+	// -- Override the chart name used in Kubernetes resource names.
+	nameOverride: ""
+
+	// -- Override the full release name used in Kubernetes resource names.
+	fullnameOverride: ""
+
+	// -- Labels added to every rendered resource.
+	commonLabels: {}
+
+	image: {
+		// -- Official Langflow image repository.
+		repository: "docker.io/langflowai/langflow"
+		// -- Official Langflow image tag. Do not use a floating tag.
+		tag: "1.11.5"
+		// -- Kubernetes image pull policy.
+		pullPolicy: "IfNotPresent"
+	}
+
+	// -- Optional image pull secrets.
+	imagePullSecrets: []
+
+	// -- Number of Langflow web/API replicas. replicaCount > 1 requires an external database.
+	replicaCount: 1
+
+	app: {
+		// -- Langflow HTTP port.
+		port: 7860
+		// -- Optional container command override.
+		command: []
+		// -- Optional container args override.
+		args: []
+		// -- Additional Langflow environment variables and provider secrets.
+		env: []
+		// -- envFrom entries for Secrets or ConfigMaps containing provider credentials.
+		envFrom: []
+		// -- Extra raw env entries appended after chart-managed variables.
+		extraEnv: []
+	}
+
+	auth: {
+		// -- Langflow secret key used for sensitive data encryption and JWT signing. Generated and preserved when empty.
+		secretKey: ""
+		// -- Initial superuser username. Defaults to langflow when empty.
+		superuser: "admin"
+		// -- Initial superuser password. Generated and preserved when empty.
+		superuserPassword: "Changeit@123"
+		// -- Existing Secret containing all auth data. Disables chart-managed credential generation.
+		existingSecret: ""
+		// -- Secret key containing LANGFLOW_SECRET_KEY.
+		secretKeyKey: "secret-key"
+		// -- Secret key containing LANGFLOW_SUPERUSER.
+		superuserKey: "superuser"
+		// -- Secret key containing LANGFLOW_SUPERUSER_PASSWORD.
+		superuserPasswordKey: "superuser-password"
+	}
+
+	database: {
+		// -- Database mode. sqlite stores data in the persistent config directory; external uses LANGFLOW_DATABASE_URL.
+		mode: "sqlite"
+		// -- External SQLAlchemy database URL. Prefer existingSecret for production.
+		url: ""
+		// -- Existing Secret containing the database URL.
+		existingSecret: ""
+		// -- Secret key containing LANGFLOW_DATABASE_URL.
+		urlKey: "database-url"
+	}
+
+	persistence: {
+		// -- Persist Langflow local config and SQLite database.
+		enabled: true
+		// -- Size of the generated PVC.
+		size: "5Gi"
+		// -- StorageClass for generated PVCs. Empty uses the cluster default.
+		storageClass: ""
+		// -- Access modes for generated PVCs. Include ReadWriteMany before scaling replicas with persistence enabled.
+		accessModes: [
+			"ReadWriteOnce",
+		]
+		// -- Existing claim for local config/SQLite data.
+		existingClaim: ""
+		// -- Mounted Langflow config directory.
+		mountPath: "/app/langflow"
+	}
+
+	serviceAccount: {
+		// -- Create a dedicated ServiceAccount.
+		create: true
+		// -- Override ServiceAccount name.
+		name: ""
+		// -- ServiceAccount annotations.
+		annotations: {}
+		// -- Mount Kubernetes API token into the Langflow pod.
+		automountServiceAccountToken: false
+	}
+
+	service: {
+		// -- Kubernetes Service type.
+		type: "ClusterIP"
+		// -- Service port.
+		port: 7860
+		// -- Service annotations.
+		annotations: {}
+		// -- Service IP family policy.
+		ipFamilyPolicy: ""
+		// -- Service IP families.
+		ipFamilies: []
+	}
+
+	gateway: {
+		// -- Create a Gateway API HTTPRoute for Langflow.
+		enabled: false
+		// -- HTTPRoute annotations.
+		annotations: {}
+		// -- HTTPRoute parentRefs.
+		parentRefs: []
+		// -- HTTPRoute hostnames.
+		hostnames: []
+		// -- HTTPRoute path match value.
+		path: "/"
+		// -- HTTPRoute path match type.
+		pathType: "PathPrefix"
+	}
+
+	pdb: {
+		// -- Create a PodDisruptionBudget. Recommended when replicaCount > 1.
+		enabled: true
+		// -- Minimum pods available during voluntary disruptions.
+		minAvailable: 1
+	}
+
+	networkPolicy: {
+		// -- Create a NetworkPolicy limiting inbound Langflow traffic.
+		enabled: false
+		// -- Ingress peers allowed to reach Langflow. Empty allows all namespaces when policy is enabled.
+		ingressFrom: []
+		// -- DNS peers allowed when egress isolation is enabled.
+		dnsEgressPeers: [
+			{
+				namespaceSelector: matchLabels: "kubernetes.io/metadata.name": "kube-system"
+				podSelector: matchLabels: "k8s-app":                           "kube-dns"
+			},
+		]
+		// -- Additional egress rules appended after the built-in DNS and HTTPS allowances.
+		extraEgress: []
+	}
+
+	probes: {
+		// -- Startup probe settings.
+		startup: {enabled: true, path: "/health_check", initialDelaySeconds: 5, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 60}
+		// -- Liveness probe settings.
+		liveness: {enabled: true, path: "/health_check", initialDelaySeconds: 0, periodSeconds: 20, timeoutSeconds: 5, failureThreshold: 3}
+		// -- Readiness probe settings.
+		readiness: {enabled: true, path: "/health_check", initialDelaySeconds: 0, periodSeconds: 10, timeoutSeconds: 5, failureThreshold: 6}
+	}
+
+	// -- Container resources.
+	resources: {
+		requests: {
+			cpu:    "100m"
+			memory: "512Mi"
+		}
+		limits: {
+			cpu:    "2"
+			memory: "2Gi"
+		}
+	}
+
+	// -- Pod security context.
+	podSecurityContext: {
+		runAsNonRoot: true
+		runAsUser:     1000
+		runAsGroup:    1000
+		fsGroup:       1000
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
+	}
+
+	// -- Container security context.
+	securityContext: {
+		allowPrivilegeEscalation: false
+		readOnlyRootFilesystem:   false
+		runAsNonRoot:             true
+		runAsUser:                1000
+		runAsGroup:               1000
+		capabilities: {
+			drop: [
+				"ALL",
+			]
+		}
+	}
+
+	// -- Node selector.
+	nodeSelector: {}
+
+	// -- Tolerations.
+	tolerations: []
+
+	// -- Affinity.
+	affinity: {}
+
+	// -- Topology spread constraints.
+	topologySpreadConstraints: []
+
+	// -- PriorityClass name.
+	priorityClassName: ""
+
+	// -- Pod termination grace period.
+	terminationGracePeriodSeconds: 30
+
+	// -- Additional pod labels.
+	podLabels: {}
+
+	// -- Additional pod annotations.
+	podAnnotations: {}
+
+	// -- Additional volumes.
+	extraVolumes: []
+
+	// -- Additional volume mounts.
+	extraVolumeMounts: []
+
+	// -- Additional raw Kubernetes manifests.
+	extraManifests: []
+}
