@@ -14,7 +14,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify"
-			tag:        "4.1.2"
+			tag:        "4.3.14"
 			pullPolicy: "IfNotPresent"
 		}
 		service: {
@@ -117,7 +117,7 @@ values: {
 		primary: {
 			image: {
 				repository: "postgres"
-				tag:        "17-alpine"
+				tag:        "18-alpine"
 				pullPolicy: "IfNotPresent"
 			}
 			persistence: {
@@ -162,7 +162,7 @@ values: {
 		}
 		image: {
 			repository: "valkey/valkey"
-			tag:        "8.1-alpine"
+			tag:        "9.0-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		master: {
@@ -200,7 +200,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify-realtime"
-			tag:        "1.0.15"
+			tag:        "1.0.18"
 			pullPolicy: "Always"
 		}
 		service: {
@@ -286,7 +286,7 @@ values: {
 		runAsGroup:               10001
 		runAsNonRoot:             true
 		allowPrivilegeEscalation: false
-		readOnlyRootFilesystem:   true
+		readOnlyRootFilesystem:   false
 		capabilities: {
 			drop: ["ALL"]
 			add: []

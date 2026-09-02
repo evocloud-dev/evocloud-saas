@@ -42,7 +42,7 @@ import (
 		replicaCount: *1 | int & >0
 		image: {
 			repository: *"ghcr.io/coollabsio/coolify" | string
-			tag:        *moduleVersion | string
+			tag:        *"4.3.14" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		service: {
@@ -112,8 +112,8 @@ import (
 		}
 		primary: {
 			image: {
-				repository: *"bitnami/postgresql" | string
-				tag:        *"15.6.0" | string
+				repository: *"postgres" | string
+				tag:        *"18-alpine" | string
 				pullPolicy: *"IfNotPresent" | string
 			}
 			persistence: {
@@ -148,8 +148,8 @@ import (
 			password:                  *"" | string
 		}
 		image: {
-			repository: *"bitnami/redis" | string
-			tag:        *"7.2.4" | string
+			repository: *"valkey/valkey" | string
+			tag:        *"9.0-alpine" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		master: {
@@ -175,7 +175,7 @@ import (
 		replicaCount: *1 | int
 		image: {
 			repository: *"ghcr.io/coollabsio/coolify-realtime" | string
-			tag:        *"1.0.8" | string
+			tag:        *"1.0.18" | string
 			pullPolicy: *"Always" | string
 		}
 		service: {
