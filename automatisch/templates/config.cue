@@ -157,7 +157,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/postgres" | string
-			tag:        *"18.4-trixie" | string
+			tag:        *"18.6-trixie" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
@@ -176,7 +176,7 @@ import (
 		architecture: *"standalone" | string
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/redis" | string
-			tag:        *"8.8.1" | string
+			tag:        *"8.8.2" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
