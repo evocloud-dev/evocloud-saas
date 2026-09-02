@@ -10,7 +10,7 @@ package main
 values: {
 	image: {
 		repository: "chatwoot/chatwoot"
-		tag:        "v4.15.1"
+		tag:        "v4.17.1"
 		pullPolicy: "IfNotPresent"
 	}
 

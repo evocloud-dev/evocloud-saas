@@ -46,6 +46,24 @@ timoni mod push . oci://<registry-url>/<username>/erpnext-timoni --version <vers
 
 ---
 
+### Offline / CI Workflow (Pre-built OCI Archive)
+
+Instead of pushing directly from the source directory, you can build a self-contained `.tar` archive offline (perfect for CI/CD pipelines or transferring across air-gaps) and push it to a registry later.
+
+1. **Build the self-contained tarball:**
+   ```bash
+   timoni mod build . --version <version> --output ./builds/<app-name>-<version>.tar
+   ```
+
+2. **Push the pre-built tarball:**
+   *(Note: This requires Timoni v0.30.0+ or a build from the `main` branch)*
+   ```bash
+   timoni mod push ./builds/<app-name>-<version>.tar oci://<registry-url>/<username>/<app-name> -v <version>
+   ```
+
+---
+
+
 ## 3. Deployment (From OCI Registry)
 
 Once published, anyone can deploy the module without needing the source files:
