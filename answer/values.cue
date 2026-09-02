@@ -173,7 +173,7 @@ values: {
 
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.4-trixie"
+			tag:        "18.6-trixie"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
@@ -184,7 +184,7 @@ values: {
 
 			// -- Database username created on first run
 			username: "answer"
-			password: ""
+			password: "postgres_password"
 		}
 
 		resources: {

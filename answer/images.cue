@@ -9,7 +9,7 @@ values: {
 	}
 	postgresql: image: {
 		repository: *"docker.io/library/postgres" | string
-		tag:        *"18.4-trixie" | string
+		tag:        *"18.6-trixie" | string
 		digest:     *"" | string
 	}
 	mysql: image: {
