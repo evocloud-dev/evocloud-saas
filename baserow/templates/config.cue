@@ -347,7 +347,7 @@ import (
 	image: {
 		registry:   *"docker.io" | string
 		repository: *"postgres" | string
-		tag:        *"18.4" | string
+		tag:        *"18.6" | string
 	}
 	auth: {
 		database:       *"baserow" | string
