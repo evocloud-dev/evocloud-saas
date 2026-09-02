@@ -38,6 +38,17 @@ import (
 					nodePort: #config.service.nodePort
 				}
 			},
+			if #config.metrics.enabled && #config.metrics.granian.enabled {
+				{
+					port:       9090
+					targetPort: "granian-metrics"
+					protocol:   "TCP"
+					name:       "granian-metrics"
+					if (#config.service.type == "NodePort" || #config.service.type == "LoadBalancer") && #config.service.nodePort != _|_ && #config.service.nodePort != "" {
+						nodePort: #config.service.nodePort
+					}
+				}
+			},
 		]
 		selector: #config.selector.labels & {
 			"app.kubernetes.io/component": "netbox"

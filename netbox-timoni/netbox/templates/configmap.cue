@@ -68,9 +68,9 @@ import (
 			ALLOW_TOKEN_RETRIEVAL:       #config.allowTokenRetrieval
 			AUTH_PASSWORD_VALIDATORS:    #config.authPasswordValidators
 			ALLOWED_URL_SCHEMES:         #config.allowedUrlSchemes
-			BANNER_TOP:                  #config.banner.top
-			BANNER_BOTTOM:               #config.banner.bottom
-			BANNER_LOGIN:                #config.banner.login
+			for k, v in #config.banner {
+				"BANNER_\(k)": v
+			}
 			BASE_PATH:                   #config.basePath
 			CHANGELOG_RETENTION:         #config.changelogRetention
 			CUSTOM_VALIDATORS:           #config.customValidators
@@ -201,6 +201,7 @@ import (
 			CSRF_COOKIE_NAME:    #config.csrf.cookieName
 			SESSION_COOKIE_NAME: #config.sessionCookieName
 			ENABLE_LOCALIZATION: #config.enableLocalization
+			TRANSLATION_ENABLED: #config.translationEnabled
 			TIME_ZONE:           #config.timeZone
 			DATE_FORMAT:         #config.dateFormat
 			SHORT_DATE_FORMAT:   #config.shortDateFormat
@@ -228,6 +229,7 @@ import (
 				AUTH_LDAP_USER_SEARCH_ATTR:    #config.remoteAuth.ldap.userSearchAttr
 				AUTH_LDAP_GROUP_SEARCH_BASEDN: #config.remoteAuth.ldap.groupSearchBaseDn
 				AUTH_LDAP_GROUP_SEARCH_CLASS:  #config.remoteAuth.ldap.groupSearchClass
+				AUTH_LDAP_GROUP_SEARCH_FILTER: #config.remoteAuth.ldap.groupSearchFilter
 				AUTH_LDAP_GROUP_TYPE:          #config.remoteAuth.ldap.groupType
 				AUTH_LDAP_FIND_GROUP_PERMS:    #config.remoteAuth.ldap.findGroupPerms
 				AUTH_LDAP_MIRROR_GROUPS:       #config.remoteAuth.ldap.mirrorGroups

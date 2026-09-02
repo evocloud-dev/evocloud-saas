@@ -55,21 +55,16 @@ import (
 				"app.kubernetes.io/component": "postgresql"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					fsGroup: 1001
-				}
+				serviceAccountName:           #config._fullname
+				automountServiceAccountToken: false
+				securityContext:              #config.postgresql.podSecurityContext
 				containers: [
 					{
-						name:  "postgresql"
-						image: "\(#config.postgresql.image.registry)/\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
+						name:            "postgresql"
+						image:           "\(#config.postgresql.image.registry)/\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
 						imagePullPolicy: #config.postgresql.image.pullPolicy
-						securityContext: {
-							runAsUser:                1001
-							runAsGroup:               1001
-							runAsNonRoot:             true
-							allowPrivilegeEscalation: false
-							capabilities: drop: ["ALL"]
-						}
+						securityContext: #config.postgresql.containerSecurityContext
+						resources:       #config.postgresql.resources
 						env: [
 							{
 								name: "POSTGRESQL_USERNAME"

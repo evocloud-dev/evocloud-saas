@@ -254,6 +254,16 @@ import (
 								},
 								{
 									secret: {
+										name:     #config._configSecretName
+										optional: true
+										items: [{
+											key:  "api_token_peppers"
+											path: "api_token_peppers"
+										}]
+									}
+								},
+								{
+									secret: {
 										name: {
 											if #config.email.existingSecretName != "" { #config.email.existingSecretName }
 											if #config.email.existingSecretName == "" { #config._configSecretName }

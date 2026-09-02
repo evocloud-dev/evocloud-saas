@@ -55,21 +55,16 @@ import (
 				"app.kubernetes.io/component": "valkey"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					fsGroup: 1001
-				}
+				serviceAccountName:           #config._fullname
+				automountServiceAccountToken: false
+				securityContext:              #config.valkey.podSecurityContext
 				containers: [
 					{
-						name:  "valkey"
-						image: "\(#config.valkey.image.registry)/\(#config.valkey.image.repository):\(#config.valkey.image.tag)"
+						name:            "valkey"
+						image:           "\(#config.valkey.image.registry)/\(#config.valkey.image.repository):\(#config.valkey.image.tag)"
 						imagePullPolicy: #config.valkey.image.pullPolicy
-						securityContext: {
-							runAsUser:                1001
-							runAsGroup:               1001
-							runAsNonRoot:             true
-							allowPrivilegeEscalation: false
-							capabilities: drop: ["ALL"]
-						}
+						securityContext: #config.valkey.containerSecurityContext
+						resources:       #config.valkey.resources
 						env: [
 							{
 								name: "VALKEY_PASSWORD"
@@ -219,21 +214,16 @@ import (
 				"app.kubernetes.io/component": "caching"
 			}
 			spec: corev1.#PodSpec & {
-				securityContext: {
-					fsGroup: 1001
-				}
+				serviceAccountName:           #config._fullname
+				automountServiceAccountToken: false
+				securityContext:              #config.valkey.podSecurityContext
 				containers: [
 					{
-						name:  "valkey"
-						image: "\(#config.valkey.image.registry)/\(#config.valkey.image.repository):\(#config.valkey.image.tag)"
+						name:            "valkey"
+						image:           "\(#config.valkey.image.registry)/\(#config.valkey.image.repository):\(#config.valkey.image.tag)"
 						imagePullPolicy: #config.valkey.image.pullPolicy
-						securityContext: {
-							runAsUser:                1001
-							runAsGroup:               1001
-							runAsNonRoot:             true
-							allowPrivilegeEscalation: false
-							capabilities: drop: ["ALL"]
-						}
+						securityContext: #config.valkey.containerSecurityContext
+						resources:       #config.valkey.resources
 						env: [
 							{
 								name: "VALKEY_PASSWORD"

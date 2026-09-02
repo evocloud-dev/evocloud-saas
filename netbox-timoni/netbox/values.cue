@@ -18,11 +18,13 @@ values: {
 	clusterDomain:     "cluster.local"
 	extraDeploy:       []
 
+	// To install custom plugins, build a custom image using a Dockerfile.
+	// Reference: https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins
 	image: {
 		registry:    "ghcr.io"
-		repository:  "netbox-community/netbox"
+		repository:  "chielochi/netbox-plugins"
 		pullPolicy:  "IfNotPresent"
-		tag:         "v4.5.8"
+		tag:         "v4.6.9"
 		digest:      ""
 		pullSecrets: []
 	}
@@ -102,7 +104,9 @@ values: {
 	maxPageSize:       1000
 	storages:          {}
 	paginateCount:     50
-	plugins: []
+	// Enable installed NetBox plugins here.
+	// Reference: https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins
+	plugins: ["netbox_routing", "netbox_topology_views"]
 	pluginsConfig: {}
 	powerFeedDefaultAmperage: 15
 	powerFeedMaxUtilisation:  80
@@ -163,12 +167,14 @@ values: {
 	sessionCookieName: "sessionid"
 	enableLocalization: true
 	timeZone:           "UTC"
+	translationEnabled: true
 	dateFormat:         "N j, Y"
 	shortDateFormat:    "Y-m-d"
 	timeFormat:         "g:i a"
 	shortTimeFormat:    "H:i:s"
 	dateTimeFormat:     "N j, Y g:i a"
 	shortDateTimeFormat: "Y-m-d H:i"
+
 	extraConfig:         []
 	secretKey:           ""
 	existingSecret:      ""
@@ -243,11 +249,11 @@ values: {
 	resources: {
 		requests: {
 			cpu:    "200m"
-			memory: "512Mi"
+			memory: "1Gi"
 		}
 		limits: {
 			cpu:    "500m"
-			memory: "1Gi"
+			memory: "2Gi"
 		}
 	}
 
@@ -353,7 +359,7 @@ values: {
 		granian: {
 			enabled: true
 			serviceMonitor: {
-				enabled:           true
+				enabled:           false
 				honorLabels:       false
 				interval:          ""
 				scrapeTimeout:     ""
@@ -369,7 +375,7 @@ values: {
 
 		enabled: true
 		serviceMonitor: {
-			enabled:           true
+			enabled:           false
 			honorLabels:       false
 			interval:          ""
 			scrapeTimeout:     ""
@@ -408,7 +414,31 @@ values: {
 			accessMode:    "ReadWriteOnce"
 			size:          "8Gi"
 		}
-		resources: {}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "1Gi"
+			}
+		}
+		podSecurityContext: {
+			runAsUser:           65510
+			runAsGroup:          65510
+			fsGroup:             65510
+			runAsNonRoot:        true
+			seccompProfile: type: "RuntimeDefault"
+		}
+		containerSecurityContext: {
+			runAsUser:                65510
+			runAsGroup:               65510
+			runAsNonRoot:             true
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 	externalDatabase: {
 		host:                     "localhost"
@@ -452,7 +482,31 @@ values: {
 			accessMode:   "ReadWriteOnce"
 			size:         "1Gi"
 		}
-		resources: {}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "128Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+		}
+		podSecurityContext: {
+			runAsUser:           65510
+			runAsGroup:          65510
+			fsGroup:             65510
+			runAsNonRoot:        true
+			seccompProfile: type: "RuntimeDefault"
+		}
+		containerSecurityContext: {
+			runAsUser:                65510
+			runAsGroup:               65510
+			runAsNonRoot:             true
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 	tasksDatabase: {
 		database:              0
@@ -499,7 +553,7 @@ values: {
 		image: {
 			registry:    "docker.io"
 			repository:  "busybox"
-			tag:         "1.37.0"
+			tag:         "1.38.0"
 			digest:      ""
 			pullPolicy:  "IfNotPresent"
 			pullSecrets: []
@@ -525,7 +579,7 @@ values: {
 		image: {
 			registry:    "docker.io"
 			repository:  "busybox"
-			tag:         "1.37.0"
+			tag:         "1.38.0"
 			digest:      ""
 			pullPolicy:  "IfNotPresent"
 			pullSecrets: []
@@ -675,7 +729,7 @@ values: {
 			image: {
 				registry:    "docker.io"
 				repository:  "rancher/kubectl"
-				tag:         "v1.35.2"
+				tag:         "v1.36.2"
 				digest:      ""
 				pullPolicy:  "IfNotPresent"
 				pullSecrets: []

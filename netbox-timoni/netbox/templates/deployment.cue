@@ -401,6 +401,16 @@ import (
 							},
 							{
 								secret: {
+									name:     #config._configSecretName
+									optional: true
+									items: [{
+										key:  "api_token_peppers"
+										path: "api_token_peppers"
+									}]
+								}
+							},
+							{
+								secret: {
 									#secretName: {
 										if #config.existingSecret != "" { #config.existingSecret }
 										if #config.existingSecret == "" {

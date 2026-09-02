@@ -234,6 +234,7 @@ import (
 	rqDefaultTimeout:  *300 | int
 	sessionCookieName: *"sessionid" | string
 	enableLocalization: *false | bool
+	translationEnabled: *false | bool
 	timeZone:           *"UTC" | string
 	dateFormat:         *"N j, Y" | string
 	shortDateFormat:    *"Y-m-d" | string
@@ -249,6 +250,7 @@ import (
 		configMap?: string
 	}]
 	secretKey:          *"" | string
+	apiTokenPeppers:    *{[string]: string} | {[string]: string}
 	existingSecret:     *"" | string
 
 	// Deployment parameters
@@ -475,6 +477,8 @@ import (
 			volumeName:    *"" | string
 		}
 		resources: *{} | {...}
+		podSecurityContext: *{} | {...}
+		containerSecurityContext: *{} | {...}
 	}
 
 	externalDatabase: {
@@ -524,6 +528,8 @@ import (
 			volumeName:    *"" | string
 		}
 		resources: *{} | {...}
+		podSecurityContext: *{} | {...}
+		containerSecurityContext: *{} | {...}
 	}
 
 	tasksDatabase: {

@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"encoding/yaml"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -27,6 +28,9 @@ import (
 		secret_key: {
 			if #config.secretKey != "" { #config.secretKey }
 			if #config.secretKey == "" { "placeholder-secret-key-that-is-at-least-fifty-characters-long-for-migration" }
+		}
+		if len(#config.apiTokenPeppers) > 0 {
+			api_token_peppers: yaml.Marshal(#config.apiTokenPeppers)
 		}
 		if [ for b in #config.remoteAuth.backends if b == "netbox.authentication.LDAPBackend" {b}] != [] {
 			ldap_bind_password: #config.remoteAuth.ldap.bindPassword
