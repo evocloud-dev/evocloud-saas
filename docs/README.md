@@ -57,15 +57,28 @@ cd /tmp
 mkcert "127.0.0.1.nip.io" "*.127.0.0.1.nip.io"
 ```
 
-### 2. Configure ingress-nginx to use the mkcert certificate as default TLS
+### 2. Install ingress-nginx controller (if not already installed)
 
 ```bash
-# Create the TLS secret in the ingress-nginx namespace
+# Add Helm repo and install ingress-nginx (disabling admission webhooks for fast local setup)
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --create-namespace \
+  --set controller.admissionWebhooks.enabled=false
+```
+
+### 3. Configure ingress-nginx to use the mkcert certificate as default TLS
+
+```bash
+# Create or update the TLS secret in the ingress-nginx namespace
 kubectl -n ingress-nginx create secret tls mkcert \
   --key /tmp/127.0.0.1.nip.io+1-key.pem \
-  --cert /tmp/127.0.0.1.nip.io+1.pem
+  --cert /tmp/127.0.0.1.nip.io+1.pem \
+  --dry-run=client -o yaml | kubectl apply -f -
 
-# Patch the controller to use it as the default SSL certificate
+# Patch the controller deployment to use the cert as default SSL
 kubectl -n ingress-nginx patch deployments.apps ingress-nginx-controller \
   --type json -p '[
     {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--default-ssl-certificate=ingress-nginx/mkcert"}

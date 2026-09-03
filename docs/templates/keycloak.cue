@@ -114,7 +114,7 @@ import (
 					command: [
 						"/bin/sh",
 						"-c",
-						"cp -rP /opt/keycloak/lib/quarkus/. /opt/keycloak/lib/quarkus-writable/",
+						"rm -rf /opt/keycloak/lib/quarkus-writable/* && cp -r /opt/keycloak/lib/quarkus/. /opt/keycloak/lib/quarkus-writable/",
 					]
 					volumeMounts: [{
 						name:      "lib-quarkus-writable"
@@ -137,11 +137,10 @@ import (
 						"start-dev",
 						"--features=preview",
 						"--import-realm",
-						"--proxy=edge",
+						"--proxy-headers=xforwarded",
 						"--http-enabled=true",
 						"--hostname=\(#config.keycloak.host)",
 						"--hostname-strict=false",
-						"--hostname-strict-https=false",
 					]
 					ports: [{
 						containerPort: 8080

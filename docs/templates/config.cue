@@ -146,6 +146,7 @@ import (
 		nodeSelector: *{} | {[string]: string}
 		tolerations: [...corev1.#Toleration]
 		affinity: *{} | corev1.#Affinity
+		hostAliases?: [...corev1.#HostAlias]
 		persistence: *{} | {[string]: {
 			type:      *"persistentVolumeClaim" | "emptyDir"
 			size?:     string
@@ -566,12 +567,12 @@ import (
 		}
 		resources:    timoniv1.#ResourceRequirements | *{
 			requests: {
-				cpu:    *"10m" | string
-				memory: *"128Mi" | string
+				cpu:    "100m"
+				memory: "512Mi"
 			}
 			limits: {
-				cpu:    *"500m" | string
-				memory: *"512Mi" | string
+				cpu:    "1000m"
+				memory: "1536Mi"
 			}
 		}
 	}

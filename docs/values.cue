@@ -11,7 +11,7 @@ values: {
 	image: {
 		repository: "lasuite/impress-backend"
 		pullPolicy: "Always"
-		tag:        "v5.4.1"
+		tag:        "v5.5.0"
 	}
 
 	nameOverride:     ""
@@ -313,6 +313,15 @@ values: {
 				}
 			},
 		]
+		hostAliases: [
+			{
+				ip: "10.96.202.176"
+				hostnames: [
+					"keycloak.127.0.0.1.nip.io",
+					"docs.127.0.0.1.nip.io",
+				]
+			},
+		]
 		pdb: enabled: true
 		serviceAccountName:           "default"
 		automountServiceAccountToken: false
@@ -339,11 +348,11 @@ values: {
 			resources: {
 				limits: {
 					cpu:    "1000m"
-					memory: "1536Mi"
+					memory: "3000Mi"
 				}
 				requests: {
-					cpu:    "100m"
-					memory: "256Mi"
+					cpu:    "200m"
+					memory: "512Mi"
 				}
 			}
 			probes: {
@@ -391,7 +400,7 @@ values: {
 		image: {
 			repository: "lasuite/impress-frontend"
 			pullPolicy: "Always"
-			tag:        "v5.4.1"
+			tag:        "v5.5.0"
 		}
 		command: []
 		args:    []
@@ -492,7 +501,7 @@ values: {
 		image: {
 			repository: "lasuite/impress-y-provider"
 			pullPolicy: "Always"
-			tag:        "v5.4.1"
+			tag:        "v5.5.0"
 		}
 		converter: {
 			enabled: false
@@ -575,7 +584,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "postgres"
-			tag:        "18-alpine"
+			tag:        "18.6-alpine"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -589,7 +598,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "postgres"
-			tag:        "16-alpine"
+			tag:        "16.15-alpine"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -603,7 +612,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "redis"
-			tag:        "8.8-alpine"
+			tag:        "8.8.2-alpine"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -616,21 +625,28 @@ values: {
 		host:          "keycloak.127.0.0.1.nip.io"
 		image: {
 			repository: "quay.io/keycloak/keycloak"
-			tag:        "20.0.1"
+			tag:        "26.7.3"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
+		}
+		resources: {
+			limits: {
+				cpu:    "1000m"
+				memory: "1536Mi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "512Mi"
+			}
 		}
 		ingress: {
 			enabled:   true
 			className: "nginx"
-			// TEST: annotations commented out to verify stale cookies (not buffer size)
-			// were the real cause of "Network is unavailable" on login.
-			// Uncomment if 502 errors reappear in nginx logs.
-			// annotations: {
-			// 	"nginx.ingress.kubernetes.io/proxy-buffer-size":       "128k"
-			// 	"nginx.ingress.kubernetes.io/proxy-buffers":            "4 256k"
-			// 	"nginx.ingress.kubernetes.io/proxy-busy-buffers-size": "256k"
-			// }
+			annotations: {
+				"nginx.ingress.kubernetes.io/proxy-buffer-size":       "128k"
+				"nginx.ingress.kubernetes.io/proxy-buffers":            "4 256k"
+				"nginx.ingress.kubernetes.io/proxy-busy-buffers-size": "256k"
+			}
 		}
 		db: {
 			host:     "kc-postgres"
@@ -667,7 +683,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "minio/minio"
-			tag:        "RELEASE.2023-08-29T23-07-35Z"
+			tag:        "RELEASE.2025-09-07T16-13-09Z-cpuv1"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -689,7 +705,7 @@ values: {
 		enabled: false
 		image: {
 			repository: "ghcr.io/docspecio/api"
-			tag:        "3.0.1"
+			tag:        "3.0.2"
 			pullPolicy: "IfNotPresent"
 		}
 		command: []
