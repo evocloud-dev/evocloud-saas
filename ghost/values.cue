@@ -13,7 +13,7 @@ values: {
 
 	image: {
 		repository: "docker.io/library/ghost"
-		tag:        "6.51.0"
+		tag:        "6.62.0"
 		pullPolicy: "IfNotPresent"
 	}
 	imagePullSecrets: []
@@ -51,7 +51,7 @@ values: {
 		backoffLimit:               1
 		archivePrefix:              "ghost"
 		images: {
-			backup:   "docker.io/library/busybox:1.37"
+			backup:   "docker.io/library/busybox:1.38"
 			uploader: "docker.io/helmforge/mc:1.0.0"
 		}
 		resources: {}
@@ -166,7 +166,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/library/mysql"
-			tag:        "8.4.7"
+			tag:        "8.4.10"
 			pullPolicy: "IfNotPresent"
 		}
 		architecture: "standalone"
