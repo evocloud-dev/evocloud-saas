@@ -10,7 +10,7 @@ package main
 values: {
 	image: {
 		repository: "docuseal/docuseal"
-		tag:        "3.0.3"
+		tag:        "3.2.3"
 		pullPolicy: "IfNotPresent"
 	}
 	env: {}
