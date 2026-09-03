@@ -972,7 +972,7 @@ values: {
 		image: {
 			registry: "docker.io"
 			repository: "library/postgres"
-			tag: "18.4"
+			tag: "18.6"
 		}
 		auth: {
 			// -- Name for a custom database to create
