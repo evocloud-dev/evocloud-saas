@@ -41,6 +41,9 @@ import (
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
+				if backend.hostAliases != _|_ {
+					hostAliases: backend.hostAliases
+				}
 				if backend.podSecurityContext != _|_ {
 					securityContext: backend.podSecurityContext
 				}

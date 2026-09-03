@@ -41,6 +41,9 @@ import (
 				if #config.imagePullSecrets != _|_ {
 					imagePullSecrets: #config.imagePullSecrets
 				}
+				if celeryWorker.hostAliases != _|_ {
+					hostAliases: celeryWorker.hostAliases
+				}
 				if celeryWorker.podSecurityContext != _|_ {
 					securityContext: celeryWorker.podSecurityContext
 				}
