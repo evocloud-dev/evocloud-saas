@@ -156,7 +156,7 @@ values: {
 		}
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.4-trixie"
+			tag:        "18.6-trixie"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
@@ -199,7 +199,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "docker.io/library/redis"
-			tag:        "8.8.1"
+			tag:        "8.8.2"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
