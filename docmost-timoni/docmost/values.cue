@@ -14,7 +14,7 @@ values: {
 
 	image: {
 		repository: "docker.io/docmost/docmost"
-		tag:        "0.90"
+		tag:        "0.95"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -45,7 +45,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.4-trixie"
+			tag:        "18.6-trixie"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
@@ -98,7 +98,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "docker.io/valkey/valkey"
-			tag:        "9.1.0-alpine"
+			tag:        "9.1.2-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
@@ -163,7 +163,7 @@ values: {
 		backoffLimit:               1
 		archivePrefix:              "docmost"
 		images: {
-			postgresql: "docker.io/library/postgres:18.4-trixie"
+			postgresql: "docker.io/library/postgres:18.6-trixie"
 			uploader:   "docker.io/helmforge/mc:1.0.0"
 		}
 		resources: {

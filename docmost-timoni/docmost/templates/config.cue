@@ -24,7 +24,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/docmost/docmost" | string
-		tag:        *"0.80.2" | string
+		tag:        *"0.95" | string
 		digest:     *"" | string
 	}
 
@@ -55,7 +55,7 @@ import (
 		architecture: *"standalone" | "replication"
 		image: {
 			repository: *"docker.io/library/postgres" | string
-			tag:        *"18.3-trixie" | string
+			tag:        *"18.6-trixie" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {
@@ -80,8 +80,8 @@ import (
 		enabled:      *true | bool
 		architecture: *"standalone" | "replication"
 		image: {
-			repository: *"docker.io/library/redis" | string
-			tag:        *"8.6.2" | string
+			repository: *"docker.io/valkey/valkey" | string
+			tag:        *"9.1.2-alpine" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {
@@ -137,7 +137,7 @@ import (
 		backoffLimit:               *1 | int & >=0
 		archivePrefix:              *"docmost" | string
 		images: {
-			postgresql: *"docker.io/library/postgres:18.3-trixie" | string
+			postgresql: *"docker.io/library/postgres:18.6-trixie" | string
 			uploader:   *"docker.io/helmforge/mc:1.0.0" | string
 		}
 		resources: {
