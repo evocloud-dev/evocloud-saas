@@ -38,7 +38,7 @@ values: {
 		image: {
 			registry:        "docker.io"
 			repository:      "postgres"
-			tag:             "16"
+			tag:             "18"
 			imagePullPolicy: "Always"
 		}
 		resourcesPreset: null
@@ -102,7 +102,7 @@ values: {
 		registry:        "docker.io"
 		repository:      "openproject/openproject"
 		imagePullPolicy: "Always"
-		tag:             "17.5.1-slim"
+		tag:             "17.8.0-slim"
 	}
 
 	imagePullSecrets: []
@@ -233,7 +233,7 @@ values: {
 		image: {
 			repository: "docker.io/openproject/hocuspocus"
 			imagePullPolicy: "Always"
-			tag: "release-749fb715"
+			tag: "release-17.7-e4163f1c"
 	
 		}
 		strategy: type: "Recreate"
