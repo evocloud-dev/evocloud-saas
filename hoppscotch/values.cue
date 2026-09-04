@@ -16,7 +16,7 @@ values: {
 
 	image: {
 		repository: "docker.io/hoppscotch/hoppscotch"
-		tag:        "2026.5.0"
+		tag:        "2026.8.0"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -25,7 +25,7 @@ values: {
 	baseUrl:           "http://localhost:3000"
 	adminUrl:          "http://localhost:3100"
 	backendGqlUrl:     "http://localhost:3170/graphql"
-	backendWsUrl:      "wss://localhost:3170/graphql"
+	backendWsUrl:      "ws://localhost:3170/graphql"
 	backendApiUrl:     "http://localhost:3170/v1"
 	shortcodeBaseUrl:  "http://localhost:3000"
 	whitelistedOrigins: "http://localhost:3170,http://localhost:3000,http://localhost:3100,app://localhost_3200,app://hoppscotch"
@@ -53,7 +53,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.4-trixie" 
+			tag:        "18.6-trixie" 
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
@@ -96,7 +96,7 @@ values: {
 		requireExistingResources: true
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.3-trixie"
+			tag:        "18.6-trixie"
 			pullPolicy: "IfNotPresent"
 		}
 		backoffLimit:          6
@@ -151,13 +151,13 @@ values: {
 		providers: "EMAIL,GITHUB"
 		github: {
 			enabled:                       true
-			clientId:                      ""
-			clientSecret:                  ""
+			clientId:                      "Ov23li1QhBMpu1WXiTwJ"
+			clientSecret:                  "0589e0d63e972c12b518971a2d8dffaae3773e0b"
 			existingSecret:                ""
 			existingSecretClientIdKey:     "github-client-id"
 			existingSecretClientSecretKey: "github-client-secret"
 			scope:                         "user:email"
-			callbackUrl:                   ""
+			callbackUrl:                   "http://localhost:3170/v1/auth/github/callback"
 		}
 		google: {
 			enabled:                       false
