@@ -182,7 +182,7 @@ import (
 	backend: {
 		enabled:      *true | bool
 		replicaCount: *1 | int
-		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-backend" | string, tag: *"v1.9.0-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-backend" | string, tag: *"v1.11.1-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
 		command: *[] | [...string]
 		args:    *[] | [...string]
 		service: {type: *"ClusterIP" | string, port: *80 | int, targetPort: *8080 | int}
@@ -221,7 +221,7 @@ import (
 	frontend: {
 		enabled:      *true | bool
 		replicaCount: *1 | int
-		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-frontend" | string, tag: *"v1.9.0-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-frontend" | string, tag: *"v1.11.1-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
 		command: *[] | [...string]
 		args:    *[] | [...string]
 		env: viteApiUrlServer: *"" | string
@@ -253,7 +253,7 @@ import (
 	webProxy: {
 		enabled:      *true | bool
 		replicaCount: *1 | int
-		image: {registry: *"docker.io" | string, repository: *"nginx" | string, tag: *"1.27-alpine" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {registry: *"docker.io" | string, repository: *"nginx" | string, tag: *"1.30-alpine" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
 		service: {type: *"ClusterIP" | string, port: *80 | int, targetPort: *8080 | int}
 		probes: {
 			startup:   {periodSeconds: *5 | int, timeoutSeconds: *3 | int, failureThreshold: *12 | int}
@@ -313,12 +313,12 @@ import (
 		securityContext:    *{} | {[string]: _}
 	}
 	initContainers: {
-		postgresql: {enabled: *true | bool, image: *"postgres:16-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
-		redis:      {enabled: *true | bool, image: *"redis:7-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
+		postgresql: {enabled: *true | bool, image: *"postgres:18-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
+		redis:      {enabled: *true | bool, image: *"redis:8-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
 	}
 	postgresql: {
 		enabled: *true | bool
-		image: {repository: *"postgres" | string, tag: *"16-alpine" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {repository: *"postgres" | string, tag: *"18-alpine" | string, pullPolicy: *"IfNotPresent" | string}
 		persistence: {enabled: *true | bool, size: *"10Gi" | string, storageClass: *"" | string}
 		service: port: *5432 | int
 		resources: *{} | {[string]: _}
@@ -332,7 +332,7 @@ import (
 	externalDatabase: host: *"" | string
 	redis: {
 		enabled: *true | bool
-		image: {repository: *"redis" | string, tag: *"7-alpine" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {repository: *"valkey/valkey" | string, tag: *"9.1.2-alpine" | string, pullPolicy: *"IfNotPresent" | string}
 		persistence: {enabled: *true | bool, size: *"2Gi" | string, storageClass: *"" | string}
 		service: port: *6379 | int
 		resources: *{} | {[string]: _}

@@ -153,7 +153,7 @@ values: {
 		image: {
 			registry: "docker.io"
 			repository: "daveearley/hi.events-backend"
-			tag: "v1.9.0-beta"
+			tag: "v1.11.1-beta"
 			digest: ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -226,7 +226,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "daveearley/hi.events-frontend"
-			tag:        "v1.9.0-beta"
+			tag:        "v1.11.1-beta"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -298,7 +298,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "nginx"
-			tag:        "1.27-alpine"
+			tag:        "1.30-alpine"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -430,12 +430,12 @@ values: {
 	initContainers: {
 		postgresql: {
 			enabled: true
-			image: "postgres:17-alpine"
+			image: "postgres:18-alpine"
 			imagePullPolicy: "IfNotPresent"
 		}
 		redis: {
 			enabled: true
-			image: "redis:7-alpine"
+			image: "redis:8-alpine"
 			imagePullPolicy: "IfNotPresent"
 		}
 	}
@@ -444,7 +444,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "postgres"
-			tag: "17-alpine"
+			tag: "18-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 
@@ -500,7 +500,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/valkey/valkey"
-			tag: "9.1.0-alpine"
+			tag: "9.1.2-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 
