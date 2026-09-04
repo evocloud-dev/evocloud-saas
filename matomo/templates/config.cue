@@ -42,7 +42,7 @@ import (
 	// The image allows setting the container image repository, tag, digest and pull policy.
 	image: {
 		repository:   *"docker.io/library/matomo" | string
-		tag:        *"5.12.0-apache" | string
+		tag:        *"5.13.0-apache" | string
 		pullPolicy: *"IfNotPresent" | string
 		reference:   "\(repository):\(tag)" // combined image reference
 	}
