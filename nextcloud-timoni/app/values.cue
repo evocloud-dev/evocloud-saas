@@ -5,7 +5,7 @@ values: {
 	image: {
 		repository: "docker.io/library/nextcloud"
 		digest:     ""
-		tag:        "34.0.0-apache"
+		tag:        "34.0.3-apache"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -153,7 +153,7 @@ values: {
 		}
 		mariadb: {
 			enabled: false
-			image:   "docker.io/bitnami/mariadb:latest"
+			image:   "docker.io/bitnami/mariadb:12.3"
 			auth: {
 				username:     "nextcloud"
 				password:     "changeme"
@@ -337,7 +337,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "nextcloud/aio-imaginary"
-			tag:        "latest"
+			tag:        "20260825_084538"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -458,7 +458,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "valkey/valkey"
-			tag:        "9.1.0-alpine"
+			tag:        "9.1.2-alpine"
 		}
 		auth: {
 			enabled:  true
