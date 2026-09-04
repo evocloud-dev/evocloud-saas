@@ -221,7 +221,7 @@ import (
 		image: timoniv1.#Image & {
 			reference:  *"docker.io/xperimental/nextcloud-exporter:0.8.0" | string
 			repository: *"xperimental/nextcloud-exporter" | string
-			tag:        *"0.8.0" | string
+			tag:        *"0.9.1" | string
 			digest:     *"" | string
 		}
 		server:       *"" | string
@@ -267,7 +267,7 @@ import (
 		enabled:      *false | bool
 		replicaCount: *1 | int & >0
 		image: timoniv1.#Image & {
-			reference:  *"docker.io/nextcloud/aio-imaginary:latest" | string
+			reference:  *"docker.io/nextcloud/aio-imaginary:20260825_084538" | string
 			repository: *"nextcloud/aio-imaginary" | string
 			tag:        *"latest" | string
 			digest:     *"" | string
@@ -306,7 +306,7 @@ import (
 		}
 		mariadb: {
 			enabled:     *false | bool
-			image:       *"docker.io/bitnami/mariadb:latest" | string
+			image:       *"docker.io/bitnami/mariadb:12.3" | string
 			primaryHost: string | *(metadata.name + "-mariadb")
 			auth: {
 				username:     *"nextcloud" | string
@@ -385,8 +385,8 @@ import (
 		enabled: bool | *false
 		image: {
 			registry:   string | *"docker.io"
-			repository: string | *"bitnamilegacy/redis"
-			tag:        string | *"latest"
+			repository: string | *"valkey/valkey"
+			tag:        string | *"9.1.2-alpine"
 		}
 		auth: {
 			enabled:                   bool | *true
