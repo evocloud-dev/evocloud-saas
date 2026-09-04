@@ -11,7 +11,7 @@ import (
 
 module: {
 	name: "evo-matomo"
-	version: "1.0.1"
+	version: "1.0.2"
 }
 // Define the schema for the user-supplied values.
 // At runtime, Timoni injects the supplied values
