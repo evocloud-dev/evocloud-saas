@@ -54,6 +54,8 @@ spec:
             - name: postgresql
               containerPort: 5432
           env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data
             - name: POSTGRES_DB
               value: {{ .Values.hieventsConfig.postgresql.database | quote }}
             - name: POSTGRES_USER
@@ -86,7 +88,7 @@ spec:
           {{- if .Values.postgresql.persistence.enabled }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           {{- end }}
   {{- if .Values.postgresql.persistence.enabled }}
   volumeClaimTemplates:
