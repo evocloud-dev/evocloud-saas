@@ -33,6 +33,19 @@ import (
 				restartPolicy:      "OnFailure"
 				serviceAccountName: #config.serviceAccountName
 				securityContext:    #config.postgresqlExtensionsJob.podSecurityContext
+				initContainers: [
+					{
+						name:            "wait-for-postgresql"
+						image:           "\(#config.postgresqlExtensionsJob.image.repository):\(#config.postgresqlExtensionsJob.image.tag)"
+						imagePullPolicy: #config.postgresqlExtensionsJob.image.pullPolicy
+						command: [
+							"sh",
+							"-c",
+							"until pg_isready -h \(#config.databaseHost) -p \(#config.databasePort); do echo waiting for database; sleep 2; done;",
+						]
+						securityContext: #config.postgresqlExtensionsJob.securityContext
+					},
+				]
 				containers: [
 					{
 						name:            "pg-extensions"

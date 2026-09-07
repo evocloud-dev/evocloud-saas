@@ -49,7 +49,7 @@ import (
 
 	image: {
 		repository: *"docker.io/hoppscotch/hoppscotch" | string
-		tag:        *"2026.5.0" | string
+		tag:        *"2026.8.0" | string
 		pullPolicy: *"IfNotPresent" | "Always" | "Never"
 	}
 
@@ -88,7 +88,7 @@ import (
 		nameOverride: *"" | string
 		image: {
 			repository: *"docker.io/library/postgres" | string
-			tag:        *"18.4-trixie" | string
+			tag:        *"18.6-trixie" | string
 			pullPolicy: *"IfNotPresent" | "Always" | "Never"
 		}
 		auth: {
@@ -124,7 +124,7 @@ import (
 		requireExistingResources: *true | bool
 		image: {
 			repository: *"docker.io/library/postgres" | string
-			tag:        *"18.3-trixie" | string
+			tag:        *"18.6-trixie" | string
 			pullPolicy: *"IfNotPresent" | "Always" | "Never"
 		}
 		backoffLimit: *6 | int
