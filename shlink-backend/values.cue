@@ -18,7 +18,7 @@ values: {
 		registry:   "docker.io"
 		repository: "shlinkio/shlink"
 		pullPolicy: "Always"
-		tag:        "5.1.5"
+		tag:        "5.1.6"
 	}
 	imagePullSecrets: []
 	replicaCount: 1
@@ -287,7 +287,7 @@ values: {
 			registry:   "docker.io"
 			repository: "shlinkio/shlink-web-client"
 			pullPolicy: "Always"
-			tag:        "4.8.0"
+			tag:        "4.8.1"
 		}
 		imagePullSecrets: []
 		replicaCount: 1

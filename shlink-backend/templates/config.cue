@@ -52,7 +52,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"shlinkio/shlink" | string
 		pullPolicy: *"Always" | string
-		tag:        *"5.1.5" | string
+		tag:        *"5.1.6" | string
 		reference:  "\(registry)/\(repository):\(tag)"
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
@@ -328,7 +328,7 @@ import (
 			registry:   *"docker.io" | string
 			repository: *"shlinkio/shlink-web-client" | string
 			pullPolicy: *"Always" | string
-			tag:        *"4.8.0" | string
+			tag:        *"4.8.1" | string
 		}
 		imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
 		serviceAccount: {
