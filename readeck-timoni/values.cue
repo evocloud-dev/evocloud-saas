@@ -11,7 +11,7 @@ values: {
 	image: {
 		repository: "codeberg.org/readeck/readeck"
 		pullPolicy: "IfNotPresent"
-		tag:        "0.22.3"
+		tag:        "0.23.2"
 	}
 
 	resources: {
