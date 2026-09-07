@@ -21,7 +21,7 @@ values: {
 		// -- image pull policy
 		pullPolicy: "Always"
 		// --Overrides the image tag
-		tag: "postgresql-v2.20.2"
+		tag: "3.3.1"
 	}
 
 
@@ -164,11 +164,11 @@ values: {
 		}
 		debug:                 ""
 		disableBotCheck:       "1"
-		disableLogin:          "1"
+		disableLogin:          "0"
 		disableTelemetry:      "1"
 		disableUpdates:        "1"
 		enableTestConsole:     "1"
-		forceSSL:              "1"
+		forceSSL:              "0"
 		hostname:              "0.0.0.0"
 		ignoreHostname:        ""
 		ignoredIpAddresses:    ""
