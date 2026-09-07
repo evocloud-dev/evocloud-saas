@@ -11,7 +11,7 @@ values: {
 	image: {
 		repository: "listmonk/listmonk"
 		pullPolicy: "IfNotPresent"
-		tag:        "v6.1.0"
+		tag:        "v6.2.0"
 	}
 
 	imagePullSecrets: []

@@ -17,7 +17,7 @@ import (
 	image: {
 		repository: string | *"listmonk/listmonk"
 		pullPolicy: string | *"IfNotPresent"
-		tag:        string | *"v6.1.0"
+		tag:        string | *"v6.2.0"
 	}
 
 	imagePullSecrets: [...corev1.#LocalObjectReference]
