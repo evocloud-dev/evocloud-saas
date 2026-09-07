@@ -200,7 +200,7 @@ import (
 
 	image: {
 		repository:  *"frappe/erpnext" | string
-		tag:         *"v16.10.1" | string
+		tag:         *"v16.34.1" | string
 		digest:      *"" | string
 		pullPolicy:  *"IfNotPresent" | string
 		reference:   *"\(repository):\(tag)" | string
@@ -557,7 +557,7 @@ import (
 		enabled: *false | bool
 		image: {
 			repository: *"mariadb" | string
-			tag:        *"10.6" | string
+			tag:        *"12.3.3" | string
 			digest?:    string
 			pullPolicy: *"IfNotPresent" | string
 		}
@@ -589,8 +589,8 @@ import (
 	"dragonfly-cache": {
 		enabled: *false | bool
 		image: {
-			repository: *"docker.io/dragonflydb/dragonfly" | string
-			tag:        *"latest" | string
+			repository: *"ghcr.io/dragonflydb/dragonfly" | string
+			tag:        *"v1.40.1" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		args?: [...string]
@@ -603,8 +603,8 @@ import (
 			size:    *"8Gi" | string
 		}
 		image: {
-			repository: *"docker.io/dragonflydb/dragonfly" | string
-			tag:        *"latest" | string
+			repository: *"ghcr.io/dragonflydb/dragonfly" | string
+			tag:        *"v1.40.1" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		args?: [...string]
@@ -626,7 +626,7 @@ import (
 		enabled: *false | bool
 		image: {
 			repository: *"postgres" | string
-			tag:        *"15" | string
+			tag:        *"18" | string
 			digest?:    string
 			pullPolicy: *"IfNotPresent" | string
 		}
@@ -663,7 +663,7 @@ import (
 		enabled: *true | bool
 		image: {
 			repository: *"valkey/valkey" | string
-			tag:        *"7.2" | string
+			tag:        *"9.0.6" | string
 			digest?:    string
 		}
 		resources:          corev1.#ResourceRequirements
@@ -675,7 +675,7 @@ import (
 		enabled: *true | bool
 		image: {
 			repository: *"valkey/valkey" | string
-			tag:        *"7.2" | string
+			tag:        *"9.0.6" | string
 			digest?:    string
 		}
 		resources:          corev1.#ResourceRequirements

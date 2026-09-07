@@ -10,7 +10,7 @@ values: {
 
 	image: {
 		repository: "frappe/erpnext"
-		tag:        "v16.21.1"
+		tag:        "v16.34.1"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -574,7 +574,7 @@ values: {
 
 		image: {
 			repository: "mariadb"
-			tag:        "10.6"
+			tag:        "12.3.3"
 			pullPolicy: "IfNotPresent"
 		}
 		rootPassword: "changeit"
@@ -626,7 +626,7 @@ values: {
 		enabled: false
 		image: {
 			repository: "ghcr.io/dragonflydb/dragonfly"
-			tag:        "v1.37.0"
+			tag:        "v1.40.1"
 		}
 		args: ["--proactor_threads=1"]
 	}
@@ -635,7 +635,7 @@ values: {
 		storage: enabled: true
 		image: {
 			repository: "ghcr.io/dragonflydb/dragonfly"
-			tag:        "v1.39.0"
+			tag:        "v1.40.1"
 		}
 		args: ["--proactor_threads=1"]
 	}
@@ -656,7 +656,7 @@ values: {
 
 		image: {
 			repository: "postgres"
-			tag:        "17"
+			tag:        "18"
 			pullPolicy: "IfNotPresent"
 		}
 		postgresUser:     "postgres"
@@ -711,7 +711,7 @@ values: {
 
 		image: {
 			repository: "valkey/valkey"
-			tag:        "7.2.13"
+			tag:        "9.0.6"
 		}
 		resources: {
 			requests: {
@@ -743,7 +743,7 @@ values: {
 
 		image: {
 			repository: "valkey/valkey"
-			tag:        "7.2.13"
+			tag:        "9.0.6"
 		}
 		resources: {
 			requests: {
