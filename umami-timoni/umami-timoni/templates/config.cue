@@ -220,7 +220,7 @@ import (
 		}
 		debug:                 string
 		disableBotCheck:       *"1" | "0"
-		disableLogin:          *"1" | "0"
+		disableLogin:          *"0" | "int"
 		disableTelemetry:      *"1" | "0"
 		disableUpdates:        *"1" | "0"
 		enableTestConsole:     *"1" | "0"
@@ -230,7 +230,7 @@ import (
 		ignoredIpAddresses:    string
 		logQuery:              *"1" | "0"
 		removeDisableLoginEnv: *true | bool
-		removeTrailingSlash:   *"1" | "0"
+		removeTrailingSlash:   *"" | "0"
 		trackerScriptName:     *"umami" | string
 		migration: v1v2: enabled: *false | bool
 	}
