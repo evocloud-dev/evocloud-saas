@@ -10,7 +10,7 @@ import (
 
 module: {
 	name: "evo-snipeit"
-	version: "0.1.1"
+	version: "0.1.2"
 }
 
 // Define the schema for the user-supplied values.

@@ -21,7 +21,7 @@ values: {
 	image: {
 		repository: "snipe/snipe-it"
 		pullPolicy: "IfNotPresent"
-		tag:        "v8.6.3"
+		tag:        "v8.7.2"
 	}
 
 	service: {
@@ -57,7 +57,7 @@ values: {
 	mysql: {
 		enabled:       true
 		image:  "mysql"
-		imageTag:        "9.7.1"
+		imageTag:        "9.7.2"
 		imagePullPolicy: "IfNotPresent" 
 		mysqlUser:     "snipeit"
 		mysqlPassword: "snipeit"

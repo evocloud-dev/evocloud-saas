@@ -66,7 +66,7 @@ import (
 	// The default image repository and tag is set in `values.cue`.
 	image: timoniv1.#Image & {
 		repository: *"snipe/snipe-it" | string
-		tag:        *"" | string
+		tag:        *"v8.7.2" | string
 		digest:     *"" | string
 	}
 
@@ -107,7 +107,7 @@ import (
 	mysql: {
 		enabled:                 *false | bool
 		image:                   *"mysql" | string
-		imageTag:                *"9.7.0" | string
+		imageTag:                *"9.7.2" | string
 		imagePullPolicy:         *"IfNotPresent" | string
 		mysqlRootPassword:       *mysqlPassword | string
 		mysqlUser:               *"snipeit" | string
