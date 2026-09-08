@@ -42,7 +42,7 @@ import (
 	image: {
 		registry:        *"docker.io" | string
 		repository:      *"openproject/openproject" | string
-		tag:             *"17.2.3-slim" | string
+		tag:             *"17.8.0-slim" | string
 		digest:          *null | string
 		imagePullPolicy: *"Always" | "IfNotPresent" | "Never"
 		reference:       "\(repository):\(tag)"
@@ -52,7 +52,7 @@ import (
 		image: {
 			registry:        *"docker.io" | string
 			repository:      *"postgres" | string
-			tag:             *"16" | string
+			tag:             *"18" | string
 			digest:          *null | string
 			imagePullPolicy: *"Always" | "IfNotPresent" | "Never"
 			reference:       "\(repository):\(tag)"
@@ -276,7 +276,7 @@ import (
 		}
 		image: {
 			repository:      *"docker.io/openproject/hocuspocus" | string
-			tag:             *"release-338001b2" | string
+			tag:             *"release-17.7-e4163f1c" | string
 			imagePullPolicy: *"Always" | "IfNotPresent" | "Never"
 			reference:       "\(repository):\(tag)"
 		}
