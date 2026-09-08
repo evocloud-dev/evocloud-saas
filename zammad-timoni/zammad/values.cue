@@ -346,7 +346,7 @@ values: {
 				enabled: true
 				image: {
 					repository: "alpine"
-					tag:        "3.23.4"
+					tag:        "3.23.5"
 					pullPolicy: "IfNotPresent"
 				}
 				command: ["/bin/sh", "-cx", "chmod 770 /opt/zammad/tmp"]
@@ -551,7 +551,7 @@ values: {
 	redis: {
 		image: {
 			repository: "docker.io/valkey/valkey"
-			tag:        "9.1.0-alpine"
+			tag:        "9.1.2-alpine"
 			pullPolicy: "Always"
 		}
 		sentinel: enabled:  true
