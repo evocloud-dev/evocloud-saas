@@ -68,7 +68,7 @@ ssl: {
 services: {
 	redis: {
 		local_setup:       true
-		image:             "valkey/valkey:7.2.13-alpine"
+		image:             "valkey/valkey:9.1.2-alpine"
 		servicePort:       6379
 		volumeSize:        "500Mi"
 		pullPolicy:        "IfNotPresent"
@@ -86,7 +86,7 @@ services: {
 
 	postgres: {
 		local_setup:       true
-		image:             "postgres:15.18-alpine"
+		image:             "postgres:18.6-alpine"
 		servicePort:       5432
 		volumeSize:        "2Gi"
 		pullPolicy:        "IfNotPresent"
@@ -104,7 +104,7 @@ services: {
 
 	rabbitmq: {
 		local_setup:           true
-		image:                 "rabbitmq:4.3.2-management-alpine"
+		image:                 "rabbitmq:4.3.5-management-alpine"
 		servicePort:           5672
 		managementPort:        15672
 		volumeSize:            "100Mi"
@@ -126,7 +126,7 @@ services: {
 
 	opensearch: {
 		local_setup:       true
-		image:             "opensearchproject/opensearch:3.7.0"
+		image:             "opensearchproject/opensearch:3.8.0"
 		servicePort:       9200
 		volumeSize:        "5Gi"
 		pullPolicy:        "IfNotPresent"
