@@ -23,7 +23,7 @@ values: {
 		// SonarQube image repository. Uses the official Docker image.
 		repository: "docker.io/library/sonarqube"
 		// SonarQube Community Build image tag.
-		tag:        "26.8.0.126808-community"
+		tag:        "26.9.0.129388-community"
 		// Image pull policy.
 		pullPolicy: "IfNotPresent"
 		digest:     ""
@@ -216,7 +216,7 @@ values: {
 		image: {
 			// Plugin installer image repository.
 			repository: "docker.io/library/busybox"
-			tag:        "1.37"
+			tag:        "1.38"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
@@ -263,7 +263,7 @@ values: {
 			// Wait init container image repository.
 			repository: "docker.io/library/busybox"
 			// Wait init container image tag.
-			tag:        "1.37"
+			tag:        "1.38"
 			// Wait init container image pull policy.
 			pullPolicy: "IfNotPresent"
 			digest:     ""
@@ -486,7 +486,7 @@ values: {
 			// Helm test image repository.
 			repository: "docker.io/library/busybox"
 			// Helm test image tag.
-			tag:        "1.37"
+			tag:        "1.38"
 			// Helm test image pull policy.
 			pullPolicy: "IfNotPresent"
 			digest:     ""
