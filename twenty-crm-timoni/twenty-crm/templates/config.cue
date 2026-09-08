@@ -79,7 +79,7 @@ import (
 
 	// Utility images
 	utilityImages: {
-		postgres: *"postgres:16-alpine" | string
+		postgres: *"postgres:18-alpine" | string
 	}
 
 	// Strategy schema
