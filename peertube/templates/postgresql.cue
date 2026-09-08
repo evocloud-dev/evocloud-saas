@@ -67,8 +67,7 @@ import (
 							if c.postgresql.persistence.enabled {
 								{
 									name:      "postgres-data"
-									mountPath: "/var/lib/postgresql/data"
-									subPath:   "pgdata"
+									mountPath: "/var/lib/postgresql"
 								}
 							},
 						]

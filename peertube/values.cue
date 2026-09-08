@@ -49,7 +49,7 @@ values: {
 				// If missing, defaults to image.pullPolicy
 				pullPolicy: null
 				// Overrides the image tag whose default is the chart appVersion
-				tag:        "v8.2.2"
+				tag:        "v8.2.4"
 			}
 			resources: {
 				requests: {
@@ -168,7 +168,7 @@ values: {
 			labels: {}
 			// Create GrafanaDashboard custom resource referencing to the configMap
 			grafanaDashboard: {
-				enabled:                   true
+				enabled:                   false
 				folder:                    "peertube"
 				allowCrossNamespaceImport: true
 				matchLabels: dashboards: "grafana"
@@ -463,7 +463,7 @@ values: {
 		// Vertical Pod Autoscaler
 		// See: https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically/
 		vpa: {
-			enabled: true
+			enabled: false
 			annotations: {}
 			// Possible values: Off, Initial, Auto
 			updateMode: "Initial"
@@ -524,7 +524,7 @@ values: {
 
 		// Enables Gateway API TCPRoute for the live (RTMP/RTMPS) service
 		tcpRoute: {
-			enabled: true
+			enabled: false
 			annotations: {}
 			rtmp: {
 				enabled: true
@@ -784,7 +784,7 @@ values: {
 
 		// KEDA ScaledObject for runner queue-based scaling
 		kedaDefaults: {
-			enabled:         true
+			enabled:         false
 			minReplicas:     1
 			maxReplicas:     20
 			cooldownPeriod:  300 // Global cooldown period in seconds
@@ -931,7 +931,7 @@ values: {
 
 		// Vertical Pod Autoscaler.
 		vpa: {
-			enabled:    true
+			enabled:    false
 			updateMode: "Initial"
 			resourcePolicy: {
 				containerPolicies: [
@@ -963,7 +963,7 @@ values: {
 					"vod-audio-merge-transcoding",
 				]
 				keda: {
-					enabled:     true
+					enabled:     false
 					maxReplicas: 10
 				}
 				config: {
@@ -1004,7 +1004,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "postgres"
-			tag:        "16-alpine"
+			tag:        "18-alpine"
 		}
 		resources: {
 			requests: {
@@ -1033,7 +1033,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "redis"
-			tag:        "7-alpine"
+			tag:        "8-alpine"
 		}
 		resources: {
 			requests: {
