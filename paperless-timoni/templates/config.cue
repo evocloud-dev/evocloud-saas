@@ -158,7 +158,7 @@ import (
 		enabled: *false | bool
 		image: {
 			repository: *"docker.io/postgres" | string
-			tag:        *"16-alpine" | string
+			tag:        *"18-alpine" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {
@@ -203,8 +203,8 @@ import (
 	redis: {
 		enabled: *true | bool
 		image: {
-			repository: *"docker.io/redis" | string
-			tag:        *"7-alpine" | string
+			repository: *"docker.io/valkey/valkey" | string
+			tag:        *"9.1.2-alpine" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {

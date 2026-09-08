@@ -1,6 +1,8 @@
 package templates
 
 import (
+	"list"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -120,87 +122,65 @@ import (
 						if #config.postgresql.auth.password != _|_ {
 							#postgresqlPasswordKey: "password"
 						}
-						#env: [
+						let _customEnv = [
 							for key, val in #config.env if val != null {
 								name:  key
 								value: "\(val)"
 							},
+						]
+						let _defaultEnv = [
 							if #config.env.PAPERLESS_TIME_ZONE == _|_ {
-								{
-									name:  "PAPERLESS_TIME_ZONE"
-									value: "\(#config.env.TZ)"
-								}
+								name:  "PAPERLESS_TIME_ZONE"
+								value: "\(#config.env.TZ)"
 							},
 							if #config.env.PAPERLESS_PORT == _|_ {
-								{
-									name:  "PAPERLESS_PORT"
-									value: "\(#config.service.main.ports.http.port)"
-								}
+								name:  "PAPERLESS_PORT"
+								value: "\(#config.service.main.ports.http.port)"
 							},
 							if #config.ingress.main.enabled && #config.env.PAPERLESS_URL == _|_ {
-								{
-									name:  "PAPERLESS_URL"
-									value: #paperlessURL
-								}
+								name:  "PAPERLESS_URL"
+								value: #paperlessURL
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBENGINE == _|_ {
-								{
-									name:  "PAPERLESS_DBENGINE"
-									value: "postgresql"
-								}
+								name:  "PAPERLESS_DBENGINE"
+								value: "postgresql"
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBHOST == _|_ {
-								{
-									name:  "PAPERLESS_DBHOST"
-									value: "\(#config.metadata.name)-postgresql"
-								}
+								name:  "PAPERLESS_DBHOST"
+								value: "\(#config.metadata.name)-postgresql"
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBNAME == _|_ {
-								{
-									name:  "PAPERLESS_DBNAME"
-									value: #config.postgresql.auth.database
-								}
+								name:  "PAPERLESS_DBNAME"
+								value: #config.postgresql.auth.database
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBUSER == _|_ {
-								{
-									name:  "PAPERLESS_DBUSER"
-									value: #config.postgresql.auth.username
-								}
+								name:  "PAPERLESS_DBUSER"
+								value: #config.postgresql.auth.username
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBPASS == _|_ {
-								{
-									name: "PAPERLESS_DBPASS"
-									valueFrom: secretKeyRef: {
-										name: #postgresqlSecretName
-										key:  #postgresqlPasswordKey
-									}
+								name: "PAPERLESS_DBPASS"
+								valueFrom: secretKeyRef: {
+									name: #postgresqlSecretName
+									key:  #postgresqlPasswordKey
 								}
 							},
 							if #config.redis.enabled && #config.redis.auth.enabled {
-								{
-									name: "A_REDIS_PASSWORD"
-									valueFrom: secretKeyRef: {
-										name: #redisSecretName
-										key:  #redisPasswordKey
-									}
+								name: "A_REDIS_PASSWORD"
+								valueFrom: secretKeyRef: {
+									name: #redisSecretName
+									key:  #redisPasswordKey
 								}
 							},
 							if #config.redis.enabled && #config.redis.auth.enabled && #config.env.PAPERLESS_REDIS == _|_ {
-								{
-									name:  "PAPERLESS_REDIS"
-									value: "redis://\(#redisAuthPrefix)$(A_REDIS_PASSWORD)@\(#config.metadata.name)-redis-master"
-								}
+								name:  "PAPERLESS_REDIS"
+								value: "redis://\(#redisAuthPrefix)$(A_REDIS_PASSWORD)@\(#config.metadata.name)-redis-master"
 							},
 							if #config.redis.enabled && !#config.redis.auth.enabled && #config.env.PAPERLESS_REDIS == _|_ {
-								{
-									name:  "PAPERLESS_REDIS"
-									value: "redis://\(#config.metadata.name)-redis-master"
-								}
+								name:  "PAPERLESS_REDIS"
+								value: "redis://\(#config.metadata.name)-redis-master"
 							},
 						]
-						if len(#env) > 0 {
-							env: #env
-						}
+						env: list.Concat([_customEnv, _defaultEnv])
 						#volumeMounts: [
 							if #config.persistence.data.enabled {
 								{name: "data", mountPath: #config.persistence.data.mountPath}

@@ -11,12 +11,13 @@ values: {
 	image: {
 		repository: "ghcr.io/paperless-ngx/paperless-ngx"
 		pullPolicy: "IfNotPresent"
-		tag:        "2.20.15"
+		tag:        "3.1.3"
 	}
 	env: {
 		TZ: "UTC"
 		// Required for s6-overlay to run as non-root under Kubernetes
 		S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES: "1"
+		PAPERLESS_SECRET_KEY: "cVCxYbtHE8POuq6J_zxjA7u0qMkxCnUZqlAhL37vnG-qaCaWSBYAQCEo4GEx-waiMSzYIPQrCssk9glRmeGjKw"
 	}
 	securityContext: {
 		readOnlyRootFilesystem: true
@@ -109,7 +110,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/postgres"
-			tag:        "17-alpine"
+			tag:        "18-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
@@ -149,7 +150,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/valkey/valkey"
-			tag:        "9.1.0-alpine"
+			tag:        "9.1.2-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
