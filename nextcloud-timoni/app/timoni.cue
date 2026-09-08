@@ -11,7 +11,7 @@ import (
 // Define the module metadata.
 module: {
 	name:        "evo-nextcloud"
-	version:     "0.1.1"
+	version:     "0.1.2"
 	description: "on premise content collaboration platform with real-time document editing, video chat & groupware"
 }
 
