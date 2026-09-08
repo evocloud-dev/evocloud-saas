@@ -16,7 +16,7 @@ values: {
     replicaCount:      1
     image: {
         repository: "docker.io/library/matomo"
-        tag: "5.12.0-apache"
+        tag: "5.13.0-apache"
         pullPolicy: "IfNotPresent"
     }
     imagePullSecrets: []
