@@ -37,7 +37,7 @@ import (
 		extraSecrets: {[string]: string} | *{}
 		image: {
 			repository: string | *"ghcr.io/saleor/saleor"
-			tag:        string | *"3.23.3"
+			tag:        string | *"3.23.31"
 			pullPolicy: "Always" | "IfNotPresent" | "Never" | *"IfNotPresent"
 		}
 		database: {
@@ -126,7 +126,7 @@ import (
 		replicaCount: int & >0 | *1
 		image: {
 			repository: string | *"ghcr.io/saleor/saleor-dashboard"
-			tag:        string | *"3.23.3"
+			tag:        string | *"3.23.32"
 			pullPolicy: "Always" | "IfNotPresent" | "Never" | *"IfNotPresent"
 		}
 		appsMarketplaceApiUrl: string | *"https://apps.saleor.io/api/v2/saleor-apps"
@@ -275,7 +275,7 @@ import (
 		architecture: "standalone" | "replication" | *"standalone"
 		image: {
 			repository: string | *"postgres"
-			tag:        string | *"15-alpine"
+			tag:        string | *"18-alpine"
 			pullPolicy: "Always" | "IfNotPresent" | "Never" | *"IfNotPresent"
 			command: [...string] | *[]
 			args: [...string] | *[]
@@ -322,7 +322,7 @@ import (
 		architecture: "standalone" | "replication" | *"standalone"
 		image: {
 			repository: string | *"valkey/valkey"
-			tag:        string | *"8.1-alpine"
+			tag:        string | *"9.0-alpine"
 			pullPolicy: "Always" | "IfNotPresent" | "Never" | *"IfNotPresent"
 			command: [...string] | *["valkey-server"]
 			args: [...string] | *["--requirepass", "$(REDIS_PASSWORD)"]

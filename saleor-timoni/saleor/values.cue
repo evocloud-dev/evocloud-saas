@@ -12,7 +12,7 @@ values: {
 		celeryRedisUrl:   ""
 		image: {
 			repository: "ghcr.io/saleor/saleor"
-			tag:        "3.23.12"
+			tag:        "3.23.31"
 			pullPolicy: "IfNotPresent"
 		}
 		database: {
@@ -104,7 +104,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/saleor/saleor-dashboard"
-			tag:        "3.23.10"
+			tag:        "3.23.32"
 			pullPolicy: "IfNotPresent"
 		}
 		appsMarketplaceApiUrl: "https://apps.saleor.io/api/v2/saleor-apps"
@@ -242,7 +242,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "postgres"
-			tag:        "17-alpine"
+			tag:        "18-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		podSecurityContext: {
@@ -308,7 +308,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "valkey/valkey"
-			tag:        "8.1-alpine"
+			tag:        "9.0-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		podSecurityContext: {
