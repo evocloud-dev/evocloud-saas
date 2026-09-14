@@ -154,8 +154,8 @@ Security validation performed via [Kubesec](https://kubesec.io) static analysis 
 
 | Workload | Kind | Kubesec Score | Status |
 |---|---|:---:|:---:|
-| **HumHub PHP-FPM (`main`)** | `Deployment` | **12 / 12** | **Passed** |
-| **HumHub NGINX (`nginx`)** | `Deployment` | **12 / 12** | **Passed** |
-| **MariaDB (`mariadb`)** | `Deployment` | **10 / 10** | **Passed** |
-| **Redis / Valkey (`redis`)** | `StatefulSet` | **12 / 12** | **Passed** |
+| **HumHub PHP-FPM (`main`)** | `Deployment` | **12 / 12** | ✅ |
+| **HumHub NGINX (`nginx`)** | `Deployment` | **12 / 12** | ✅ |
+| **MariaDB (`mariadb`)** | `Deployment` | **10 / 10** | ✅ |
+| **Redis / Valkey (`redis`)** | `StatefulSet` | **12 / 12** | ✅ |
 
