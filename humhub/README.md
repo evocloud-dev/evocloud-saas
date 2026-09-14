@@ -1,7 +1,7 @@
 # HumHub
 
 ## Description
-HumHub is an open-source, flexible, and feature-rich social network and collaboration platform built with PHP and the Yii framework. It is designed to facilitate communication, information sharing, project coordination, and teamwork within organizations, communities, and enterprises. Featuring customizable "Spaces", activity streams, rich directory search, granular access control, and an extensive module marketplace, HumHub enables teams to build tailored social intranets and interactive portals. It is a strong open-source alternative to Facebook social media platform. 
+HumHub is an open-source, flexible, and feature-rich social network and collaboration platform built with PHP and the Yii framework. It is designed to facilitate communication, information sharing, project coordination, and teamwork within organizations, communities, and enterprises. Featuring customizable "Spaces", activity streams, rich directory search, granular access control, and an extensive module marketplace, HumHub enables teams to build tailored social intranets and interactive portals. It is a strong open-source alternative to Facebook. 
 
 ## Application Information
 - **Version**: `1.17.2`
