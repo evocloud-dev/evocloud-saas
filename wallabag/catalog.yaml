@@ -1,0 +1,8 @@
+# Wallabag Application catalog
+
+name: wallabag
+tagline: Wallabag is a save and read-it-later tool, self hostable application for saving web pages and articles, and read them later.
+categories:
+  - Collaboration Tools
+  - Document Management
+tags: [Wallabag, Karakeep]
