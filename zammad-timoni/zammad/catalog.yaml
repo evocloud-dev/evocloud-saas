@@ -1,0 +1,6 @@
+# Zammad Application catalog metada
+name: Zammad
+tagline: Zammad is a powerful and intuitive helpdesk solution that connects all your communication channels, offers helpful reporting, and delivers a great service experience.
+categories:
+  - ERP/CRM
+tags: [Zammad, Jira, Zendesk, Fresdesk, Open Source]
