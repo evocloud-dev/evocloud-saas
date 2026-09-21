@@ -1,0 +1,7 @@
+# Umami application catalog
+
+name: Umami
+tagline: Umami is a privacy-first analytics platform. Traffic, campaigns, behavior, conversions, and revenue in one place — no cookies, no surveillance, self-hosted
+categories:
+  - Analytics
+tags: [Google Analytics, Umami, Matomo, Plausible]
