@@ -1,0 +1,7 @@
+# Cloud9 application catalog
+
+name: Cloud9
+tagline: Cloud9 is a cloud-based Integrated Development Environment (IDE) that lets you write, run, and debug your code with just a browser.
+categories:
+  - Coding/IDEs
+tags: [Cloud9, Gitpod]
