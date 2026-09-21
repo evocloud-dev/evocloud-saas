@@ -1,0 +1,8 @@
+# Apache Superset application catalog
+
+name: Apache Superset
+tagline: Apache Superset is a Data Visualization and Data Exploration Platform.
+categories:
+  - Business Intelligence
+  - Analytics
+tags: [Apache Superset, Tableau Software, Microsoft Power BI]
