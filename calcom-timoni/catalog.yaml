@@ -1,0 +1,7 @@
+# Calcom application catalog
+
+name: Calcom
+tagline: Calcom is an appointment scheduling tool for businesses and individuals.
+categories:
+  - Calendar/Scheduling
+tags: [Calcom, Calendly, NocoDB]
