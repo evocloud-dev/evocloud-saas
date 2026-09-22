@@ -29,6 +29,11 @@ import (
 					app: #config.redis.nameOverride
 				}
 				spec: corev1.#PodSpec & {
+					automountServiceAccountToken: false
+					serviceAccountName:           #config.metadata.name
+					if #config.redis.podSecurityContext != _|_ {
+						securityContext: #config.redis.podSecurityContext
+					}
 					containers: [
 						{
 							name:  "redis"
@@ -41,6 +46,12 @@ import (
 								containerPort: 6379
 								name:          "redis"
 							}]
+							if #config.redis.resources != _|_ {
+								resources: #config.redis.resources
+							}
+							if #config.redis.securityContext != _|_ {
+								securityContext: #config.redis.securityContext
+							}
 							volumeMounts: [{
 								name:      "data"
 								mountPath: "/bitnami/redis/data"
@@ -64,6 +75,12 @@ import (
 									containerPort: 26379
 									name:          "redis-sentinel"
 								}]
+								if #config.redis.resources != _|_ {
+									resources: #config.redis.resources
+								}
+								if #config.redis.securityContext != _|_ {
+									securityContext: #config.redis.securityContext
+								}
 							}
 						},
 					]

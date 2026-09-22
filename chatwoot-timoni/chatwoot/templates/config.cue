@@ -95,6 +95,9 @@ import (
 		}
 		postgresqlHost?: string
 		postgresqlPort:  *5432 | int
+		resources?:          corev1.#ResourceRequirements
+		podSecurityContext?: corev1.#PodSecurityContext
+		securityContext?:    corev1.#SecurityContext
 	}
 
 	redis: {
@@ -120,6 +123,9 @@ import (
 			masterSet:  *"mymaster" | string
 			sentinelSet: *"" | string
 		}
+		resources?:          corev1.#ResourceRequirements
+		podSecurityContext?: corev1.#PodSecurityContext
+		securityContext?:    corev1.#SecurityContext
 	}
 
 	services: {
