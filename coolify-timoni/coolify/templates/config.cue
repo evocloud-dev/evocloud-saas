@@ -305,7 +305,8 @@ import (
 		if config.metadata.namespace != "" {
 			ns: #Namespace & {#config: config}
 		}
-		pvc: #SharedPVC & {#config: config}
+		sa:     #ServiceAccount & {#config: config}
+		pvc:    #SharedPVC & {#config: config}
 		secret: #AppSecret & {#config: config}
 		if config.postgresql.enabled {
 			pgSec: (#PostgreSQLSecret & {#config: config}).secret
