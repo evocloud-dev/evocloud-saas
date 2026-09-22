@@ -1,0 +1,7 @@
+# Coolify application catalog
+
+name: Coolify
+tagline: Coolify offers a robust API that enables you to automate deployments, manage resources, and integrate with your existing application deployment workflows.
+categories:
+  - Workflow Automation
+tags: [Coolify, Vercel, Heroku, Netlify]
