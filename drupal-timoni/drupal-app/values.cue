@@ -341,7 +341,7 @@ values: {
 	}
 
 	mysql: {
-		enabled: false
+		enabled: true
 		image: {
 			registry:   "docker.io"
 			repository: "bitnamilegacy/mysql"
@@ -380,10 +380,17 @@ values: {
 				tag:        "12-debian-12"
 			}
 		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
+		podSecurityContext: {
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 
 	postgresql: {
-		enabled: true
+		enabled: false
 		image: {
 			registry:   "docker.io"
 			repository: "bitnamilegacy/postgresql"

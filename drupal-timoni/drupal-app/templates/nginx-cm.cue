@@ -7,18 +7,8 @@ import (
 #NginxConfigMap: timoniv1.#ImmutableConfig & {
 	#config: #Config
 	#Kind:   timoniv1.#ConfigMapKind
-	#Meta: {
-		name:      "\(#config.metadata.name)-nginx"
-		namespace: #config.metadata.namespace
-		labels: {
-			"app.kubernetes.io/name":     "\(#config.metadata.name)-nginx"
-			"app.kubernetes.io/instance": #config.metadata.name
-			"app.kubernetes.io/version":  #config.moduleVersion
-		}
-		if #config.metadata.annotations != _|_ {
-			annotations: #config.metadata.annotations
-		}
-	}
+	#Suffix: "-nginx"
+	#Meta:   #config.metadata
 	#Data: {
 		"nginx.conf": """
 			error_log /proc/self/fd/2;
