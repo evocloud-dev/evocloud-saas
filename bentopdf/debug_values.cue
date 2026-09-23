@@ -12,17 +12,6 @@ values: {
 		serviceMonitor: enabled: true
 		prometheusRule: enabled: true
 	}
-	ingress: {
-		enabled:          true
-		ingressClassName: "traefik"
-		hosts: [{
-			host: "pdf.example.com"
-			paths: [{
-				path:     "/"
-				pathType: "Prefix"
-			}]
-		}]
-	}
 	gatewayAPI: {
 		enabled: true
 		httpRoutes: [{

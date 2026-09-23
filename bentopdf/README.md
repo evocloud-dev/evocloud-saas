@@ -22,7 +22,6 @@
 - **ServiceMonitor (`bentopdf`):** Optional Prometheus Operator CRD (`monitoring.coreos.com/v1`) for automated scrape configuration.
 - **PrometheusRule (`bentopdf`):** Optional Prometheus alerting rules detecting exporter unavailability (`BentoPDFNginxUnavailable`).
 - **ServiceAccount (`bentopdf`):** Dedicated unprivileged Kubernetes ServiceAccount with `automountServiceAccountToken: false`.
-- **NetworkPolicy (`bentopdf`):** Pod network isolation enforcing ingress restriction to HTTP and metrics ports, and default-deny outbound egress.
 - **HorizontalPodAutoscaler (`bentopdf`):** Optional HorizontalPodAutoscaler scaling replicas based on static-serving container CPU utilization.
 - **PodDisruptionBudget (`bentopdf`):** Optional PodDisruptionBudget protecting service availability during voluntary disruptions.
 - **Gateway API HTTPRoute (`bentopdf`):** Optional Gateway API HTTPRoute definitions for Kubernetes Gateway API controllers.
@@ -33,7 +32,6 @@
 - [Timoni CLI](https://timoni.sh) v0.17+ installed locally
 - Optional: [Prometheus Operator](https://prometheus-operator.dev) if `metrics.serviceMonitor.enabled` or `metrics.prometheusRule.enabled` is active
 - Optional: [Gateway API](https://gateway-api.sigs.k8s.io) CRDs if `gatewayAPI.enabled` is active
-- Optional: Ingress controller (e.g., Ingress-NGINX, Traefik) if `ingress.enabled` is active
 
 ## Install
 
@@ -51,22 +49,15 @@ package main
 values: {
 	replicaCount: 2
 	server: port: 8080
-	ingress: {
-		enabled:          true
-		ingressClassName: "nginx"
-		hosts: [
-			{
-				host: "pdf.example.com"
-				paths: [{
-					path:     "/"
-					pathType: "Prefix"
-				}]
-			},
-		]
-	}
-	metrics: {
-		enabled: true
-		serviceMonitor: enabled: true
+	resources: {
+		requests: {
+			cpu:    "100m"
+			memory: "128Mi"
+		}
+		limits: {
+			cpu:    "500m"
+			memory: "256Mi"
+		}
 	}
 }
 ```
@@ -114,17 +105,9 @@ timoni -n default delete bentopdf
 | `service.annotations` | `object` | `{}` | Service annotations |
 | `service.ipFamilyPolicy` | `string` | `""` | Service IP family policy; empty uses cluster default |
 | `service.ipFamilies` | `list` | `[]` | Requested address families; RequireDualStack needs dual-stack |
-| `ingress.enabled` | `bool` | `false` | Create an Ingress for the application Service |
-| `ingress.ingressClassName` | `string` | `""` | Ingress controller class; empty omits the field |
-| `ingress.annotations` | `object` | `{}` | Ingress annotations |
-| `ingress.hosts` | `list` | `[]` | Host and path routing rules |
-| `ingress.tls` | `list` | `[]` | TLS host and Secret entries |
 | `gatewayAPI.enabled` | `bool` | `false` | Render canonical Gateway API HTTPRoutes |
-| `gatewayAPI.httpRoutes` | `list` | `[]` | Route definitions with parentRefs, hostnames, and rules |
-| `networkPolicy.enabled` | `bool` | `true` | Create NetworkPolicies for ingress and pod egress |
-| `networkPolicy.ingressFrom` | `list` | `[]` | Allowed ingress peers; empty allows pods in namespace |
-| `networkPolicy.egressIsolation` | `bool` | `true` | Isolate outbound traffic; browser CDN requests unaffected |
-| `networkPolicy.extraEgress` | `list` | `[]` | Explicit extra egress rules; default empty denies egress |
+| `gatewayAPI.gatewayClassName` | `string` | `""` | Optional GatewayClass controller name |
+| `gatewayAPI.httpRoutes` | `list` | `[]` | Route definitions with parentRefs, hostnames, rules, labels, annotations |
 | `probes.startup.enabled` | `bool` | `true` | Enable startup probe |
 | `probes.startup.path` | `string` | `"/"` | Startup probe HTTP path |
 | `probes.liveness.enabled` | `bool` | `true` | Enable liveness probe |
@@ -162,7 +145,6 @@ timoni -n default delete bentopdf
 | `metrics.serviceMonitor.scrapeTimeout` | `string` | `"10s"` | Prometheus scrape timeout |
 | `metrics.prometheusRule.enabled` | `bool` | `false` | Deploy Prometheus Operator alerting rules |
 | `metrics.prometheusRule.additionalRules` | `list` | `[]` | Additional native Prometheus alerting or recording rules |
-| `metrics.ingressFrom` | `list` | `[]` | Allowed ingress peers for metrics port 9113 |
 
 ---
 
