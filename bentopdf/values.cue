@@ -26,7 +26,7 @@ values: {
 		pullPolicy: "IfNotPresent"
 	}
 	// -- Registry credentials for a private mirror.
-	imagePullSecrets: [] 
+	imagePullSecrets: []
 	// -- NGINX listener; deploy the official image at the domain root.
 	server: {
 		// -- Service HTTP port.
@@ -37,7 +37,7 @@ values: {
 	// -- Public runtime tool controls; these are not an authorization boundary.
 	config: {
 		// -- Disabled Tools.
-		disabledTools: [] 
+		disabledTools: []
 		// -- Native editor category IDs, for example annotation-shape or redaction.
 		editorDisabledCategories: []
 	}
@@ -63,15 +63,56 @@ values: {
 		// -- Service IP family policy; empty uses cluster default.
 		ipFamilyPolicy: ""
 		// -- Requested address families; RequireDualStack needs a dual-stack cluster.
-		ipFamilies: [] 
+		ipFamilies: []
 	}
-	
 	// -- Gateway.
 	gatewayAPI: {
 		// -- Render canonical Gateway API HTTPRoutes.
-		enabled: true
+		enabled: false
+		// -- GatewayClass name.
+		gatewayClassName: ""
 		// -- Route definitions with parentRefs, hostnames, rules, labels and annotations.
-		httpRoutes: [] 
+		httpRoutes: [
+			{
+				name: ""
+				// -- Route labels.
+				labels: {}
+				// -- Route annotations.
+				annotations: {}
+				// -- References to parent Gateways.
+				parentRefs: [
+					{
+						// -- Gateway name.
+						name: "gateway"
+						// -- Gateway namespace (optional, defaults to route namespace).
+						namespace: ""
+						// -- Gateway API group.
+						group: "gateway.networking.k8s.io"
+						// -- Gateway API kind.
+						kind: "Gateway"
+						// -- Gateway section name.
+						sectionName: ""
+						// -- Gateway listener port.
+						port: 80
+					},
+				]
+				// -- Hostnames matching the route.
+				hostnames: []
+				// -- Routing rules, match conditions, filters and backend references.
+				rules: [
+					{
+						matches: [
+							{
+								path: {
+									type:  "PathPrefix"
+									value: "/"
+								}
+							},
+						]
+					},
+				]
+			},
+		]
 	}
 	// -- Probes.
 	probes: {
@@ -176,11 +217,11 @@ values: {
 	// -- Node selection constraints.
 	nodeSelector: {}
 	// -- Scheduling tolerations.
-	tolerations: *[] | [...]
+	tolerations: []
 	// -- Pod affinity or anti-affinity.
 	affinity: {}
 	// -- Topology spreading across nodes or zones.
-	topologySpreadConstraints: *[] | [...]
+	topologySpreadConstraints: []
 	// -- Scheduling priority class.
 	priorityClassName: ""
 	// -- Grace period for HTTP shutdown.
@@ -248,9 +289,9 @@ values: {
 			// -- Labels.
 			labels: {}
 			// -- Additional native Prometheus alerting or recording rules.
-			additionalRules: [] 
+			additionalRules: []
 		}
 		// -- Allowed ingress peers; empty allows pods in this namespace only.
-		ingressFrom: [] 
+		ingressFrom: []
 	}
 }

@@ -93,6 +93,8 @@ import (
 	gatewayAPI: {
 		// -- Render canonical Gateway API HTTPRoutes.
 		enabled: *false | bool
+		// -- GatewayClass name.
+		gatewayClassName: *"" | string
 		// -- Route definitions with parentRefs, hostnames, rules, labels and annotations.
 		httpRoutes: *[] | [...#HTTPRouteConfig]
 	}
@@ -320,20 +322,7 @@ import (
 	failureThreshold: int & >=1
 }
 
-#IngressPath: {
-	path:     string & =~"^/"
-	pathType: "Prefix" | "Exact" | "ImplementationSpecific"
-}
 
-#IngressHost: {
-	host:  string & !=""
-	paths: [...#IngressPath] & [_, ...]
-}
-
-#IngressTLS: {
-	hosts: [...string]
-	secretName: string & !=""
-}
 
 #HTTPRouteParentRef: {
 	name:         string & !=""
