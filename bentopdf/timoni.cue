@@ -5,8 +5,12 @@
 package main
 
 import (
-	templates "timoni.sh/bentopdf/templates"
+	templates "timoni.sh/evo-bentopdf/templates"
 )
+module: {
+	name: "evo-bentopdf"
+	version: "0.1.0"
+}
 
 // Define the schema for the user-supplied values.
 // At runtime, Timoni injects the supplied values
