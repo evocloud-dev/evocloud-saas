@@ -34,13 +34,18 @@ import (
 				app: "mysql"
 			}
 			spec: corev1.#PodSpec & {
-				if #config.mysql.volumePermissions.enabled {
-					securityContext: fsGroup: 1001
+				serviceAccountName: [ if #config.drupal.serviceAccount.name != "" { #config.drupal.serviceAccount.name }, #config.metadata.name ][0]
+				automountServiceAccountToken: false
+				if #config.mysql.podSecurityContext != _|_ {
+					securityContext: #config.mysql.podSecurityContext
 				}
 				containers: [
 					{
 						name:  "mysql"
 						image: "\(#config.mysql.image.registry)/\(#config.mysql.image.repository):\(#config.mysql.image.tag)"
+						if #config.mysql.securityContext != _|_ {
+							securityContext: #config.mysql.securityContext
+						}
 						env: [
 							{
 								name:  "MYSQL_DATABASE"
