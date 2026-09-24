@@ -154,6 +154,21 @@ values: {
 		    // postgresqlPort: 5432
 			// postgresqlHost: postgres
 		}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+		}
+		podSecurityContext: {
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
 	}
 
 	redis: {
@@ -174,20 +189,39 @@ values: {
 			// password: redis
 			// port: 6379
 		}
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "128Mi"
+			}
+			limits: {
+				cpu:    "200m"
+				memory: "256Mi"
+			}
+		}
+		podSecurityContext: {
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: {
+				drop: ["ALL"]
+			}
+		}
 		sentinel: {
 			enabled: true
 			masterSet: "mymaster"
-				 image: {
-					repository: "bitnamilegacy/redis-sentinel"
-					tag: "6.2.9-debian-11-r0"
-				}
+			image: {
+				repository: "bitnamilegacy/redis-sentinel"
+				tag: "6.2.9-debian-11-r0"
+			}
 		}
 
 		master: {
 			persistence: {
 				enabled: true
-				
-				     
 			}
 		}
 		replica: {

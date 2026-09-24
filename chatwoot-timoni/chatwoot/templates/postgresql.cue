@@ -29,6 +29,11 @@ import (
 					app: #config.postgresql.nameOverride
 				}
 				spec: corev1.#PodSpec & {
+					automountServiceAccountToken: false
+					serviceAccountName:           #config.metadata.name
+					if #config.postgresql.podSecurityContext != _|_ {
+						securityContext: #config.postgresql.podSecurityContext
+					}
 					containers: [{
 						name:  "postgresql"
 						image: "\(#config.postgresql.image.registry)/\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
@@ -50,6 +55,12 @@ import (
 							containerPort: 5432
 							name:          "postgresql"
 						}]
+						if #config.postgresql.resources != _|_ {
+							resources: #config.postgresql.resources
+						}
+						if #config.postgresql.securityContext != _|_ {
+							securityContext: #config.postgresql.securityContext
+						}
 						volumeMounts: [{
 							name:      "data"
 							mountPath: "/bitnami/postgresql"
