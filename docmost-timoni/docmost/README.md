@@ -1,39 +1,93 @@
-# docmost
+# Docmost
 
-A [timoni.sh](http://timoni.sh) module for deploying docmost to Kubernetes clusters.
+## Description
+[Docmost](https://docmost.com/) is an open-source collaborative wiki and document sharing platform designed for technical teams and organizations. It provides real-time collaborative rich-text editing, organized knowledge spaces, permissions management, and diagrams integration as an open alternative to Notion, Confluence, and Slite.
+
+## Application Information
+- **Version:** 0.95
+- **Upstream Project:** [https://github.com/docmost/docmost](https://github.com/docmost/docmost)
+- **Container Base:**
+  - Docmost App: [docker.io/docmost/docmost](https://hub.docker.com/r/docmost/docmost) (`docker.io/docmost/docmost:0.95`)
+  - PostgreSQL Database: [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-trixie`)
+  - Redis / Valkey Cache: [docker.io/valkey/valkey](https://hub.docker.com/r/valkey/valkey) (`docker.io/valkey/valkey:9.1.2-alpine`)
+- **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
+
+## Components
+- **Docmost Application (`docmost`):** Core collaborative documentation and wiki server running `docker.io/docmost/docmost:0.95` on container port 3000, managing real-time collaboration, document spaces, and rich-text editing.
+- **PostgreSQL Database (`docmost-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-trixie`) with persistent volume storage (`8Gi`), headless service, and automated database initialization with `pg_trgm` and `unaccent` extensions.
+- **Valkey / Redis Cache & Pub/Sub (`docmost-redis`):** Dedicated Valkey/Redis StatefulSet (`docker.io/valkey/valkey:9.1.2-alpine`) with persistent storage (`1Gi`) handling caching, session storage, and real-time collaboration channels.
+- **Docmost Service (`docmost`):** ClusterIP service exposing port 80 (routing to container port 3000) for internal access and gateway/ingress routing.
+- **PostgreSQL Services (`docmost-postgresql`, `docmost-postgresql-primary-headless`):** ClusterIP and headless services routing database traffic on port 5432.
+- **Redis Services (`docmost-redis-client`, `docmost-redis-headless`):** ClusterIP and headless services routing Redis/Valkey traffic on port 6379.
+- **Persistent Data Storage (`pvc`):** PersistentVolumeClaim (`10Gi`, ReadWriteOnce) persisting file attachments and user uploads when local storage mode is enabled.
+- **Database Backup CronJob (`backup`):** Scheduled CronJob performing automated PostgreSQL database backups and uploading them to S3-compatible object storage via MinIO Client (`mc`).
+- **Gateway API HTTPRoute / Ingress (`httproute`, `ingress`):** Optional Gateway API HTTPRoute (`gateway.networking.k8s.io/v1`) or standard Kubernetes Ingress for external traffic management.
+- **External Secrets Operator (`externalsecret`):** Optional ExternalSecret resources syncing application secrets, database credentials, and S3 keys from external vaults.
+- **ServiceAccount (`sa`):** Dedicated unprivileged Kubernetes ServiceAccount for Docmost pods.
+
+## Prerequisites
+- Kubernetes cluster v1.20+ (recommended v1.26+)
+- [Timoni CLI](https://timoni.sh) v0.17+ installed locally
+- Gateway API CRDs (`gateway.networking.k8s.io/v1`) and a configured Gateway (e.g. Envoy Gateway) if HTTPRoute is enabled
 
 ## Install
 
-To create an instance using the default values:
+To create an instance using default values:
 
 ```shell
-timoni -n default apply docmost oci://<container-registry-url>
+timoni -n default apply docmost ./docmost
 ```
 
-To change the [default configuration](#configuration),
-create one or more `values.cue` files and apply them to the instance.
-
-For example, create a file `my-values.cue` with the following content:
+To deploy with customized values, create a `my-values.cue` file:
 
 ```cue
+package main
+
 values: {
-	resources: requests: {
-		cpu:    "100m"
-		memory: "128Mi"
+	docmost: {
+		appUrl:    "https://wiki.example.com"
+		appSecret: "a-very-secret-random-key-at-least-32-chars"
+	}
+	resources: {
+		requests: {
+			cpu:    "200m"
+			memory: "512Mi"
+		}
+		limits: {
+			cpu:    "1000m"
+			memory: "1Gi"
+		}
+	}
+	postgresql: {
+		enabled: true
+		auth: {
+			database: "docmost"
+			username: "docmost"
+			password: "DocmostDbPassword123!"
+		}
+	}
+	redis: {
+		enabled: true
+	}
+	storage: {
+		mode: "local"
+		local: {
+			size: "10Gi"
+		}
 	}
 }
 ```
 
-And apply the values with:
+Apply the values to the instance:
 
 ```shell
-timoni -n default apply docmost oci://<container-registry-url> \
---values ./my-values.cue
+timoni -n default apply docmost ./docmost \
+  --values ./my-values.cue
 ```
 
 ## Uninstall
 
-To uninstall an instance and delete all its Kubernetes resources:
+To uninstall the instance and remove all created Kubernetes resources:
 
 ```shell
 timoni -n default delete docmost
@@ -43,43 +97,60 @@ timoni -n default delete docmost
 
 ### General values
 
-| Key                          | Type                                    | Default                    | Description                                                                                                                                  |
-|------------------------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `image: tag:`                | `string`                                | `<latest version>`         | Container image tag                                                                                                                          |
-| `image: digest:`             | `string`                                | `<latest digest>`          | Container image digest, takes precedence over `tag` when specified                                                                           |
-| `image: repository:`         | `string`                                | `cgr.dev/chainguard/nginx` | Container image repository                                                                                                                   |
-| `image: pullPolicy:`         | `string`                                | `IfNotPresent`             | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)                                     |
-| `metadata: labels:`          | `{[ string]: string}`                   | `{}`                       | Common labels for all resources                                                                                                              |
-| `metadata: annotations:`     | `{[ string]: string}`                   | `{}`                       | Common annotations for all resources                                                                                                         |
-| `podAnnotations:`            | `{[ string]: string}`                   | `{}`                       | Annotations applied to pods                                                                                                                  |
-| `imagePullSecrets:`          | `[...timoniv1.ObjectReference]`         | `[]`                       | [Kubernetes image pull secrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod)                 |
-| `tolerations:`               | `[ ...corev1.#Toleration]`              | `[]`                       | [Kubernetes toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration)                                        |
-| `affinity:`                  | `corev1.#Affinity`                      | `{}`                       | [Kubernetes affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) |
-| `resources:`                 | `timoniv1.#ResourceRequirements`        | `{}`                       | [Kubernetes resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)                     |
-| `topologySpreadConstraints:` | `[...corev1.#TopologySpreadConstraint]` | `[]`                       | [Kubernetes pod topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints)            |
-| `podSecurityContext:`        | `corev1.#PodSecurityContext`            | `{}`                       | [Kubernetes pod security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                                 |
-| `securityContext:`           | `corev1.#SecurityContext`               | `{}`                       | [Kubernetes container security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                           |
-| `service: annotations:`      | `{[ string]: string}`                   | `{}`                       | Annotations applied to the Kubernetes Service                                                                                                |
-| `service: port:`             | `int`                                   | `80`                       | Kubernetes Service HTTP port                                                                                                                 |
-| `test: enabled:`             | `bool`                                  | `false`                    | Run end-to-end tests at install and upgrades                                                                                                 |
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `image.repository` | string | `docker.io/docmost/docmost` | Container image repository for Docmost |
+| `image.tag` | string | `0.95` | Pinned container image tag for Docmost |
+| `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
+| `docmost.appUrl` | string | `""` | Full external base URL of the Docmost application |
+| `docmost.appSecret` | string | `""` | Secret key used for cryptographic signing and sessions |
+| `docmost.jwtTokenExpiresIn` | string | `30d` | JWT token lifespan for user sessions |
+| `resources` | object | `{requests: {cpu: "500m", memory: "512Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}` | Resource requests and limits for Docmost pods |
+| `postgresql.enabled` | bool | `true` | Deploy internal PostgreSQL 18 StatefulSet |
+| `postgresql.image.repository` | string | `docker.io/library/postgres` | PostgreSQL image repository |
+| `postgresql.image.tag` | string | `18.6-trixie` | Pinned PostgreSQL image tag |
+| `postgresql.standalone.persistence.size` | string | `8Gi` | Storage size for PostgreSQL persistent volume |
+| `redis.enabled` | bool | `true` | Deploy internal Valkey/Redis StatefulSet |
+| `redis.image.repository` | string | `docker.io/valkey/valkey` | Valkey/Redis image repository |
+| `redis.image.tag` | string | `9.1.2-alpine` | Pinned Valkey image tag |
+| `redis.standalone.persistence.size` | string | `1Gi` | Storage size for Redis/Valkey persistent volume |
+| `storage.mode` | string | `local` | Attachment storage backend (`local` or `s3`) |
+| `storage.local.size` | string | `10Gi` | Storage size for local attachment volume |
+| `backup.enabled` | bool | `true` | Enable scheduled automated database backups to S3 |
+| `backup.schedule` | string | `0 3 * * *` | Cron schedule for automated backups |
 
-#### Recommended values
+### Recommended values
 
-Comply with the restricted [Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
+Comply with the restricted Kubernetes pod security standard:
 
 ```cue
 values: {
 	podSecurityContext: {
-		runAsUser:  65532
-		runAsGroup: 65532
-		fsGroup:    65532
+		fsGroup: 10001
 	}
 	securityContext: {
-		allowPrivilegeEscalation: false
-		readOnlyRootFilesystem:   false
+		runAsUser:                10001
+		runAsGroup:               10001
 		runAsNonRoot:             true
+		readOnlyRootFilesystem:   true
+		allowPrivilegeEscalation: false
 		capabilities: drop: ["ALL"]
-		seccompProfile: type: "RuntimeDefault"
 	}
 }
 ```
+
+## Additional Resources
+- [Official Docmost Website](https://docmost.com/)
+- [Official Docmost Repository](https://github.com/docmost/docmost)
+- [Docmost Documentation](https://docmost.com/docs)
+- [Timoni Documentation](https://timoni.sh)
+
+## Kubesec Scan Scores
+
+Security validation performed via [Kubesec](https://kubesec.io) static analysis across the Docmost module workloads:
+
+| Workload | Kind | Kubesec Score | Status |
+|---|---|---|---|
+| Docmost Core Application (`docmost`) | Deployment | 13 points | ✅  |
+| PostgreSQL Database (`docmost-postgresql`) | StatefulSet | 13 points | ✅ |
+| Valkey / Redis Subchart (`docmost-redis`) | StatefulSet | 15 points | ✅ |
