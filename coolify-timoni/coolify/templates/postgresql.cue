@@ -91,6 +91,7 @@ import (
 					}
 					spec: corev1.#PodSpec & {
 						automountServiceAccountToken: false
+						serviceAccountName:            #config.metadata.name
 						securityContext: {
 							runAsUser:    999
 							runAsGroup:   999

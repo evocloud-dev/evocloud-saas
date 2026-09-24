@@ -38,6 +38,7 @@ import (
 			spec: corev1.#PodSpec & {
 				terminationGracePeriodSeconds: #config.coolifyApp.migration.timeout
 				automountServiceAccountToken:  false
+				serviceAccountName:            #config.metadata.name
 				securityContext: {
 					runAsUser:    #config.securityContext.runAsUser
 					runAsGroup:   #config.securityContext.runAsGroup
