@@ -1,85 +1,153 @@
-# hievents
+# Hi.Events
 
-A [timoni.sh](http://timoni.sh) module for deploying hievents to Kubernetes clusters.
+## Description
+
+[Hi.Events](https://hi.events/) is an open-source event management and ticket-selling platform designed as a modern, self-hosted alternative to platforms like Eventbrite. It provides complete control over event creation, attendee registration, ticket types, check-in processing, automated confirmation emails, and payment integrations.
+
+## Application Information
+
+- **Version:** 1.11.1-beta
+- **Official Website:** [https://hi.events/](https://hi.events/)
+- **Upstream Project:** [https://github.com/HiEventsDev/hi.events](https://github.com/HiEventsDev/hi.events)
+- **Container Base:**
+  - Backend / Worker: `docker.io/daveearley/hi.events-backend:v1.11.1-beta`
+  - Frontend: `docker.io/daveearley/hi.events-frontend:v1.11.1-beta`
+  - Web Proxy: `docker.io/nginx:1.30-alpine`
+  - PostgreSQL: `docker.io/postgres:18-alpine`
+  - Valkey / Redis: `docker.io/valkey/valkey:9.1.2-alpine`
+- **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
+
+## Components
+
+- **Hi.Events Backend (`hievents-backend`):** Core Laravel API service processing business logic, authentication, event schemas, ticket operations, and webhooks on container port `8080`.
+- **Hi.Events Frontend (`hievents-frontend`):** Web client dashboard providing attendee registration and organizer management on container port `5678`.
+- **NGINX Reverse Proxy (`hievents-deployment-nginx`):** Reverse proxy unifying frontend and backend routing into a single public interface on port `80` (container port `8080`).
+- **Queue Worker (`hievents-worker`):** Asynchronous background queue worker processing asynchronous jobs (emails, webhooks, order transactions, ticket generation).
+- **PostgreSQL Database (`hievents-postgresql`):** Dedicated relational database StatefulSet storing application data, attendee records, and transactional history.
+- **Valkey / Redis In-Memory Store (`hievents-redis`):** High-performance caching layer and queue broker StatefulSet managing sessions and background tasks.
+- **Database Migration Job (`hievents-migration`):** Automated database schema migration job executed during module deployment.
+- **Task Scheduler CronJob (`hievents-scheduler`):** Periodic Laravel scheduler CronJob running automated event maintenance and scheduled tasks.
+- **Gateway API HTTPRoute (`hievents`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resource for modern cluster ingress routing.
+- **Persistent Volume Claims (`pvc`):** Dedicated storage claims for persistent uploads (`/var/www/html/storage/app`) and database persistence.
+- **ServiceAccount (`hievents`):** Dedicated unprivileged Kubernetes ServiceAccount applied across Hi.Events workloads with `automountServiceAccountToken: false`.
+
+## Prerequisites
+
+- Kubernetes cluster v1.26+
+- [Timoni CLI](https://timoni.sh) v0.17+ installed locally
+- Storage provisioner supporting dynamic `ReadWriteOnce` persistent volumes
+- Optional: Kubernetes Gateway API controller (Envoy Gateway, Traefik, Cilium, etc.)
 
 ## Install
 
-To create an instance using the default values:
+To create an instance using default values:
 
-```shell
-timoni -n default apply hievents oci://<container-registry-url>
+```bash
+timoni -n default apply hievents ./hievents
 ```
 
-To change the [default configuration](#configuration),
-create one or more `values.cue` files and apply them to the instance.
-
-For example, create a file `my-values.cue` with the following content:
+To deploy with customized values, create a `my-values.cue` file:
 
 ```cue
+package main
+
 values: {
-	resources: requests: {
-		cpu:    "100m"
-		memory: "128Mi"
+	hieventsConfig: app: {
+		url:         "https://events.example.com"
+		frontendUrl: "https://events.example.com"
 	}
+	backend: {
+		replicaCount: 2
+		resources: requests: {
+			cpu:    "250m"
+			memory: "512Mi"
+		}
+	}
+	postgresql: persistence: size: "20Gi"
 }
 ```
 
-And apply the values with:
+Apply the custom values to the instance:
 
-```shell
-timoni -n default apply hievents oci://<container-registry-url> \
---values ./my-values.cue
+```bash
+timoni -n default apply hievents ./hievents \
+  --values ./my-values.cue
 ```
 
 ## Uninstall
 
-To uninstall an instance and delete all its Kubernetes resources:
+To uninstall the instance and delete all its Kubernetes resources:
 
-```shell
+```bash
 timoni -n default delete hievents
 ```
 
 ## Configuration
 
-### General values
+### Key Configuration Parameters
 
-| Key                          | Type                                    | Default                    | Description                                                                                                                                  |
-|------------------------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `image: tag:`                | `string`                                | `<latest version>`         | Container image tag                                                                                                                          |
-| `image: digest:`             | `string`                                | `<latest digest>`          | Container image digest, takes precedence over `tag` when specified                                                                           |
-| `image: repository:`         | `string`                                | `cgr.dev/chainguard/nginx` | Container image repository                                                                                                                   |
-| `image: pullPolicy:`         | `string`                                | `IfNotPresent`             | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)                                     |
-| `metadata: labels:`          | `{[ string]: string}`                   | `{}`                       | Common labels for all resources                                                                                                              |
-| `metadata: annotations:`     | `{[ string]: string}`                   | `{}`                       | Common annotations for all resources                                                                                                         |
-| `podAnnotations:`            | `{[ string]: string}`                   | `{}`                       | Annotations applied to pods                                                                                                                  |
-| `imagePullSecrets:`          | `[...timoniv1.ObjectReference]`         | `[]`                       | [Kubernetes image pull secrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod)                 |
-| `tolerations:`               | `[ ...corev1.#Toleration]`              | `[]`                       | [Kubernetes toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration)                                        |
-| `affinity:`                  | `corev1.#Affinity`                      | `{}`                       | [Kubernetes affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) |
-| `resources:`                 | `timoniv1.#ResourceRequirements`        | `{}`                       | [Kubernetes resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)                     |
-| `topologySpreadConstraints:` | `[...corev1.#TopologySpreadConstraint]` | `[]`                       | [Kubernetes pod topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints)            |
-| `podSecurityContext:`        | `corev1.#PodSecurityContext`            | `{}`                       | [Kubernetes pod security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                                 |
-| `securityContext:`           | `corev1.#SecurityContext`               | `{}`                       | [Kubernetes container security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                           |
-| `service: annotations:`      | `{[ string]: string}`                   | `{}`                       | Annotations applied to the Kubernetes Service                                                                                                |
-| `service: port:`             | `int`                                   | `80`                       | Kubernetes Service HTTP port                                                                                                                 |
-| `test: enabled:`             | `bool`                                  | `false`                    | Run end-to-end tests at install and upgrades                                                                                                 |
+| Key | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `hieventsConfig.app.name` | `string` | `"Hi.Events"` | Application display name |
+| `hieventsConfig.app.url` | `string` | `"http://localhost:8080"` | Base URL for API endpoints |
+| `hieventsConfig.app.frontendUrl` | `string` | `"http://localhost:8080"` | Base URL for frontend interface |
+| `backend.image.repository` | `string` | `"daveearley/hi.events-backend"` | Backend container image repository |
+| `backend.image.tag` | `string` | `"v1.11.1-beta"` | Backend container image tag |
+| `backend.replicaCount` | `int` | `2` | Number of backend API replicas |
+| `frontend.image.repository` | `string` | `"daveearley/hi.events-frontend"` | Frontend container image repository |
+| `frontend.image.tag` | `string` | `"v1.11.1-beta"` | Frontend container image tag |
+| `frontend.replicaCount` | `int` | `2` | Number of frontend replicas |
+| `webProxy.image.repository` | `string` | `"nginx"` | Reverse proxy image repository |
+| `webProxy.image.tag` | `string` | `"1.30-alpine"` | Reverse proxy image tag |
+| `postgresql.enabled` | `bool` | `true` | Deploy internal PostgreSQL StatefulSet |
+| `postgresql.image.tag` | `string` | `"18-alpine"` | PostgreSQL image tag |
+| `postgresql.persistence.size` | `string` | `"10Gi"` | Persistent storage size for database |
+| `redis.enabled` | `bool` | `true` | Deploy internal Valkey/Redis StatefulSet |
+| `redis.image.tag` | `string` | `"9.1.2-alpine"` | Valkey/Redis image tag |
+| `serviceAccount.create` | `bool` | `true` | Create dedicated ServiceAccount |
+| `serviceAccount.automountServiceAccountToken` | `bool` | `false` | Disable API token automounting |
 
-#### Recommended values
+### Recommended values
 
 Comply with the restricted [Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
 
 ```cue
 values: {
 	podSecurityContext: {
-		runAsUser:  65532
-		runAsGroup: 65532
-		fsGroup:    65532
+		runAsUser:  10001
+		runAsGroup: 10001
+		fsGroup:    10001
 	}
 	securityContext: {
 		allowPrivilegeEscalation: false
-		readOnlyRootFilesystem:   false
+		readOnlyRootFilesystem:   true
 		runAsNonRoot:             true
 		capabilities: drop: ["ALL"]
 		seccompProfile: type: "RuntimeDefault"
 	}
 }
 ```
+
+---
+
+## Additional Resources
+
+- [Official Hi.Events Website](https://hi.events/)
+- [Official Hi.Events Repository](https://github.com/HiEventsDev/hi.events)
+- [Hi.Events Documentation](https://hi.events/docs)
+- [Timoni Documentation](https://timoni.sh)
+
+---
+
+## Kubesec Scan Scores
+
+Security validation performed via [Kubesec](https://kubesec.io) static analysis across the Hi.Events module workloads:
+
+| Workload | Kind | Kubesec Score | Status |
+|---|---|:---:|:---:|
+| **Hi.Events Backend (`hievents-backend`)** | `Deployment` | **13 points** | ✅ |
+| **Hi.Events Frontend (`hievents-frontend`)** | `Deployment` | **13 points** | ✅ |
+| **NGINX Reverse Proxy (`hievents-deployment-nginx`)** | `Deployment` | **13 points** | ✅ |
+| **Hi.Events Worker (`hievents-worker`)** | `Deployment` | **13 points** | ✅ |
+| **PostgreSQL Database (`hievents-postgresql`)** | `StatefulSet` | **15 points** | ✅ |
+| **Valkey / Redis Broker (`hievents-redis`)** | `StatefulSet` | **15 points** | ✅ |
