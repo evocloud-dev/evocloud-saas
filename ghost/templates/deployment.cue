@@ -22,11 +22,11 @@ import (
 		template: {
 			metadata: {
 				labels: #config.selector.labels & #config.podLabels
-				annotations: {
-					"seccomp.security.alpha.kubernetes.io/pod": "runtime/default"
-					"container.seccomp.security.alpha.kubernetes.io/ghost": "runtime/default"
-					for k, v in #config.podAnnotations {
-						"\(k)": v
+				if len(#config.podAnnotations) > 0 {
+					annotations: {
+						for k, v in #config.podAnnotations {
+							"\(k)": v
+						}
 					}
 				}
 			}

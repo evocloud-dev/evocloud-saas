@@ -191,6 +191,18 @@ values: {
 				}
 			}
 		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: {
+				drop: ["ALL"]
+				add: ["SETGID", "SETUID", "CHOWN"]
+			}
+		}
+		podSecurityContext: {
+			runAsUser:      999
+			runAsGroup:     999
+			seccompProfile: type: "RuntimeDefault"
+		}
 	}
 
 	ingress: {

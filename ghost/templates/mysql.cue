@@ -93,11 +93,21 @@ import (
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
 			spec: corev1.#PodSpec & {
+				if #config.serviceAccount.create || #config.serviceAccount.name != "" {
+					serviceAccountName: #config.#serviceAccountName
+				}
+				automountServiceAccountToken: #config.serviceAccount.automountServiceAccountToken
+				if #config.mysql.podSecurityContext != _|_ {
+					securityContext: #config.mysql.podSecurityContext
+				}
 				terminationGracePeriodSeconds: 30
 				containers: [{
 					name:            "mysql"
 					image:           "\(#config.mysql.image.repository):\(#config.mysql.image.tag)"
 					imagePullPolicy: #config.mysql.image.pullPolicy
+					if #config.mysql.securityContext != _|_ {
+						securityContext: #config.mysql.securityContext
+					}
 					ports: [{
 						name:          "mysql"
 						containerPort: 3306
