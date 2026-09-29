@@ -27,17 +27,48 @@ spec:
       {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken | default false }}
       {{- with .Values.backend.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.initContainers.postgresql.enabled .Values.initContainers.redis.enabled }}
+      {{- if or .Values.initContainers.postgresql.enabled .Values.initContainers.redis.enabled .Values.backend.securityContext.readOnlyRootFilesystem }}
       initContainers:
         {{- if .Values.initContainers.postgresql.enabled }}
         {{- include "hievents.initContainers.waitForPostgresql" . | nindent 8 }}
         {{- end }}
         {{- if .Values.initContainers.redis.enabled }}
         {{- include "hievents.initContainers.waitForRedis" . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.backend.securityContext.readOnlyRootFilesystem }}
+        - name: init-nginx-config
+          image: {{ include "hievents.image" .Values.backend.image | quote }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - cp -a /etc/nginx/. /mnt/nginx-config/
+          {{- with .Values.backend.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: nginx-config-dir
+              mountPath: /mnt/nginx-config
+        - name: init-public-dir
+          image: {{ include "hievents.image" .Values.backend.image | quote }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - cp -a /var/www/html/public/. /mnt/public-dir/ && ln -sf /var/www/html/storage/app/public /mnt/public-dir/storage
+          {{- with .Values.backend.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: public-dir
+              mountPath: /mnt/public-dir
         {{- end }}
       {{- end }}
       containers:
@@ -50,7 +81,7 @@ spec:
                 command:
                   - /bin/sh
                   - -c
-                  - php artisan storage:link || true
+                  - mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/sessions /var/www/html/storage/framework/cache && php artisan storage:link || true
           {{- with .Values.backend.command }}
           command:
             {{- toYaml . | nindent 12 }}
@@ -117,7 +148,64 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- include "hievents.backendStorageVolumeMounts" . | nindent 10 }}
-      {{- include "hievents.backendStorageVolumes" . | nindent 6 }}
+          {{- if or (include "hievents.localStorageEnabled" .) .Values.backend.securityContext.readOnlyRootFilesystem }}
+          volumeMounts:
+            {{- if include "hievents.localStorageEnabled" . }}
+            - name: storage
+              mountPath: {{ .Values.backend.persistence.mountPath }}
+            {{- end }}
+            {{- if .Values.backend.securityContext.readOnlyRootFilesystem }}
+            - name: tmp
+              mountPath: /tmp
+            - name: public-dir
+              mountPath: /var/www/html/public
+            - name: storage-framework
+              mountPath: /var/www/html/storage/framework
+            - name: storage-logs
+              mountPath: /var/www/html/storage/logs
+            - name: nginx-config-dir
+              mountPath: /etc/nginx
+            - name: var-run
+              mountPath: /var/run
+            - name: run
+              mountPath: /run
+            - name: var-lib-nginx
+              mountPath: /var/lib/nginx
+            - name: var-cache-nginx
+              mountPath: /var/cache/nginx
+            - name: var-log-nginx
+              mountPath: /var/log/nginx
+            {{- end }}
+          {{- end }}
+      {{- if or (include "hievents.localStorageEnabled" .) .Values.backend.securityContext.readOnlyRootFilesystem }}
+      volumes:
+        {{- if include "hievents.localStorageEnabled" . }}
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ include "hievents.backendStorageClaimName" . }}
+        {{- end }}
+        {{- if .Values.backend.securityContext.readOnlyRootFilesystem }}
+        - name: tmp
+          emptyDir: {}
+        - name: public-dir
+          emptyDir: {}
+        - name: storage-framework
+          emptyDir: {}
+        - name: storage-logs
+          emptyDir: {}
+        - name: nginx-config-dir
+          emptyDir: {}
+        - name: var-run
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: var-lib-nginx
+          emptyDir: {}
+        - name: var-cache-nginx
+          emptyDir: {}
+        - name: var-log-nginx
+          emptyDir: {}
+        {{- end }}
+      {{- end }}
       {{- include "hievents.podScheduling" (dict "root" . "componentValues" .Values.backend) | nindent 6 }}
 {{- end }}
