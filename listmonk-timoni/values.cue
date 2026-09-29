@@ -46,23 +46,6 @@ values: {
 		port: 9000
 	}
 
-	ingress: {
-		enabled:   false
-		className: ""
-		annotations: {}
-		hosts: [{
-			host: "example.com"
-			paths: [{
-				path:     "/"
-				pathType: "Prefix"
-			}]
-		}]
-		tls: [{
-			secretName: "example-tls"
-			hosts: ["example.com"]
-		}]
-	}
-
 	resources: {
 		limits: {
 			cpu:    "500m"
