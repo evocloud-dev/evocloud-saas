@@ -52,23 +52,6 @@ import (
 		port: int | *9000
 	}
 
-	ingress: {
-		enabled:   bool | *false
-		className: string | *""
-		annotations: {[string]: string}
-		hosts: [...{
-			host: string
-			paths: [...{
-				path:     string
-				pathType: string
-			}]
-		}]
-		tls: [...{
-			secretName: string
-			hosts: [...string]
-		}]
-	}
-
 	resources: corev1.#ResourceRequirements | *{
 		limits: {
 			cpu:    "500m"
@@ -250,11 +233,8 @@ import (
 	#helpers: #Helpers & {#config: config}
 
 	objects: {
-		"configmap": #ConfigMap & {#config: config, #helpers: #helpers}
+		"configmap":  #ConfigMap & {#config: config, #helpers: #helpers}
 		"deployment": #Deployment & {#config: config, #helpers: #helpers}
-		if config.ingress.enabled {
-			"ingress": #Ingress & {#config: config, #helpers: #helpers}
-		}
 		if config.init.enabled {
 			"job-init": #JobInit & {#config: config, #helpers: #helpers}
 		}
