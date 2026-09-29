@@ -25,6 +25,7 @@ spec:
       {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
       {{- end }}
       serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken | default false }}
       {{- with .Values.frontend.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -86,5 +87,15 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if .Values.frontend.securityContext.readOnlyRootFilesystem }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          {{- end }}
+      {{- if .Values.frontend.securityContext.readOnlyRootFilesystem }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- end }}
       {{- include "hievents.podScheduling" (dict "root" . "componentValues" .Values.frontend) | nindent 6 }}
 {{- end }}

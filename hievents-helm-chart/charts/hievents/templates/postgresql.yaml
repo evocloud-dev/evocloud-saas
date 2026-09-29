@@ -46,16 +46,51 @@ spec:
       labels:
         {{- include "hievents.podLabels" (dict "root" . "component" "postgresql") | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      {{- include "hievents.imagePullSecrets" $ | nindent 6 }}
+      {{- end }}
+      serviceAccountName: {{ include "hievents.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken | default false }}
+      {{- with .Values.postgresql.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.postgresql.persistence.enabled .Values.postgresql.volumePermissions.enabled }}
+      initContainers:
+        - name: volume-permissions
+          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          command:
+            - chown
+            - -R
+            - "{{ .Values.postgresql.securityContext.runAsUser | default 10001 }}:{{ .Values.postgresql.securityContext.runAsGroup | default 10001 }}"
+            - /var/lib/postgresql/data
+          {{- with .Values.postgresql.volumePermissions.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.postgresql.volumePermissions.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      {{- end }}
       containers:
         - name: postgresql
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
           imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          {{- with .Values.postgresql.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: postgresql
               containerPort: 5432
           env:
             - name: PGDATA
-              value: /var/lib/postgresql/data
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_DB
               value: {{ .Values.hieventsConfig.postgresql.database | quote }}
             - name: POSTGRES_USER
@@ -85,11 +120,24 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.postgresql.persistence.enabled }}
           volumeMounts:
+            {{- if .Values.postgresql.persistence.enabled }}
             - name: data
-              mountPath: /var/lib/postgresql
-          {{- end }}
+              mountPath: /var/lib/postgresql/data
+            {{- end }}
+            {{- if .Values.postgresql.securityContext.readOnlyRootFilesystem }}
+            - name: postgres-run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+            {{- end }}
+      {{- if .Values.postgresql.securityContext.readOnlyRootFilesystem }}
+      volumes:
+        - name: postgres-run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+      {{- end }}
   {{- if .Values.postgresql.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:

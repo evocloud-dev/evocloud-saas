@@ -305,6 +305,10 @@ s3
 {{- end }}
 
 {{- define "hievents.env.laravelVariables" -}}
+- name: S6_READ_ONLY_ROOT
+  value: "1"
+- name: S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES
+  value: "1"
 - name: APP_NAME
   value: {{ .Values.hieventsConfig.app.name | quote }}
 - name: APP_ENV
