@@ -127,6 +127,8 @@ import (
 				limits: {cpu: "500m", memory: "768Mi"}
 			} | corev1.#ResourceRequirements
 		}
+		securityContext?:    corev1.#SecurityContext
+		podSecurityContext?: corev1.#PodSecurityContext
 	}
 
 	if !mysql.enabled {
