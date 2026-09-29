@@ -277,13 +277,6 @@ import (
 		ipFamilies: *[] | [...string]
 	}
 
-	ingress: {
-		enabled: *false | bool
-		ingressClassName: *"" | string
-		host: *"" | string
-		annotations: *{} | {[string]: string}
-		tls: *[] | [...]
-	}
 
 	gateway: {
 		enabled: *false | bool
@@ -364,47 +357,25 @@ import (
 	if namespaceOverride != "" { namespace: namespaceOverride }
 	if namespaceOverride == "" { namespace: metadata.namespace }
 
-	protocol: string
-	if len(ingress.tls) > 0 { protocol: "https" }
-	if len(ingress.tls) == 0 { protocol: "http" }
-
 	#baseUrl: string
 	if baseUrl != "" { #baseUrl: baseUrl }
-	if baseUrl == "" {
-		if ingress.host != "" { #baseUrl: "\(protocol)://\(ingress.host)" }
-		if ingress.host == "" { #baseUrl: "http://localhost:3000" }
-	}
+	if baseUrl == "" { #baseUrl: "http://localhost:3000" }
 
 	#adminUrl: string
 	if adminUrl != "" { #adminUrl: adminUrl }
-	if adminUrl == "" {
-		if ingress.host != "" { #adminUrl: "\(protocol)://\(ingress.host)/admin" }
-		if ingress.host == "" { #adminUrl: "http://localhost:3100" }
-	}
+	if adminUrl == "" { #adminUrl: "http://localhost:3100" }
 
 	#backendGqlUrl: string
 	if backendGqlUrl != "" { #backendGqlUrl: backendGqlUrl }
-	if backendGqlUrl == "" {
-		if ingress.host != "" { #backendGqlUrl: "\(protocol)://\(ingress.host)/backend/graphql" }
-		if ingress.host == "" { #backendGqlUrl: "http://localhost:3170/graphql" }
-	}
+	if backendGqlUrl == "" { #backendGqlUrl: "http://localhost:3170/graphql" }
 
 	#backendWsUrl: string
 	if backendWsUrl != "" { #backendWsUrl: backendWsUrl }
-	if backendWsUrl == "" {
-		if ingress.host != "" {
-			if len(ingress.tls) > 0 { #backendWsUrl: "wss://\(ingress.host)/backend/graphql" }
-			if len(ingress.tls) == 0 { #backendWsUrl: "ws://\(ingress.host)/backend/graphql" }
-		}
-		if ingress.host == "" { #backendWsUrl: "ws://localhost:3170/graphql" }
-	}
+	if backendWsUrl == "" { #backendWsUrl: "ws://localhost:3170/graphql" }
 
 	#backendApiUrl: string
 	if backendApiUrl != "" { #backendApiUrl: backendApiUrl }
-	if backendApiUrl == "" {
-		if ingress.host != "" { #backendApiUrl: "\(protocol)://\(ingress.host)/backend/v1" }
-		if ingress.host == "" { #backendApiUrl: "http://localhost:3170/v1" }
-	}
+	if backendApiUrl == "" { #backendApiUrl: "http://localhost:3170/v1" }
 
 	#shortcodeBaseUrl: string
 	if shortcodeBaseUrl != "" { #shortcodeBaseUrl: shortcodeBaseUrl }
@@ -624,9 +595,6 @@ import (
 			httproute: #HTTPRoute & {#config: config}
 		}
 
-		if config.ingress.enabled {
-			ingress: #Ingress & {#config: config}
-		}
 
 		if config.networkPolicy.enabled {
 			networkpolicy: #NetworkPolicy & {#config: config}

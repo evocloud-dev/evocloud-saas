@@ -249,13 +249,6 @@ values: {
 		ipFamilies: []
 	}
 
-	ingress: {
-		enabled:          false
-		ingressClassName: ""
-		host:             ""
-		annotations: {}
-		tls: []
-	}
 
 	gateway: {
 		enabled:    true
