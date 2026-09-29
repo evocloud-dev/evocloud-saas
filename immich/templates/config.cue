@@ -285,25 +285,6 @@ import (
 		ipFamilies:     *[] | [...string]
 	}
 
-	ingress: {
-		enabled:          *false | bool
-		ingressClassName: *"" | string
-		annotations:      {[string]: string}
-		hosts: *[{
-			host: "immich.local"
-			paths: [{path: "/", pathType: "Prefix"}]
-		}] | [...{
-			host: string
-			paths: [...{
-				path:     string
-				pathType: *"Prefix" | string
-			}]
-		}]
-		tls: *[] | [...{
-			secretName: string
-			hosts: [...string]
-		}]
-	}
 
 	gateway: {
 		enabled:     *false | bool
@@ -636,9 +617,6 @@ import (
 			if config.externalSecrets.redis.enabled {
 				redisExternalSecret: #RedisExternalSecretBuilder & {_config: config}
 			}
-		}
-		if config.ingress.enabled {
-			ingress: #IngressBuilder & {_config: config}
 		}
 		if config.gateway.enabled {
 			httpRoute: #HTTPRouteBuilder & {_config: config}
