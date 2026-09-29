@@ -141,6 +141,7 @@ import (
 				"app.kubernetes.io/instance": #config.metadata.name
 			}
 			spec: {
+				serviceAccountName: #config.serviceAccountName
 				securityContext: {
 					fsGroup:             999
 					fsGroupChangePolicy: "OnRootMismatch"
