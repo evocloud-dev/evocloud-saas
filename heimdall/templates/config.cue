@@ -104,11 +104,22 @@ import (
 
 	// Pod security context
 	podSecurityContext: *{
-		fsGroup: 1000
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
 	} | corev1.#PodSecurityContext
 
 	// Container security context
-	securityContext: corev1.#SecurityContext | *{}
+	securityContext: *{
+		allowPrivilegeEscalation: false
+		capabilities: {
+			drop: ["ALL"]
+			add: ["CHOWN", "SETUID", "SETGID", "FOWNER", "DAC_OVERRIDE"]
+		}
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
+	} | corev1.#SecurityContext
 
 	// Startup probe
 	startupProbe: {
@@ -147,23 +158,6 @@ import (
 		annotations: *{} | {[string]: string}
 	}
 
-	// Ingress
-	ingress: {
-		enabled:          *false | bool
-		ingressClassName: *"" | string
-		annotations: *{} | {[string]: string}
-		hosts: *[] | [...{
-			host: string
-			paths: *[{path: "/", pathType: "Prefix"}] | [...{
-				path:     string
-				pathType: *"Prefix" | "Exact" | "ImplementationSpecific"
-			}]
-		}]
-		tls: *[] | [...{
-			secretName: string
-			hosts: [...string]
-		}]
-	}
 
 	// Service Account
 	serviceAccount: {
@@ -253,9 +247,6 @@ import (
 			pvc: #PVCBuilder & {_config: config}
 		}
 
-		if config.ingress.enabled {
-			ingress: #IngressBuilder & {_config: config}
-		}
 
 		if config.serviceAccount.create {
 			sa: #ServiceAccountBuilder & {_config: config}

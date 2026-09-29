@@ -142,9 +142,30 @@ values: {
 		}
 	}
 
-	podSecurityContext: {}
+	podSecurityContext: {
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
+	}
 
-	securityContext: {}
+	securityContext: {
+		allowPrivilegeEscalation: false
+		capabilities: {
+			drop: [
+				"ALL",
+			]
+			add: [
+				"CHOWN",
+				"SETUID",
+				"SETGID",
+				"FOWNER",
+				"DAC_OVERRIDE",
+			]
+		}
+		seccompProfile: {
+			type: "RuntimeDefault"
+		}
+	}
 
 	startupProbe: {
 		// -- Enable startup probe
@@ -189,18 +210,6 @@ values: {
 		annotations: {}
 	}
 
-	// =============================================================================
-	// Ingress
-	// =============================================================================
-
-	ingress: {
-		// -- Enable ingress
-		enabled:          false
-		ingressClassName: ""
-		annotations: {}
-		hosts: []
-		tls: []
-	}
 
 	// =============================================================================
 	// Service Account
