@@ -214,22 +214,6 @@ import (
 		name:   *"" | string
 	}
 
-	ingress: {
-		enabled:   *false | bool
-		className: *"" | string
-		annotations: *{} | {[string]: string}
-		hosts: *[{
-			host: "invoiceninja.local"
-			paths: [{
-				path:     "/"
-				pathType: "Prefix"
-			}]
-		}] | [...#IngressHost]
-		tls: *[] | [...{
-			hosts?: [...string]
-			secretName?: string
-		}]
-	}
 
 	secret: {
 		appKey:          *"" | string
@@ -289,15 +273,6 @@ import (
 	storageClassName: *"" | string
 }
 
-#IngressPath: {
-	path:     *"/" | string
-	pathType: *"Prefix" | "ImplementationSpecific" | "Exact"
-}
-
-#IngressHost: {
-	host:  string
-	paths: [...#IngressPath]
-}
 
 #Instance: {
 	config: #Config
@@ -332,9 +307,5 @@ import (
 		mysqlService: #MysqlService & {#config: config}
 		redisDeploy: #RedisDeployment & {#config: config}
 		redisService: #RedisService & {#config: config}
-
-		if config.ingress.enabled {
-			ingress: #Ingress & {#config: config}
-		}
 	}
 }

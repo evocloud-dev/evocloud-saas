@@ -238,23 +238,6 @@ values: {
 		name:   ""
 	}
 
-	ingress: {
-		enabled:   false
-		className: ""
-		annotations: {}
-		hosts: [
-			{
-				host: "invoiceninja.local"
-				paths: [
-					{
-						path:     "/"
-						pathType: "Prefix"
-					},
-				]
-			},
-		]
-		tls: []
-	}
 
 	secret: {
 		// REQUIRED: generate with `php artisan key:generate --show` or
@@ -275,7 +258,7 @@ values: {
 		requireHttps:           "false"
 		phantomjsPdfGeneration: "false"
 		pdfGenerator:           "snappdf"
-		// trustedProxies: restrict to your ingress controller/gateway API's CIDR in production
+		// trustedProxies: restrict to your reverse proxy/gateway CIDR in production
 		trustedProxies:  "*"
 		cacheDriver:     "redis"
 		queueConnection: "redis"
