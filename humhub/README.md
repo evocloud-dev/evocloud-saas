@@ -25,7 +25,7 @@ HumHub is an open-source, flexible, and feature-rich social network and collabor
 - Kubernetes cluster v1.20+
 - [Timoni CLI](https://timoni.sh) v0.17+ installed locally
 - Default StorageClass with `ReadWriteOnce` volume support (or `ReadWriteMany` if scaling workloads across nodes)
-- Ingress Controller (e.g. Traefik, NGINX Ingress, or Envoy Gateway) for external HTTPS access
+- Reverse proxy or LoadBalancer for external HTTPS access
 
 ## Install
 
