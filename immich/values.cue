@@ -432,24 +432,6 @@ values: {
 		ipFamilies: []
 	}
 
-	ingress: {
-		// -- Enable Ingress.
-		enabled: false
-		// -- Ingress class name.
-		ingressClassName: ""
-		// -- Ingress annotations.
-		annotations: {}
-		// -- Ingress hosts and paths.
-		hosts: [{
-			host: "immich.local"
-			paths: [{
-				path:     "/"
-				pathType: "Prefix"
-			}]
-		}]
-		// -- Ingress TLS configuration.
-		tls: []
-	}
 
 	gateway: {
 		// -- Enable Gateway API HTTPRoute. Requires Gateway API CRDs and parentRefs.
