@@ -49,29 +49,6 @@ values: {
 		}
 	}
 	service: main: ports: http: port: 8000
-	ingress: main: {
-		enabled:          false
-		primary:          true
-		annotations:      {}
-		labels:           {}
-		ingressClassName: ""
-		hosts: [
-			{
-				host: "chart-example.local"
-				paths: [
-					{
-						path:     "/"
-						pathType: "Prefix"
-						service: {
-							name: ""
-							port: 0
-						}
-					},
-				]
-			},
-		]
-		tls: []
-	}
 	persistence: {
 		data: {
 			enabled:    true
@@ -118,6 +95,34 @@ values: {
 			username:         "postgres"
 			postgresPassword: "changeme"
 		}
+		serviceAccount: {
+			name:                         "default"
+			automountServiceAccountToken: false
+		}
+		securityContext: {
+			runAsUser:    70
+			runAsGroup:   70
+			fsGroup:      70
+			runAsNonRoot: true
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
+		containerSecurityContext: {
+			runAsUser:                70
+			runAsGroup:               70
+			runAsNonRoot:             true
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   false
+			capabilities: {
+				drop: [
+					"ALL",
+				]
+			}
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
 		primary: {
 			persistence: {
 				enabled:    true
@@ -158,6 +163,34 @@ values: {
 			username:                  ""
 			password:                  "changeme"
 			existingSecretPasswordKey: "redis-password"
+		}
+		serviceAccount: {
+			name:                         "default"
+			automountServiceAccountToken: false
+		}
+		securityContext: {
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+			runAsNonRoot: true
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
+		}
+		containerSecurityContext: {
+			runAsUser:                999
+			runAsGroup:               999
+			runAsNonRoot:             true
+			allowPrivilegeEscalation: false
+			readOnlyRootFilesystem:   false
+			capabilities: {
+				drop: [
+					"ALL",
+				]
+			}
+			seccompProfile: {
+				type: "RuntimeDefault"
+			}
 		}
 		master: {
 			persistence: {

@@ -98,13 +98,7 @@ import (
 							initialDelaySeconds: 0
 							failureThreshold:    30
 							timeoutSeconds:      1
-							periodSeconds:       5
 						}
-						#urlScheme: "http"
-						if len(#config.ingress.main.tls) > 0 {
-							#urlScheme: "https"
-						}
-						#paperlessURL: "\(#urlScheme)://\(#config.ingress.main.hosts[0].host)"
 						#redisSecretName: "\(#config.metadata.name)-redis"
 						if #config.redis.auth.existingSecret != _|_ {
 							#redisSecretName: #config.redis.auth.existingSecret
@@ -136,10 +130,6 @@ import (
 							if #config.env.PAPERLESS_PORT == _|_ {
 								name:  "PAPERLESS_PORT"
 								value: "\(#config.service.main.ports.http.port)"
-							},
-							if #config.ingress.main.enabled && #config.env.PAPERLESS_URL == _|_ {
-								name:  "PAPERLESS_URL"
-								value: #paperlessURL
 							},
 							if #config.postgresql.enabled && #config.env.PAPERLESS_DBENGINE == _|_ {
 								name:  "PAPERLESS_DBENGINE"
