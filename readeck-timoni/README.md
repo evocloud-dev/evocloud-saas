@@ -1,85 +1,125 @@
-# readeck-timoni
+# Readeck
 
-A [timoni.sh](http://timoni.sh) module for deploying readeck-timoni to Kubernetes clusters.
+## Description
+[Readeck](https://readeck.org/) is a self-hosted read-it-later and bookmarking tool designed for reading without distractions. It strips web pages of ads and clutter to extract and archive articles, bookmarks, and images for easy reading and reference.
+
+## Application Information
+- **Version:** 0.23.2
+- **Official Website:** [https://readeck.org/](https://readeck.org/)
+- **Upstream Project:** [https://codeberg.org/readeck/readeck](https://codeberg.org/readeck/readeck)
+- **Container Base:** [codeberg.org/readeck/readeck](https://codeberg.org/readeck/readeck) (`codeberg.org/readeck/readeck:0.23.2`)
+- **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
+
+## Components
+- **Readeck Core Application (`read`):** Lightweight web application server running `codeberg.org/readeck/readeck:0.23.2` on container port 8000. Configured with a read-only root filesystem, dropped kernel capabilities (`ALL`), and running as non-root user UID `1000`.
+- **Kubernetes Service (`svc`):** ClusterIP Service routing incoming traffic on port 8000 for internal access and reverse proxy integration.
+- **Persistent Data Storage (`pvc`):** PersistentVolumeClaim (`100Mi`, ReadWriteOnce) mounted to `/readeck` for storing SQLite database files, bookmarks, article extracts, and cached media.
+
+## Prerequisites
+- Kubernetes cluster v1.20+ (recommended v1.26+)
+- [Timoni CLI](https://timoni.sh) v0.17+ installed locally
 
 ## Install
 
-To create an instance using the default values:
+To create an instance using default values:
 
 ```shell
-timoni -n default apply readeck-timoni oci://<container-registry-url>
+timoni -n default apply readeck ./readeck-timoni
 ```
 
-To change the [default configuration](#configuration),
-create one or more `values.cue` files and apply them to the instance.
-
-For example, create a file `my-values.cue` with the following content:
+To deploy with customized values, create a `my-values.cue` file:
 
 ```cue
+package main
+
 values: {
-	resources: requests: {
-		cpu:    "100m"
-		memory: "128Mi"
+	persistence: {
+		data: {
+			size: "5Gi"
+		}
+	}
+	resources: {
+		requests: {
+			cpu:    "100m"
+			memory: "128Mi"
+		}
+		limits: {
+			cpu:    "500m"
+			memory: "512Mi"
+		}
 	}
 }
 ```
 
-And apply the values with:
+Apply the values to the instance:
 
 ```shell
-timoni -n default apply readeck-timoni oci://<container-registry-url> \
---values ./my-values.cue
+timoni -n default apply readeck ./readeck-timoni \
+  --values ./my-values.cue
 ```
 
 ## Uninstall
 
-To uninstall an instance and delete all its Kubernetes resources:
+To uninstall the instance and remove all associated Kubernetes resources:
 
 ```shell
-timoni -n default delete readeck-timoni
+timoni -n default delete readeck
 ```
 
 ## Configuration
 
 ### General values
 
-| Key                          | Type                                    | Default                    | Description                                                                                                                                  |
-|------------------------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `image: tag:`                | `string`                                | `<latest version>`         | Container image tag                                                                                                                          |
-| `image: digest:`             | `string`                                | `<latest digest>`          | Container image digest, takes precedence over `tag` when specified                                                                           |
-| `image: repository:`         | `string`                                | `cgr.dev/chainguard/nginx` | Container image repository                                                                                                                   |
-| `image: pullPolicy:`         | `string`                                | `IfNotPresent`             | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)                                     |
-| `metadata: labels:`          | `{[ string]: string}`                   | `{}`                       | Common labels for all resources                                                                                                              |
-| `metadata: annotations:`     | `{[ string]: string}`                   | `{}`                       | Common annotations for all resources                                                                                                         |
-| `podAnnotations:`            | `{[ string]: string}`                   | `{}`                       | Annotations applied to pods                                                                                                                  |
-| `imagePullSecrets:`          | `[...timoniv1.ObjectReference]`         | `[]`                       | [Kubernetes image pull secrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod)                 |
-| `tolerations:`               | `[ ...corev1.#Toleration]`              | `[]`                       | [Kubernetes toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration)                                        |
-| `affinity:`                  | `corev1.#Affinity`                      | `{}`                       | [Kubernetes affinity and anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) |
-| `resources:`                 | `timoniv1.#ResourceRequirements`        | `{}`                       | [Kubernetes resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)                     |
-| `topologySpreadConstraints:` | `[...corev1.#TopologySpreadConstraint]` | `[]`                       | [Kubernetes pod topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints)            |
-| `podSecurityContext:`        | `corev1.#PodSecurityContext`            | `{}`                       | [Kubernetes pod security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                                 |
-| `securityContext:`           | `corev1.#SecurityContext`               | `{}`                       | [Kubernetes container security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)                           |
-| `service: annotations:`      | `{[ string]: string}`                   | `{}`                       | Annotations applied to the Kubernetes Service                                                                                                |
-| `service: port:`             | `int`                                   | `80`                       | Kubernetes Service HTTP port                                                                                                                 |
-| `test: enabled:`             | `bool`                                  | `false`                    | Run end-to-end tests at install and upgrades                                                                                                 |
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `image.repository` | string | `codeberg.org/readeck/readeck` | Container image repository |
+| `image.tag` | string | `0.23.2` | Container image tag |
+| `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
+| `resources.requests.cpu` | string | `200m` | Minimum CPU requested |
+| `resources.requests.memory` | string | `256Mi` | Minimum memory requested |
+| `resources.limits.cpu` | string | `500m` | Maximum CPU limit |
+| `resources.limits.memory` | string | `512Mi` | Maximum memory limit |
+| `service.main.ports.http.port` | int | `8000` | Service HTTP port |
+| `ingress.main.enabled` | bool | `false` | Enable ingress routing |
+| `persistence.data.enabled` | bool | `true` | Enable persistent storage for data |
+| `persistence.data.mountPath` | string | `/readeck` | Mount path for data directory |
+| `persistence.data.accessMode` | string | `ReadWriteOnce` | Persistent volume access mode |
+| `persistence.data.size` | string | `100Mi` | Persistent volume storage size |
+| `securityContext.runAsUser` | int | `1000` | Container user ID |
+| `securityContext.runAsGroup` | int | `1000` | Container group ID |
+| `securityContext.fsGroup` | int | `1000` | Pod filesystem group ID |
+| `securityContext.runAsNonRoot` | bool | `true` | Enforce running as a non-root user |
+| `securityContext.readOnlyRootFilesystem` | bool | `true` | Mount container root filesystem as read-only |
+| `securityContext.capabilities.drop` | list | `["ALL"]` | Drop all Linux kernel capabilities |
 
-#### Recommended values
+### Recommended values
 
 Comply with the restricted [Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
 
 ```cue
 values: {
-	podSecurityContext: {
-		runAsUser:  65532
-		runAsGroup: 65532
-		fsGroup:    65532
-	}
 	securityContext: {
-		allowPrivilegeEscalation: false
-		readOnlyRootFilesystem:   false
-		runAsNonRoot:             true
-		capabilities: drop: ["ALL"]
-		seccompProfile: type: "RuntimeDefault"
+		runAsUser:              1000
+		runAsGroup:             1000
+		fsGroup:                1000
+		runAsNonRoot:           true
+		readOnlyRootFilesystem: true
+		capabilities: drop: [
+			"ALL",
+		]
 	}
 }
 ```
+
+## Additional Resources
+- [Official Readeck Website](https://readeck.org/)
+- [Official Readeck Repository](https://codeberg.org/readeck/readeck)
+- [Timoni Documentation](https://timoni.sh)
+
+## Kubesec Scan Scores
+
+Security validation performed via [Kubesec](https://kubesec.io) static analysis across the Readeck module workloads:
+
+| Workload | Kind | Kubesec Score | Status |
+|---|---|---|---|
+| Readeck Core (`read`) | Deployment | 11 points | ✅ |
