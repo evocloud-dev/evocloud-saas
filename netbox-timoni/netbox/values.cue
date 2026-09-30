@@ -331,18 +331,6 @@ values: {
 		sessionAffinityConfig: {}
 	}
 
-	ingress: {
-		enabled:   false
-		pathType:  "ImplementationSpecific"
-		className: ""
-		annotations: {}
-		hosts: [{
-			host: "chart-example.local"
-			paths: ["/"]
-		}]
-		tls: []
-	}
-
 	httpRoute: {
 		enabled:     false
 		annotations: {}
