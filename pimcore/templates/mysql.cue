@@ -31,6 +31,8 @@ import (
                 }
             }
             spec: corev1.#PodSpec & {
+                serviceAccountName:           #config.metadata.name
+                automountServiceAccountToken: false
                 containers: [
                     {
                         name:            "mariadb"
@@ -45,7 +47,7 @@ import (
                         env: [
                             {
                                 name:  "MARIADB_ROOT_PASSWORD"
-                                value: "#config.pimcore.db.root_password"
+                                value: #config.pimcore.db.root_password
                             },
                             {
                                 name:  "MARIADB_DATABASE"

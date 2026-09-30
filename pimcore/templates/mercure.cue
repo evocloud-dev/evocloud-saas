@@ -35,6 +35,7 @@ import (
 				}
 			}
 			spec: {
+				serviceAccountName:           #config.metadata.name
 				automountServiceAccountToken: false
 				securityContext: {
 					seccompProfile: type: "RuntimeDefault"

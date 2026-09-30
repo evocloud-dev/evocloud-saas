@@ -31,6 +31,8 @@ import (
                 }
             }
             spec: corev1.#PodSpec & {
+                serviceAccountName:           #config.metadata.name
+                automountServiceAccountToken: false
                 containers: [
                     {
                         name:            "redis"
