@@ -146,14 +146,6 @@ values: {
         ipFamilies: []
     }
 
-    ingress: {
-        enabled: false
-        ingressClassName: ""
-        annotations: {}
-        hosts: []
-        tls: []
-    }
-
     gatewayAPI: {
         enabled: false
         httpRoutes: []
@@ -254,6 +246,7 @@ values: {
             memory: "256Mi"
         }
         limits: {
+            cpu: "500m"
             memory: "1Gi"
         }
     }
