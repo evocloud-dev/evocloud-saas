@@ -29,10 +29,14 @@ import (
 					"app.kubernetes.io/component": "redis"
 				}
 				spec: corev1.#PodSpec & {
+					serviceAccountName:           #in.rbac.serviceAccount.name
+					automountServiceAccountToken: false
+					securityContext:              #in.redis.podSecurityContext
 					containers: [
 						{
-							name:  "redis"
-							image: "\(#in.redis.image.registry)/\(#in.redis.image.repository):\(#in.redis.image.tag)"
+							name:            "redis"
+							image:           "\(#in.redis.image.registry)/\(#in.redis.image.repository):\(#in.redis.image.tag)"
+							securityContext: #in.redis.securityContext
 							ports: [
 								{
 									containerPort: #in.redis.port

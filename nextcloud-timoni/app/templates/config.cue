@@ -403,9 +403,25 @@ import (
 		}
 		port: *6379 | int
 		resources?: corev1.#ResourceRequirements
+		podSecurityContext: corev1.#PodSecurityContext & {
+			runAsUser:           *999 | int
+			runAsGroup:          *999 | int
+			fsGroup:             *999 | int
+			runAsNonRoot:        *true | bool
+			seccompProfile: type: *"RuntimeDefault" | string
+		}
+		securityContext: corev1.#SecurityContext & {
+			allowPrivilegeEscalation: *false | bool
+			privileged:               *false | bool
+			runAsNonRoot:             *true | bool
+			runAsUser:                *999 | int
+			runAsGroup:               *999 | int
+			readOnlyRootFilesystem:   *false | bool
+			capabilities: drop: *["ALL"] | [...string]
+			seccompProfile: type: *"RuntimeDefault" | string
+		}
 		_name: metadata.name + "-redis"
 		primaryHost: string | *(_name + "-master")
-
 	}
 
 	// External Redis — use when Redis is not deployed via sub-chart
@@ -480,16 +496,6 @@ import (
 		failedJobsHistoryLimit:     *5 | int
 		concurrencyPolicy:          *"Forbid" | string
 		backoffLimit:               *1 | int
-	}
-
-	ingress: {
-		enabled:   *false | bool
-		className: *"" | string
-		path:      *"/" | string
-		pathType:  *"ImplementationSpecific" | string
-		tls:       *[...] | [...]
-		annotations: {[string]: string} | *{}
-		labels:      {[string]: string} | *{}
 	}
 
 	httpRoute: {
@@ -677,9 +683,6 @@ import (
 		}
 
 
-		if config.ingress.enabled {
-			ingress: #Ingress & {#in: config}
-		}
 		if config.httpRoute.enabled {
 			httpRoute: #HTTPRoute & {#in: config}
 		}
