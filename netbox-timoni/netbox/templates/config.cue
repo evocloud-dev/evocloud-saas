@@ -395,20 +395,6 @@ import (
 		sessionAffinityConfig:    *{...} | {...}
 	}
 
-	ingress: {
-		enabled:  *false | bool
-		pathType: *"ImplementationSpecific" | string
-		className: *"" | string
-		annotations: *{[string]: string} | {[string]: string}
-		hosts: *[] | [...{
-			host: string
-			paths: [...string | {...}]
-		}]
-		tls: *[] | [...{
-			hosts: [...string]
-			secretName: string
-		}]
-	}
 
 	httpRoute: {
 		enabled:     *true | bool
@@ -805,9 +791,6 @@ import (
 		}
 		if config.scriptsPersistence.enabled && config.scriptsPersistence.existingClaim == "" {
 			"scripts-pvc": #ScriptsPVC & {#config: config}
-		}
-		if config.ingress.enabled {
-			"ingress": #Ingress & {#config: config}
 		}
 		if config.httpRoute.enabled {
 			"httproute": #HTTPRoute & {#config: config}
