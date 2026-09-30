@@ -386,23 +386,6 @@ import (
 	}
 
 	port: *80 | int & >0 & <=65535
-	// Ingress
-	ingress: {
-		enabled:          *false | bool
-		ingressClassName: *"" | string
-		annotations: {[string]: string}
-		hosts: *[] | [...{
-			host: string
-			paths?: [...{
-				path:     *"" | string
-				pathType: *"" | string
-			}]
-		}]
-		tls: *[] | [...{
-			secretName: string
-			hosts: [...string]
-		}]
-	}
 
 	// Pod optional settings.
 	podAnnotations?: {[string]: string}
@@ -711,13 +694,13 @@ import (
 
 	webhookUrl: [
 		if n8n.webhookUrl != "" {n8n.webhookUrl},
-		if ingress.enabled && len(ingress.hosts) > 0 {"https://\(ingress.hosts[0].host)/"},
+		if gateway.enabled && len(gateway.hostnames) > 0 {"https://\(gateway.hostnames[0])/"},
 		"",
 	][0]
 
 	editorBaseUrl: [
 		if n8n.editorBaseUrl != "" {n8n.editorBaseUrl},
-		if ingress.enabled && len(ingress.hosts) > 0 {"https://\(ingress.hosts[0].host)/"},
+		if gateway.enabled && len(gateway.hostnames) > 0 {"https://\(gateway.hostnames[0])/"},
 		"",
 	][0]
 }
@@ -757,10 +740,6 @@ import (
 
 		if config.queue.enabled {
 			deployWorker: #WorkerDeploymentBuilder & {_config: config}
-		}
-
-		if config.ingress.enabled {
-			ingress: #IngressBuilder & {_config: config}
 		}
 
 		if config.gateway.enabled {

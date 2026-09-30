@@ -1,0 +1,804 @@
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n
+  namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-encryption
+  namespace: default
+stringData:
+  encryption-key: 4mkIsuiazygbIyIxI9BrB+GlxgjzbYnTtASD7BsJTCI=
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-task-runners
+  namespace: default
+stringData:
+  auth-token: CHANGE_ME_N8N_RUNNERS_AUTH_TOKEN
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-database
+  namespace: default
+stringData:
+  database-password: n8n_postgres_password
+type: Opaque
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-data
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: runners
+    port: 5679
+    protocol: TCP
+    targetPort: 5679
+  selector:
+    app.kubernetes.io/name: n8n
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: n8n
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: n8n
+    spec:
+      affinity: {}
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: DB_TYPE
+          value: postgresdb
+        - name: DB_POSTGRESDB_HOST
+          value: n8n-n8n-postgresql
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: n8n
+        - name: DB_POSTGRESDB_USER
+          value: n8n
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: n8n-n8n-database
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              key: encryption-key
+              name: n8n-n8n-encryption
+        - name: N8N_PORT
+          value: "5678"
+        - name: N8N_LOG_LEVEL
+          value: warn
+        - name: N8N_LOG_OUTPUT
+          value: console
+        - name: N8N_DIAGNOSTICS_ENABLED
+          value: "false"
+        - name: N8N_GRACEFUL_SHUTDOWN_TIMEOUT
+          value: "60"
+        - name: N8N_RUNNERS_MODE
+          value: external
+        - name: N8N_RUNNERS_BROKER_LISTEN_ADDRESS
+          value: 0.0.0.0
+        - name: N8N_RUNNERS_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: auth-token
+              name: n8n-n8n-task-runners
+        - name: N8N_NATIVE_PYTHON_RUNNER
+          value: "false"
+        - name: EXECUTIONS_MODE
+          value: queue
+        - name: OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS
+          value: "true"
+        - name: QUEUE_BULL_REDIS_HOST
+          value: n8n-n8n-redis-client
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: QUEUE_BULL_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: redis-password
+              name: n8n-n8n-redis-auth
+        image: docker.io/n8nio/n8n:2.37.11
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 0
+          periodSeconds: 15
+          timeoutSeconds: 5
+        name: n8n
+        ports:
+        - containerPort: 5678
+          name: http
+          protocol: TCP
+        - containerPort: 5679
+          name: runners
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz/readiness
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - mountPath: /home/node/.n8n
+          name: data
+      - env:
+        - name: N8N_RUNNERS_TASK_BROKER_URI
+          value: http://127.0.0.1:5679
+        - name: N8N_RUNNERS_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: auth-token
+              name: n8n-n8n-task-runners
+        - name: N8N_RUNNERS_LAUNCHER_LOG_LEVEL
+          value: warn
+        - name: N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT
+          value: "15"
+        - name: N8N_RUNNERS_LAUNCHER_HEALTH_CHECK_PORT
+          value: "5680"
+        image: docker.io/n8nio/runners:2.37.11
+        imagePullPolicy: IfNotPresent
+        name: task-runners
+        ports:
+        - containerPort: 5680
+          name: runner-health
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |-
+          echo "Waiting for n8n-n8n-postgresql:5432 ..."
+          until nc -z -w2 n8n-n8n-postgresql 5432; do
+            sleep 2
+          done
+          echo "Database is reachable."
+        image: docker.io/library/busybox:1.37
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      - command:
+        - sh
+        - -c
+        - |-
+          echo "Waiting for n8n-n8n-redis-client:6379 ..."
+          until nc -z -w2 n8n-n8n-redis-client 6379; do
+            sleep 2
+          done
+          echo "Redis is reachable."
+        image: docker.io/library/busybox:1.37
+        imagePullPolicy: IfNotPresent
+        name: wait-for-redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      nodeSelector:
+        kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: n8n-n8n
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: n8n-n8n-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-worker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/name: n8n
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/name: n8n
+    spec:
+      affinity: {}
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - n8n
+        - worker
+        - --concurrency=10
+        env:
+        - name: DB_TYPE
+          value: postgresdb
+        - name: DB_POSTGRESDB_HOST
+          value: n8n-n8n-postgresql
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: n8n
+        - name: DB_POSTGRESDB_USER
+          value: n8n
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: n8n-n8n-database
+        - name: N8N_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              key: encryption-key
+              name: n8n-n8n-encryption
+        - name: N8N_DIAGNOSTICS_ENABLED
+          value: "false"
+        - name: N8N_GRACEFUL_SHUTDOWN_TIMEOUT
+          value: "60"
+        - name: N8N_RUNNERS_MODE
+          value: external
+        - name: N8N_RUNNERS_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: auth-token
+              name: n8n-n8n-task-runners
+        - name: N8N_NATIVE_PYTHON_RUNNER
+          value: "false"
+        - name: EXECUTIONS_MODE
+          value: queue
+        - name: QUEUE_BULL_REDIS_HOST
+          value: n8n-n8n-redis-client
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: QUEUE_BULL_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: redis-password
+              name: n8n-n8n-redis-auth
+        image: docker.io/n8nio/n8n:2.37.11
+        imagePullPolicy: IfNotPresent
+        name: worker
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /home/node/.n8n
+          name: data
+      - env:
+        - name: N8N_RUNNERS_TASK_BROKER_URI
+          value: http://127.0.0.1:5679
+        - name: N8N_RUNNERS_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: auth-token
+              name: n8n-n8n-task-runners
+        - name: N8N_RUNNERS_LAUNCHER_LOG_LEVEL
+          value: warn
+        - name: N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT
+          value: "15"
+        - name: N8N_RUNNERS_LAUNCHER_HEALTH_CHECK_PORT
+          value: "5680"
+        image: docker.io/n8nio/runners:2.37.11
+        imagePullPolicy: IfNotPresent
+        name: task-runners
+        ports:
+        - containerPort: 5680
+          name: runner-health
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |-
+          echo "Waiting for n8n-n8n-postgresql:5432 ..."
+          until nc -z -w2 n8n-n8n-postgresql 5432; do
+            sleep 2
+          done
+          echo "Database is reachable."
+        image: docker.io/library/busybox:1.37
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      - command:
+        - sh
+        - -c
+        - |-
+          echo "Waiting for n8n-n8n-redis-client:6379 ..."
+          until nc -z -w2 n8n-n8n-redis-client 6379; do
+            sleep 2
+          done
+          echo "Redis is reachable."
+        image: docker.io/library/busybox:1.37
+        imagePullPolicy: IfNotPresent
+        name: wait-for-redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      - command:
+        - sh
+        - -c
+        - |-
+          echo "Waiting for n8n main readiness..."
+          until wget -qO- http://n8n-n8n:80/healthz/readiness >/dev/null 2>&1; do
+            sleep 2
+          done
+          echo "n8n main is ready."
+        image: docker.io/library/busybox:1.37
+        imagePullPolicy: IfNotPresent
+        name: wait-for-main
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+      nodeSelector:
+        kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: n8n-n8n
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: n8n-n8n-data
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-postgresql-auth
+  namespace: default
+stringData:
+  user-password: n8n_postgres_password
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-postgresql
+  namespace: default
+spec:
+  ports:
+  - name: tcp-postgresql
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: postgresql
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-postgresql-primary-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: tcp-postgresql
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: postgresql
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-postgresql
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: n8n
+      app.kubernetes.io/name: postgresql
+  serviceName: n8n-n8n-postgresql-primary-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: n8n
+        app.kubernetes.io/name: postgresql
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: n8n
+        - name: POSTGRES_USER
+          value: n8n
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: user-password
+              name: n8n-n8n-postgresql-auth
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: docker.io/library/postgres:18.6-alpine
+        imagePullPolicy: IfNotPresent
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          name: postgresql
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 70
+          runAsNonRoot: true
+          runAsUser: 70
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /docker-entrypoint-initdb.d
+          name: initdb
+      securityContext:
+        fsGroup: 70
+        runAsGroup: 70
+        runAsNonRoot: true
+        runAsUser: 70
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: n8n-n8n
+      volumes:
+      - configMap:
+          defaultMode: 493
+          name: n8n-n8n-postgresql-initdb
+        name: initdb
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+---
+apiVersion: v1
+data:
+  02-n8n-extensions.sh: |-
+    #!/bin/bash
+    set -euo pipefail
+    export PGPASSWORD="${POSTGRES_PASSWORD}"
+    psql --username "${POSTGRES_USER}" --dbname "${APP_DATABASE}" \
+      -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-postgresql-initdb
+  namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-redis-auth
+  namespace: default
+stringData:
+  redis-password: redis_password
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-redis-client
+  namespace: default
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: redis
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-redis-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app.kubernetes.io/instance: n8n
+    app.kubernetes.io/name: redis
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/version: 0.0.0-devel
+  name: n8n-n8n-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: n8n
+      app.kubernetes.io/name: redis
+  serviceName: n8n-n8n-redis-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: n8n
+        app.kubernetes.io/name: redis
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        command:
+        - redis-server
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: redis-password
+              name: n8n-n8n-redis-auth
+        image: docker.io/library/redis:8.10.1
+        imagePullPolicy: IfNotPresent
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 999
+          runAsNonRoot: true
+          runAsUser: 999
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      securityContext:
+        fsGroup: 999
+        runAsGroup: 999
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: n8n-n8n
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
