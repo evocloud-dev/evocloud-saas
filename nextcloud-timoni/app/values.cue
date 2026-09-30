@@ -380,16 +380,6 @@ values: {
 		backoffLimit:               1
 	}
 
-	ingress: {
-		enabled:   false
-		className: ""
-		path:      "/"
-		pathType:  "ImplementationSpecific"
-		tls: []
-		annotations: {}
-		labels: {}
-	}
-
 	httpRoute: {
 		enabled:   false
 		apiVersion: "gateway.networking.k8s.io/v1beta1"
@@ -477,6 +467,23 @@ values: {
 				cpu:    "500m"
 				memory: "256Mi"
 			}
+		}
+		podSecurityContext: {
+			runAsUser:           999
+			runAsGroup:          999
+			fsGroup:             999
+			runAsNonRoot:        true
+			seccompProfile: type: "RuntimeDefault"
+		}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			privileged:               false
+			runAsNonRoot:             true
+			runAsUser:                999
+			runAsGroup:               999
+			readOnlyRootFilesystem:   false
+			capabilities: drop: ["ALL"]
+			seccompProfile: type: "RuntimeDefault"
 		}
 	}
 
