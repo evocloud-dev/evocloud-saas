@@ -255,9 +255,9 @@ import (
 			openproject_url: *"" | string
 			https:           openproject.https
 			ingress: {
-			path:     *"/hocuspocus" | string
-			pathType: *"Prefix" | string
-		}
+				path:     *"/hocuspocus" | string
+				pathType: *"Prefix" | string
+			}
 		auth: {
 			existingSecret: *"" | string
 			secret:         *"secret" | string
