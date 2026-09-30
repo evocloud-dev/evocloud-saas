@@ -131,14 +131,30 @@ import (
 				"app.kubernetes.io/component": "postgresql"
 			}
 			spec: corev1.#PodSpec & {
-				serviceAccountName:           "default"
-				automountServiceAccountToken: true
+				serviceAccountName:           #config.postgresql.serviceAccount.name
+				automountServiceAccountToken: #config.postgresql.serviceAccount.automountServiceAccountToken
 				dnsPolicy:                    "ClusterFirst"
 				enableServiceLinks:           true
+				securityContext: {
+					runAsUser:    #config.postgresql.securityContext.runAsUser
+					runAsGroup:   #config.postgresql.securityContext.runAsGroup
+					fsGroup:      #config.postgresql.securityContext.fsGroup
+					runAsNonRoot: #config.postgresql.securityContext.runAsNonRoot
+					seccompProfile: type: #config.postgresql.securityContext.seccompProfile.type
+				}
 				containers: [{
 					name:            "postgresql"
 					image:           "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
 					imagePullPolicy: #config.postgresql.image.pullPolicy
+					securityContext: {
+						allowPrivilegeEscalation: #config.postgresql.containerSecurityContext.allowPrivilegeEscalation
+						readOnlyRootFilesystem:   #config.postgresql.containerSecurityContext.readOnlyRootFilesystem
+						runAsNonRoot:             #config.postgresql.containerSecurityContext.runAsNonRoot
+						runAsUser:                #config.postgresql.containerSecurityContext.runAsUser
+						runAsGroup:               #config.postgresql.containerSecurityContext.runAsGroup
+						capabilities: drop:       #config.postgresql.containerSecurityContext.capabilities.drop
+						seccompProfile: type:     #config.postgresql.containerSecurityContext.seccompProfile.type
+					}
 					env: [
 						{
 							name:  "POSTGRES_DB"

@@ -89,14 +89,30 @@ import (
 				"app.kubernetes.io/component": "redis"
 			}
 			spec: corev1.#PodSpec & {
-				serviceAccountName:           "default"
-				automountServiceAccountToken: true
+				serviceAccountName:           #config.redis.serviceAccount.name
+				automountServiceAccountToken: #config.redis.serviceAccount.automountServiceAccountToken
 				dnsPolicy:                    "ClusterFirst"
 				enableServiceLinks:           true
+				securityContext: {
+					runAsUser:    #config.redis.securityContext.runAsUser
+					runAsGroup:   #config.redis.securityContext.runAsGroup
+					fsGroup:      #config.redis.securityContext.fsGroup
+					runAsNonRoot: #config.redis.securityContext.runAsNonRoot
+					seccompProfile: type: #config.redis.securityContext.seccompProfile.type
+				}
 				containers: [{
 					name:            "redis"
 					image:           "\(#config.redis.image.repository):\(#config.redis.image.tag)"
 					imagePullPolicy: #config.redis.image.pullPolicy
+					securityContext: {
+						allowPrivilegeEscalation: #config.redis.containerSecurityContext.allowPrivilegeEscalation
+						readOnlyRootFilesystem:   #config.redis.containerSecurityContext.readOnlyRootFilesystem
+						runAsNonRoot:             #config.redis.containerSecurityContext.runAsNonRoot
+						runAsUser:                #config.redis.containerSecurityContext.runAsUser
+						runAsGroup:               #config.redis.containerSecurityContext.runAsGroup
+						capabilities: drop:       #config.redis.containerSecurityContext.capabilities.drop
+						seccompProfile: type:     #config.redis.containerSecurityContext.seccompProfile.type
+					}
 					args: [
 						"redis-server",
 						"--appendonly",
@@ -176,7 +192,7 @@ import (
 	spec: corev1.#PersistentVolumeClaimSpec & {
 		accessModes: [#config.redis.master.persistence.accessMode]
 		if #config.redis.master.persistence.storageClass != _|_ {
-			storageClassName: #config.redis.master.persSistence.storageClass
+			storageClassName: #config.redis.master.persistence.storageClass
 		}
 		resources: requests: storage: #config.redis.master.persistence.size
 	}

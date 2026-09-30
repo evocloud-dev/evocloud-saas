@@ -47,44 +47,6 @@ import (
 		main: ports: http: port: *8000 | int & >0 & <=65535
 	}
 
-	// The ingress values mirror the upstream Helm chart values and common defaults.
-	ingress: {
-		main: {
-			enabled: *false | bool
-			primary: *true | bool
-			nameOverride?: string
-			annotations: *{} | {[string]: string}
-			labels:      *{} | {[string]: string}
-			ingressClassName: *"" | string
-			hosts: *[
-				{
-					host: "chart-example.local"
-					paths: [{
-						path:     *"/" | string
-						pathType: *"Prefix" | "Exact" | "ImplementationSpecific"
-						service: *{} | {
-							name: *"" | string
-							port: *0 | int & >=0 & <=65535
-						}
-					}]
-				},
-			] | [...{
-				host: string
-				paths: [...{
-					path:     *"/" | string
-					pathType: *"Prefix" | "Exact" | "ImplementationSpecific"
-					service: *{} | {
-						name: *"" | string
-						port: *0 | int & >=0 & <=65535
-					}
-				}]
-			}]
-			tls: *[] | [...{
-				secretName?: string
-				hosts: [...string]
-			}]
-		}
-	}
 
 	// Environment variables passed to the Paperless container.
 	env: *{} | {[string]: null | string | bool | int | number}
@@ -168,6 +130,32 @@ import (
 			existingSecret?: string
 			password?: string
 		}
+		serviceAccount: {
+			name:                         *"default" | string
+			automountServiceAccountToken: *false | bool
+		}
+		securityContext: {
+			runAsUser:    *70 | int
+			runAsGroup:   *70 | int
+			fsGroup:      *70 | int
+			runAsNonRoot: *true | bool
+			seccompProfile: {
+				type: *"RuntimeDefault" | string
+			}
+		}
+		containerSecurityContext: {
+			runAsUser:                *70 | int
+			runAsGroup:               *70 | int
+			runAsNonRoot:             *true | bool
+			allowPrivilegeEscalation: *false | bool
+			readOnlyRootFilesystem:   *false | bool
+			capabilities: {
+				drop: *["ALL"] | [...string]
+			}
+			seccompProfile: {
+				type: *"RuntimeDefault" | string
+			}
+		}
 		primary: {
 			persistence: {
 				enabled: *false | bool
@@ -214,6 +202,32 @@ import (
 			existingSecret?:           string
 			existingSecretPasswordKey: *"redis-password" | string
 		}
+		serviceAccount: {
+			name:                         *"default" | string
+			automountServiceAccountToken: *false | bool
+		}
+		securityContext: {
+			runAsUser:    *999 | int
+			runAsGroup:   *999 | int
+			fsGroup:      *999 | int
+			runAsNonRoot: *true | bool
+			seccompProfile: {
+				type: *"RuntimeDefault" | string
+			}
+		}
+		containerSecurityContext: {
+			runAsUser:                *999 | int
+			runAsGroup:               *999 | int
+			runAsNonRoot:             *true | bool
+			allowPrivilegeEscalation: *false | bool
+			readOnlyRootFilesystem:   *false | bool
+			capabilities: {
+				drop: *["ALL"] | [...string]
+			}
+			seccompProfile: {
+				type: *"RuntimeDefault" | string
+			}
+		}
 		master: {
 			persistence: {
 				enabled: *false | bool
@@ -247,9 +261,6 @@ import (
 	objects: {
 		svc: #Service & {#config: config}
 		deploy: #Deployment & {#config: config}
-		if config.ingress.main.enabled {
-			ingress: #Ingress & {#config: config}
-		}
 		if config.persistence.data.enabled && !config.persistence.data.emptyDir.enabled {
 			pvcData: #PersistentVolumeClaim & {#config: config, #volumeName: "data"}
 		}
