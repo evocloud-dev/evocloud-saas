@@ -4,7 +4,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8sCore "k8s.io/api/core/v1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sNetworking "k8s.io/api/networking/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
 )
 
@@ -181,15 +180,6 @@ import (
 		ipFamilies: [...string] | *[]
 	}
 
-	// Ingress configuration
-	ingress: {
-		enabled:          *false | bool
-		ingressClassName: *null | string
-		annotations: [string]: string
-		hosts: [...k8sNetworking.#IngressRule] | *[]
-		tls: [...k8sNetworking.#IngressTLS] | *[]
-	}
-
 	// Gateway API HTTPRoute configuration (Merged & Deduplicated)
 	gatewayAPI: {
 		enabled: *false | bool
@@ -336,6 +326,7 @@ import (
 			memory: *"256Mi" | timoniv1.#MemoryQuantity
 		}
 		limits: {
+			cpu:    *"500m" | timoniv1.#CPUQuantity
 			memory: *"1Gi" | timoniv1.#MemoryQuantity
 		}
 	}
@@ -375,9 +366,6 @@ import (
         deployment: #Deployment & {#config: config}
         if config.metrics.serviceMonitor.enabled {
             servicemonitor: #ServiceMonitor & {#config: config}
-        }
-        if config.ingress.enabled {
-            ingress: #Ingress & {#config: config}
         }
         if config.gatewayAPI.enabled {
             for idx, r in config.gatewayAPI.httpRoutes {
