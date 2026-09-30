@@ -31,6 +31,8 @@ import (
 				"app.kubernetes.io/component": "postgresql"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           c.postgresql.serviceAccountName
+				automountServiceAccountToken: c.postgresql.automountServiceAccountToken
 				containers: [
 					{
 						name:            "postgresql"
