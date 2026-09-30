@@ -1006,6 +1006,8 @@ values: {
 			repository: "postgres"
 			tag:        "18-alpine"
 		}
+		serviceAccountName:           "default"
+		automountServiceAccountToken: false
 		resources: {
 			requests: {
 				cpu:    "100m"
@@ -1035,6 +1037,8 @@ values: {
 			repository: "redis"
 			tag:        "8-alpine"
 		}
+		serviceAccountName:           "default"
+		automountServiceAccountToken: false
 		resources: {
 			requests: {
 				cpu:    "100m"

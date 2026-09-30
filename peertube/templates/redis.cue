@@ -31,6 +31,8 @@ import (
 				"app.kubernetes.io/component": "redis"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           c.redis.serviceAccountName
+				automountServiceAccountToken: c.redis.automountServiceAccountToken
 				containers: [
 					{
 						name:            "redis"

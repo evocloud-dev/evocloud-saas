@@ -482,6 +482,8 @@ import (
 			repository: *"postgres" | string
 			tag:        *"16-alpine" | string
 		}
+		serviceAccountName:           *"default" | string
+		automountServiceAccountToken: *false | bool
 		resources: timoniv1.#ResourceRequirements & {
 			requests: {
 				cpu:    *"100m" | timoniv1.#CPUQuantity
@@ -511,6 +513,8 @@ import (
 			repository: *"redis" | string
 			tag:        *"7-alpine" | string
 		}
+		serviceAccountName:           *"default" | string
+		automountServiceAccountToken: *false | bool
 		resources: timoniv1.#ResourceRequirements & {
 			requests: {
 				cpu:    *"100m" | timoniv1.#CPUQuantity
