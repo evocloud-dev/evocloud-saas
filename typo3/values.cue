@@ -55,6 +55,7 @@ values: {
 
 	// -- container-level security context
 	securityContext: {
+		allowPrivilegeEscalation: false
 		capabilities: {
 			drop: ["ALL"]
 			add: ["NET_BIND_SERVICE", "CHOWN", "SETUID", "SETGID"]
@@ -237,6 +238,17 @@ values: {
 			storageClassName: ""
 			resources: requests: storage: "8Gi"
 		}
+		// -- database container resources
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+		}
 	}
 
 	mariadb: {
@@ -264,6 +276,17 @@ values: {
 			storageClassName: ""
 			resources: requests: storage: "8Gi"
 		}
+		// -- database container resources
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
+		}
 	}
 
 	postgresql: {
@@ -290,6 +313,17 @@ values: {
 			enabled:          true
 			storageClassName: ""
 			resources: requests: storage: "8Gi"
+		}
+		// -- database container resources
+		resources: {
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+			limits: {
+				cpu:    "500m"
+				memory: "512Mi"
+			}
 		}
 	}
 
