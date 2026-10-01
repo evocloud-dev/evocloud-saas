@@ -71,6 +71,8 @@ import (
 						"app.kubernetes.io/instance":  #config.metadata.name
 					}
 					spec: corev1.#PodSpec & {
+						serviceAccountName:           #config.#serviceAccountName
+						automountServiceAccountToken: false
 						containers: [{
 							name:  "rabbitmq"
 							image: "\(#config.rabbitmq.image.repository):\(#config.rabbitmq.image.tag)"
@@ -91,6 +93,9 @@ import (
 								name:          "stats"
 								containerPort: 15672
 							}]
+							if len(#config.rabbitmq.resources) > 0 {
+								resources: #config.rabbitmq.resources
+							}
 							volumeMounts: [{
 								name:      "rabbitmq-data"
 								mountPath: "/var/lib/rabbitmq"

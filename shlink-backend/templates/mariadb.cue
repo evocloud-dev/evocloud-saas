@@ -89,6 +89,8 @@ import (
 						"app.kubernetes.io/instance":  #config.metadata.name
 					}
 					spec: corev1.#PodSpec & {
+						serviceAccountName:           #config.#serviceAccountName
+						automountServiceAccountToken: false
 						containers: [{
 							name:  "mariadb"
 							image: "\(#config.mariadb.image.repository):\(#config.mariadb.image.tag)"
@@ -115,6 +117,9 @@ import (
 								name:          "mysql"
 								containerPort: 3306
 							}]
+							if len(#config.mariadb.resources) > 0 {
+								resources: #config.mariadb.resources
+							}
 							volumeMounts: [{
 								name:      "data"
 								mountPath: "/bitnami/mariadb"
@@ -146,3 +151,4 @@ import (
 		}
 	]
 }
+
