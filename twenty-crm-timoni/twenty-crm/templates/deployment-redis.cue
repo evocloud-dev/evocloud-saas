@@ -35,6 +35,7 @@ import (
 				"app.kubernetes.io/component": "redis"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           "default"
 				automountServiceAccountToken: false
 				securityContext:              #config.redis.internal.podSecurityContext
 				containers: [

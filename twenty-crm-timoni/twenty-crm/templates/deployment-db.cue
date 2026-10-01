@@ -28,12 +28,15 @@ import (
 				"app.kubernetes.io/component": "db"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           "default"
 				automountServiceAccountToken: false
+				securityContext:              #config.db.internal.podSecurityContext
 				containers: [
 					{
 						name:            "db"
 						image:           #config.db.internal.image.reference
 						imagePullPolicy: #config.db.internal.image.pullPolicy
+						securityContext: #config.db.internal.securityContext
 						ports: [
 							{
 								containerPort: 5432

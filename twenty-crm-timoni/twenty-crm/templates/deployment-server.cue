@@ -37,6 +37,7 @@ import (
 				"app.kubernetes.io/component": "server"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           "default"
 				automountServiceAccountToken: false
 				securityContext:              #config.server.podSecurityContext
 				_serverEnv: [

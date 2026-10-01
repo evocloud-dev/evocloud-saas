@@ -32,6 +32,7 @@ import (
 				"app.kubernetes.io/component": "worker"
 			}
 			spec: corev1.#PodSpec & {
+				serviceAccountName:           "default"
 				automountServiceAccountToken: false
 				securityContext:              #config.worker.podSecurityContext
 				initContainers: [
