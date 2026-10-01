@@ -103,11 +103,38 @@ import (
 		allowPrivilegeEscalation: *false | bool
 		capabilities: {
 			drop: *["ALL"] | [...string]
+			add?: [...string]
 		}
 		readOnlyRootFilesystem: *true | bool
 		runAsNonRoot:            *true | bool
 		runAsUser:               *10001 | int
 		runAsGroup:              *10001 | int
+	}
+
+	#DbPodSecurityContext: {
+		runAsUser?:           int
+		runAsGroup?:          int
+		runAsNonRoot?:        bool
+		fsGroup?:             int
+		fsGroupChangePolicy?: string
+		seccompProfile?: {
+			type: string
+		}
+	}
+
+	#DbContainerSecurityContext: {
+		allowPrivilegeEscalation: *false | bool
+		capabilities: {
+			drop: *["ALL"] | [...string]
+			add?: [...string]
+		}
+		readOnlyRootFilesystem: *false | bool
+		runAsNonRoot?:          bool
+		runAsUser?:             int
+		runAsGroup?:            int
+		seccompProfile?: {
+			type: string
+		}
 	}
 
 	server: {
@@ -222,14 +249,23 @@ import (
 		internal: {
 			enabled:  *true | bool
 			database: *"twenty" | string
-			podSecurityContext: #PodSecurityContext & {
-				runAsUser:           *10001 | int
-				runAsGroup:          *10001 | int
-				fsGroup:             *10001 | int
+			podSecurityContext: #DbPodSecurityContext & {
+				fsGroup:             *103 | int
+				fsGroupChangePolicy: *"Always" | string
+				seccompProfile: {
+					type: *"RuntimeDefault" | string
+				}
 			}
-			securityContext:    #ContainerSecurityContext & {
-				runAsUser:               *10001 | int
-				runAsGroup:              *10001 | int
+			securityContext: #DbContainerSecurityContext & {
+				allowPrivilegeEscalation: *false | bool
+				capabilities: {
+					drop: *["ALL"] | [...string]
+					add: *["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER"] | [...string]
+				}
+				readOnlyRootFilesystem: *false | bool
+				seccompProfile: {
+					type: *"RuntimeDefault" | string
+				}
 			}
 			appUser:  *"twenty_app_user" | string
 			appPassword: *"twenty" | string

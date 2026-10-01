@@ -188,21 +188,16 @@ values: {
 			enabled:     true
 			database:    "twenty"
 			podSecurityContext: {
-				runAsUser:           10001
-				runAsGroup:          10001
-				runAsNonRoot:        true
-				fsGroup:             10001
+				fsGroup:             103
 				fsGroupChangePolicy: "Always"
 			}
 			securityContext: {
 				allowPrivilegeEscalation: false
 				capabilities: {
 					drop: ["ALL"]
+					add: ["CHOWN", "SETUID", "SETGID", "DAC_OVERRIDE", "FOWNER"]
 				}
-				readOnlyRootFilesystem: true
-				runAsNonRoot:            true
-				runAsUser:               10001
-				runAsGroup:              10001
+				readOnlyRootFilesystem: false
 			}
 			appUser:     "twenty_app_user"
 			appPassword: "twenty"
