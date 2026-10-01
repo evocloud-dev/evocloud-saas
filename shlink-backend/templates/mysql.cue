@@ -89,6 +89,8 @@ import (
 						"app.kubernetes.io/instance":  #config.metadata.name
 					}
 					spec: corev1.#PodSpec & {
+						serviceAccountName:           #config.#serviceAccountName
+						automountServiceAccountToken: false
 						containers: [{
 							name:  "mysql"
 							image: "\(#config.mysql.image.repository):\(#config.mysql.image.tag)"
@@ -115,6 +117,9 @@ import (
 								name:          "mysql"
 								containerPort: 3306
 							}]
+							if len(#config.mysql.resources) > 0 {
+								resources: #config.mysql.resources
+							}
 							volumeMounts: [{
 								name:      "data"
 								mountPath: "/bitnami/mysql"
@@ -146,3 +151,4 @@ import (
 		}
 	]
 }
+

@@ -232,6 +232,16 @@ values: {
 			repository: "bitnamilegacy/mariadb"
 			tag:        "12.0.2-debian-12-r0"
 		}
+		resources: {
+			limits: {
+				cpu:    "1"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+		}
 	}
 	mysql: {
 		enabled: false
@@ -243,6 +253,16 @@ values: {
 		image: {
 			repository: "bitnamilegacy/mysql"
 			tag:        "9.4.0-debian-12-r1"
+		}
+		resources: {
+			limits: {
+				cpu:    "1"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
 		}
 	}
 	postgresql: {
@@ -256,12 +276,32 @@ values: {
 			repository: "bitnamilegacy/postgresql"
 			tag:        "17.6.0-debian-12-r4"
 		}
+		resources: {
+			limits: {
+				cpu:    "1"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
+		}
 	}
 	rabbitmq: {
-		enabled: false
+		enabled: true
 		image: {
 			repository: "bitnamilegacy/rabbitmq"
 			tag:        "4.1.3-debian-12-r1"
+		}
+		resources: {
+			limits: {
+				cpu:    "1"
+				memory: "1Gi"
+			}
+			requests: {
+				cpu:    "100m"
+				memory: "256Mi"
+			}
 		}
 	}
 	redis: {
@@ -277,6 +317,16 @@ values: {
 		image: {
 			repository: "bitnamilegacy/redis"
 			tag:        "8.2.1-debian-12-r0"
+		}
+		resources: {
+			limits: {
+				cpu:    "250m"
+				memory: "256Mi"
+			}
+			requests: {
+				cpu:    "50m"
+				memory: "64Mi"
+			}
 		}
 	}
 	// Below parameters are for the web components

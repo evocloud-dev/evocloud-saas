@@ -260,6 +260,16 @@ import (
 			repository: *"bitnamilegacy/mariadb" | string
 			tag:        *"12.0.2-debian-12-r0" | string
 		}
+		resources: *{
+			limits: {
+				cpu:    *"1" | string
+				memory: *"1Gi" | string
+			}
+			requests: {
+				cpu:    *"100m" | string
+				memory: *"256Mi" | string
+			}
+		} | corev1.#ResourceRequirements
 		persistence: #Persistence & {
 			enabled: *true | bool
 		}
@@ -275,6 +285,16 @@ import (
 			repository: *"bitnamilegacy/mysql" | string
 			tag:        *"9.4.0-debian-12-r1" | string
 		}
+		resources: *{
+			limits: {
+				cpu:    *"1" | string
+				memory: *"1Gi" | string
+			}
+			requests: {
+				cpu:    *"100m" | string
+				memory: *"256Mi" | string
+			}
+		} | corev1.#ResourceRequirements
 		persistence: #Persistence & {
 			enabled: *true | bool
 		}
@@ -290,6 +310,16 @@ import (
 			repository: *"bitnamilegacy/postgresql" | string
 			tag:        *"17.6.0-debian-12-r4" | string
 		}
+		resources: *{
+			limits: {
+				cpu:    *"1" | string
+				memory: *"1Gi" | string
+			}
+			requests: {
+				cpu:    *"100m" | string
+				memory: *"256Mi" | string
+			}
+		} | corev1.#ResourceRequirements
 		persistence: #Persistence & {
 			enabled: *true | bool
 		}
@@ -300,6 +330,16 @@ import (
 			repository: *"bitnamilegacy/rabbitmq" | string
 			tag:        *"4.1.3-debian-12-r1" | string
 		}
+		resources: *{
+			limits: {
+				cpu:    *"1" | string
+				memory: *"1Gi" | string
+			}
+			requests: {
+				cpu:    *"100m" | string
+				memory: *"256Mi" | string
+			}
+		} | corev1.#ResourceRequirements
 		persistence: #Persistence & {
 			enabled: *true | bool
 		}
@@ -318,6 +358,16 @@ import (
 			repository: *"bitnamilegacy/redis" | string
 			tag:        *"8.2.1-debian-12-r0" | string
 		}
+		resources: *{
+			limits: {
+				cpu:    *"250m" | string
+				memory: *"256Mi" | string
+			}
+			requests: {
+				cpu:    *"50m" | string
+				memory: *"64Mi" | string
+			}
+		} | corev1.#ResourceRequirements
 		persistence: #Persistence & {
 			enabled: *true | bool
 		}

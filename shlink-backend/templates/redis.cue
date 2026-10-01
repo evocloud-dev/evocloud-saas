@@ -52,6 +52,8 @@ import (
 						"app.kubernetes.io/instance":  #config.metadata.name
 					}
 					spec: corev1.#PodSpec & {
+						serviceAccountName:           #config.#serviceAccountName
+						automountServiceAccountToken: false
 						containers: [{
 							name:  "redis"
 							image: "\(#config.redis.image.repository):\(#config.redis.image.tag)"
@@ -66,6 +68,9 @@ import (
 								name:          "redis"
 								containerPort: 6379
 							}]
+							if len(#config.redis.resources) > 0 {
+								resources: #config.redis.resources
+							}
 							volumeMounts: [{
 								name:      "redis-data"
 								mountPath: "/bitnami/redis/data"
@@ -97,3 +102,4 @@ import (
 		}
 	]
 }
+
