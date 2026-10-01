@@ -142,10 +142,10 @@ values: {
 	}
 
 	nodeSelector:   {}
-	tolerations:    *[] | [...]
+	tolerations:    []
 	affinity:       {}
 	extraEnv: []	
-	initContainers: *[] | [...]
+	initContainers: []
 
 	umami: {
 		appSecret: {

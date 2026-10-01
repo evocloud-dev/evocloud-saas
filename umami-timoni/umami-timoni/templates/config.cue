@@ -100,7 +100,7 @@ import (
 
 	ingress: {
 		enabled:   *false | bool
-		className: string
+		className: *"" | string
 		annotations: {[string]: string}
 		hosts: [...{
 			host: string
@@ -220,7 +220,7 @@ import (
 		}
 		debug:                 string
 		disableBotCheck:       *"1" | "0"
-		disableLogin:          *"0" | "int"
+		disableLogin:          *"0" | "1"
 		disableTelemetry:      *"1" | "0"
 		disableUpdates:        *"1" | "0"
 		enableTestConsole:     *"1" | "0"
@@ -230,7 +230,7 @@ import (
 		ignoredIpAddresses:    string
 		logQuery:              *"1" | "0"
 		removeDisableLoginEnv: *true | bool
-		removeTrailingSlash:   *"" | "0"
+		removeTrailingSlash:   *"" | "0" | "1"
 		trackerScriptName:     *"umami" | string
 		migration: v1v2: enabled: *false | bool
 	}
