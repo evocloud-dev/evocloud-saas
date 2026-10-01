@@ -89,6 +89,8 @@ import (
 						"app.kubernetes.io/instance":  #config.metadata.name
 					}
 					spec: corev1.#PodSpec & {
+						serviceAccountName:           #config.#serviceAccountName
+						automountServiceAccountToken: #config.automountServiceAccountToken
 						containers: [{
 							name:  "postgresql"
 							image: "\(#config.postgresql.image.repository):\(#config.postgresql.image.tag)"
@@ -109,6 +111,9 @@ import (
 								name:          "postgresql"
 								containerPort: 5432
 							}]
+							if len(#config.postgresql.resources) > 0 {
+								resources: #config.postgresql.resources
+							}
 							volumeMounts: [{
 								name:      "data"
 								mountPath: "/bitnami/postgresql"

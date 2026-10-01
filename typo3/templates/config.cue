@@ -230,6 +230,16 @@ import (
 	persistence: #Persistence & {
 		enabled: *true | bool
 	}
+	resources: corev1.#ResourceRequirements & {
+		requests: {
+			cpu:    *"100m" | string
+			memory: *"256Mi" | string
+		}
+		limits: {
+			cpu:    *"500m" | string
+			memory: *"512Mi" | string
+		}
+	}
 	test: {
 		enabled: *false | bool
 	}
