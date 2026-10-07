@@ -1,0 +1,696 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: midd
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app.kubernetes.io/name: midd
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: midd
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: ENVIRONMENT
+          value: prod
+        - name: POSTGRES_DB_ENABLED
+          value: "false"
+        - name: REDIS_ENABLED
+          value: "false"
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: user-password
+              name: midd-postgresql-auth
+        - name: DB_HOST
+          value: midd-postgresql
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: mhq-oss
+        - name: DB_USER
+          value: middleware
+        - name: REDIS_HOST
+          value: midd-redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: TZ
+          value: UTC
+        image: docker.io/middlewareeng/middleware:0.3.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 0
+          periodSeconds: 15
+          tcpSocket:
+            port: http
+          timeoutSeconds: 5
+        name: middleware
+        ports:
+        - containerPort: 3333
+          name: http
+          protocol: TCP
+        - containerPort: 9696
+          name: analytics
+          protocol: TCP
+        - containerPort: 9697
+          name: sync
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          tcpSocket:
+            port: http
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 30
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          tcpSocket:
+            port: http
+          timeoutSeconds: 3
+        volumeMounts:
+        - mountPath: /app/keys
+          name: data
+      imagePullSecrets: []
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until nc -z midd-postgresql 5432; do echo waiting for postgresql; sleep
+          2; done
+        image: docker.io/library/busybox:1.37
+        name: wait-for-postgresql
+      nodeSelector: {}
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: midd
+      terminationGracePeriodSeconds: 30
+      tolerations: []
+      topologySpreadConstraints: []
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: midd-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: midd
+  type: ClusterIP
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd
+  namespace: default
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: data
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-data
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql-auth
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql-auth
+  namespace: default
+stringData:
+  password: middleware
+  postgres-password: middleware
+  user-password: middleware
+type: Opaque
+---
+apiVersion: v1
+data:
+  pg_hba.conf: |-
+    local   all             all                                     scram-sha-256
+    host    all             all             127.0.0.1/32            scram-sha-256
+    host    all             all             ::1/128                 scram-sha-256
+
+    host all             all             0.0.0.0/0            scram-sha-256
+    host all             all             ::/0            scram-sha-256
+  postgres_exporter.yml: |
+    {}
+  postgresql.conf: |-
+    listen_addresses = '*'
+    port = 5432
+    wal_level = replica
+    hot_standby = on
+    max_wal_senders = 10
+    max_replication_slots = 10
+    wal_keep_size = '512MB'
+    password_encryption = scram-sha-256
+    max_connections = 200
+    shared_buffers = '256MB'
+    ssl = off
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql-config
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql-config
+  namespace: default
+---
+apiVersion: v1
+data:
+  01-init-users.sh: |-
+    #!/bin/bash
+    set -euo pipefail
+    export PGPASSWORD="${POSTGRES_PASSWORD}"
+    psql --username "${POSTGRES_USER}" --dbname postgres \
+      --set=app_username="${APP_USERNAME}" \
+      --set=app_password="${APP_PASSWORD}" \
+      --set=app_database="${APP_DATABASE}" \
+      --set=replication_username="${REPLICATION_USERNAME:-}" \
+      --set=replication_password="${REPLICATION_PASSWORD:-}" <<'SQL'
+    SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'app_username', :'app_password')
+    WHERE :'app_username' <> ''
+      AND :'app_password' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'app_username') \gexec
+
+    SELECT format('CREATE DATABASE %I OWNER %I', :'app_database', :'app_username')
+    WHERE :'app_database' <> ''
+      AND :'app_username' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'app_database') \gexec
+
+    SELECT format('CREATE ROLE %I REPLICATION LOGIN PASSWORD %L', :'replication_username', :'replication_password')
+    WHERE :'replication_username' <> ''
+      AND :'replication_password' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'replication_username') \gexec
+    SQL
+
+    # PostgreSQL 15+ revokes CREATE on the public schema for non-superusers.
+    # Grant schema privileges so the application user can run migrations.
+    if [ -n "${APP_DATABASE}" ] && [ -n "${APP_USERNAME}" ]; then
+      psql --username "${POSTGRES_USER}" --dbname "${APP_DATABASE}" \
+        -c "GRANT ALL ON SCHEMA public TO \"${APP_USERNAME}\";"
+    fi
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql-initdb
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql-initdb
+  namespace: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql-primary-headless
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql-primary-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/instance: midd
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: postgresql
+    app.kubernetes.io/role: standalone
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql
+  namespace: default
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+  selector:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/instance: midd
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: postgresql
+    app.kubernetes.io/role: standalone
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-postgresql
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgresql
+      app.kubernetes.io/instance: midd
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/part-of: postgresql
+      app.kubernetes.io/role: standalone
+  serviceName: midd-postgresql-primary-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgresql
+        app.kubernetes.io/instance: midd
+        app.kubernetes.io/name: postgresql
+        app.kubernetes.io/part-of: postgresql
+        app.kubernetes.io/role: standalone
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - -c
+        - config_file=/etc/postgresql/generated/postgresql.conf
+        - -c
+        - hba_file=/etc/postgresql/generated/pg_hba.conf
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: mhq-oss
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgres-password
+              name: midd-postgresql-auth
+        - name: APP_DATABASE
+          value: mhq-oss
+        - name: APP_USERNAME
+          value: middleware
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: user-password
+              name: midd-postgresql-auth
+        image: docker.io/library/postgres:18.6-trixie
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="${POSTGRES_PASSWORD}" pg_isready -U postgres -h 127.0.0.1
+              -p 5432 -d postgres
+          failureThreshold: 6
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          name: postgres
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - |-
+              DATA_DIR="${PGDATA:-/var/lib/postgresql/data/pgdata}"
+              if [ ! -s "${DATA_DIR}/PG_VERSION" ]; then
+                exit 1
+              fi
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              if psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1" >/dev/null 2>&1; then
+                if ! psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1 FROM pg_database WHERE datname = 'postgres'" | grep -qx 1; then
+                  createdb -U postgres -h 127.0.0.1 -p 5432 postgres
+                fi
+              else
+                echo "Unable to verify or repair the postgres database on this PostgreSQL data directory." >&2
+                exit 1
+              fi
+              PGPASSWORD="${POSTGRES_PASSWORD}" pg_isready -U postgres -h 127.0.0.1 -p 5432 -d postgres
+          failureThreshold: 6
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 999
+          runAsNonRoot: true
+          runAsUser: 999
+        startupProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - |-
+              DATA_DIR="${PGDATA:-/var/lib/postgresql/data/pgdata}"
+              if [ ! -s "${DATA_DIR}/PG_VERSION" ]; then
+                exit 1
+              fi
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              if psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1" >/dev/null 2>&1; then
+                if ! psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1 FROM pg_database WHERE datname = 'postgres'" | grep -qx 1; then
+                  createdb -U postgres -h 127.0.0.1 -p 5432 postgres
+                fi
+              else
+                echo "Unable to verify or repair the postgres database on this PostgreSQL data directory." >&2
+                exit 1
+              fi
+          failureThreshold: 60
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /etc/postgresql/generated
+          name: config
+        - mountPath: /docker-entrypoint-initdb.d
+          name: initdb
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - configMap:
+          name: midd-postgresql-config
+        name: config
+      - name: initdb
+        projected:
+          defaultMode: 493
+          sources:
+          - configMap:
+              name: midd-postgresql-initdb
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/instance: midd
+        app.kubernetes.io/name: postgresql
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/component: redis-auth
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-redis-auth
+  namespace: default
+stringData:
+  redis-password: redis
+type: Opaque
+---
+apiVersion: v1
+data:
+  redis-standalone.conf: |-
+    bind 0.0.0.0
+    protected-mode no
+    dir /data
+    appendonly yes
+    save 900 1
+    save 300 10
+    save 60 10000
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: redis-config
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-redis-config
+  namespace: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: redis-headless
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-redis-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: redis
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/instance: midd
+    app.kubernetes.io/name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-redis
+  namespace: default
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: redis
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/instance: midd
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/role: standalone
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: midd
+    app.kubernetes.io/version: 0.0.0-devel
+  name: midd-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+      app.kubernetes.io/instance: midd
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/part-of: redis
+      app.kubernetes.io/role: standalone
+  serviceName: midd-redis-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: redis
+        app.kubernetes.io/instance: midd
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/part-of: redis
+        app.kubernetes.io/role: standalone
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - /etc/redis/redis.conf
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        command:
+        - redis-server
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: redis-password
+              name: midd-redis-auth
+        image: docker.io/valkey/valkey:9.2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 6
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          timeoutSeconds: 5
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 999
+          runAsNonRoot: true
+          runAsUser: 999
+        startupProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 30
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /etc/redis/redis.conf
+          name: config
+          subPath: redis-standalone.conf
+        - mountPath: /data
+          name: data
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - configMap:
+          name: midd-redis-config
+        name: config
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/instance: midd
+        app.kubernetes.io/name: redis
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+---
