@@ -1,0 +1,100 @@
+@if(debug)
+
+package main
+
+// Values used by debug_tool.cue.
+// Debug example 'cue cmd -t debug -t name=mattermost -t namespace=mattermost -t mv=9.6.0 -t kv=1.28.0 build'.
+values: {
+	podAnnotations: "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+	image: {
+		repository: "docker.io/mattermost/mattermost-enterprise-edition"
+		tag:        "release-12.0"
+		digest:     "sha256:6e591e3aa84788b98727a63c6196f4d470f10efdfe053a200dd49cf56e7247aa"
+	}
+	workload: {
+		main: {
+			podSpec: {
+				containers: {
+					main: {
+						env: {
+							TIMEZONE:                   "UTC"
+							MM_SQLSETTINGS_DRIVERNAME:  "postgres"
+							MM_BLEVESETTINGS_INDEXDIR:  "/mattermost/bleve-indexes"
+							MM_SERVICESETTINGS_SITEURL: "https://test.example.com"
+							MM_SQLSETTINGS_DATASOURCE:  "postgresql://mattermost:secret@mattermost-cnpg-main-rw:5432/mattermost"
+						}
+					}
+				}
+			}
+		}
+	}
+	service: {
+		main: {
+			ports: {
+				main: {
+					port:       10239
+					targetPort: 8065
+				}
+			}
+		}
+	}
+	persistence: {
+		config: {
+			enabled:   true
+			mountPath: "/mattermost/config"
+			size:      "100Gi"
+		}
+		data: {
+			enabled:   true
+			mountPath: "/mattermost/data"
+			size:      "100Gi"
+		}
+		logs: {
+			enabled:   true
+			mountPath: "/mattermost/logs"
+			size:      "100Gi"
+		}
+		plugins: {
+			enabled:   true
+			mountPath: "/mattermost/plugins"
+			size:      "100Gi"
+		}
+		clientplugins: {
+			enabled:   true
+			mountPath: "/mattermost/client/plugins"
+			size:      "100Gi"
+		}
+		bleveindexes: {
+			enabled:   true
+			mountPath: "/mattermost/bleve-indexes"
+			size:      "100Gi"
+		}
+	}
+	cnpg: {
+		main: {
+			enabled:   true
+			user:      "mattermost"
+			password:  "mattermost"
+			database:  "mattermost"
+			instances: 2
+			image: {
+				repository: "ghcr.io/cloudnative-pg/postgresql"
+				tag:        "18.6"
+				digest:     "sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533"
+			}
+			storage: {
+				size: "100Gi"
+			}
+			walStorage: {
+				size: "100Gi"
+			}
+		}
+	}
+	affinity: nodeAffinity: requiredDuringSchedulingIgnoredDuringExecution: nodeSelectorTerms: [{
+		matchExpressions: [{
+			key:      "kubernetes.io/os"
+			operator: "In"
+			values: ["linux"]
+		}]
+	}]
+}
