@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Background Container -->
+  <rect width="512" height="512" rx="104" fill="#171D37" />
+
+  <!-- Outer Ring (Purple) -->
+  <circle cx="256" cy="256" r="207" fill="none" stroke="#6B1FB7" stroke-width="14" />
+
+  <!-- Middle Ring (Lilac / Light Lavender) -->
+  <circle cx="256" cy="256" r="164" fill="none" stroke="#E6CEFF" stroke-width="14" />
+
+  <!-- Inner Ring (Purple) -->
+  <circle cx="256" cy="256" r="122" fill="none" stroke="#6B1FB7" stroke-width="14" />
+</svg>
