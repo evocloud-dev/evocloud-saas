@@ -4,9 +4,9 @@
 [Chatwoot](https://www.chatwoot.com/) is an open-source, omni-channel customer engagement and support platform. It enables teams to manage customer conversations across live chat, email, WhatsApp, Instagram, Facebook, and Twitter from a single, unified dashboard.
 
 ## Application Information
-- **Version:** v4.17.1
+- **Version:** v4.19.0
 - **Upstream Project:** [https://github.com/chatwoot/chatwoot](https://github.com/chatwoot/chatwoot)
-- **Container Base:** [docker.io/chatwoot/chatwoot](https://hub.docker.com/r/chatwoot/chatwoot) (`chatwoot/chatwoot:v4.17.1`)
+- **Container Base:** [docker.io/chatwoot/chatwoot](https://hub.docker.com/r/chatwoot/chatwoot) (`chatwoot/chatwoot:v4.19.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -94,7 +94,7 @@ timoni -n default delete chatwoot
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `"chatwoot/chatwoot"` | Chatwoot container image repository |
-| `image.tag` | string | `"v4.17.1"` | Chatwoot container image tag |
+| `image.tag` | string | `"v4.19.0"` | Chatwoot container image tag |
 | `image.pullPolicy` | string | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | list | `[]` | Secrets for authenticating against private container registries |
 | `web.replicaCount` | int | `2` | Initial replica count for the web application |
@@ -179,6 +179,11 @@ values: {
 - [Official Chatwoot Repository](https://github.com/chatwoot/chatwoot)
 - [Chatwoot Documentation](https://www.chatwoot.com/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-23
+- **Changed:** Upgraded Chatwoot container image from `v4.17.1` to `v4.19.0` (`docker.io/chatwoot/chatwoot:v4.19.0`).
 
 ## Kubesec Scan Scores
 
