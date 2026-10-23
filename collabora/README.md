@@ -4,13 +4,13 @@
 [Collabora Online](https://github.com/CollaboraOnline/online) (CODE - Collabora Online Development Edition) is a powerful, open-source, web-based office suite that provides real-time collaborative document editing directly in your web browser. Built on the upstream Collabora Online architecture, this Timoni module delivers a cloud-native, production-ready Collabora deployment with Kubernetes Secret credentials management, in-memory RAM disk sandboxing, secure non-root operation, and Kubernetes Gateway API integration.
 
 ## Application Information
-- **Version:** 26.04.4.1.1
+- **Version:** 26.04.5.2.1
 - **Upstream Project:** [https://github.com/CollaboraOnline/online](https://github.com/CollaboraOnline/online)
-- **Container Base:** [docker.io/collabora/code](https://hub.docker.com/r/collabora/code) (`docker.io/collabora/code:26.04.4.1.1@sha256:1efda3043e8b9cb437d1b6c6efe20cc3753760e634de012b8dac391da488bf97`)
+- **Container Base:** [docker.io/collabora/code](https://hub.docker.com/r/collabora/code) (`docker.io/collabora/code:26.04.5.2.1`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Collabora Online Core (`collabora`):** The web-based document editing and rendering engine container running `docker.io/collabora/code:26.04.4.1.1` on container port 9980. Operates as dedicated unprivileged system user `cool` (`1001`), dropping all kernel capabilities (`ALL`), with `allowPrivilegeEscalation: false`, `seccompProfile: RuntimeDefault`, and `--o:mount_jail_tree=false` to achieve full non-root isolation and a 11/11 Kubesec score without requiring node-level DaemonSets.
+- **Collabora Online Core (`collabora`):** The web-based document editing and rendering engine container running `docker.io/collabora/code:26.04.5.2.1` on container port 9980. Operates as dedicated unprivileged system user `cool` (`1001`), dropping all kernel capabilities (`ALL`), with `allowPrivilegeEscalation: false`, `seccompProfile: RuntimeDefault`, and `--o:mount_jail_tree=false` to achieve full non-root isolation and a 11/11 Kubesec score without requiring node-level DaemonSets.
 - **Kubernetes Secret (`collabora`):** Securely stores the administrator username and password, mapped to container environment variables via `secretKeyRef` (mirroring upstream security architecture).
 - **ConfigMap (`collabora`):** Stores Collabora server configuration parameters, spellcheck dictionaries, and WOPI client URL whitelist (`aliasgroups`).
 - **Kubernetes Service (`collabora`):** ClusterIP service exposing port 9980 (named `http`) for cluster-internal access and ingress/gateway routing.
@@ -94,8 +94,8 @@ timoni -n default delete collabora
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docker.io/collabora/code` | Container image repository |
-| `image.tag` | string | `26.04.4.1.1` | Pinned container image tag |
-| `image.digest` | string | `sha256:1efda3043e8b9cb437d1b6c6efe20cc3753760e634de012b8dac391da488bf97` | Pinned container image digest |
+| `image.tag` | string | `26.04.5.2.1` | Pinned container image tag |
+| `image.digest` | string | `""` | Pinned container image digest |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `collabora.username` | string | `admin` | Collabora administrator username (stored in Secret) |
 | `collabora.password` | string | `changeme` | Collabora administrator password (stored in Secret) |
@@ -177,6 +177,14 @@ values: {
 - [Official Collabora Online Documentation & Admin Console Guide](https://sdk.collaboraonline.com/docs/advanced_integration.html#admin-console)
 - [Collabora Online WOPI Protocol Specification](https://sdk.collaboraonline.com/docs/installation/Configuration.html#wopi)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-23
+- **Changed:** Upgraded Collabora CODE container image from `26.04.4.1.1` to `26.04.5.2.1` (`docker.io/collabora/code:26.04.5.2.1`).
+- **Changed:** Upgraded customFonts Alpine container image to `3.24.3` (`docker.io/alpine:3.24.3`).
+- **Changed:** Upgraded endpointReloader Alpine k8s container image from `1.31.1` to `1.34.12` (`docker.io/alpine/k8s:1.34.12`).
+- **Changed:** Upgraded NGINX container image from `1.25` to `1.30` (`docker.io/nginx:1.30`).
 
 ## Kubesec Scan Scores
 
