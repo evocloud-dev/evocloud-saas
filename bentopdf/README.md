@@ -6,10 +6,10 @@
 
 ## Application Information
 
-- **Version:** 2.8.8
+- **Version:** 2.8.10
 - **Official Website:** [https://www.bentopdf.com/](https://www.bentopdf.com/)
 - **Upstream Project:** [https://github.com/alam00000/bentopdf](https://github.com/alam00000/bentopdf)
-- **Container Base:** [ghcr.io/alam00000/bentopdf](https://ghcr.io/alam00000/bentopdf) (`ghcr.io/alam00000/bentopdf:2.8.8`), [docker.io/nginx/nginx-prometheus-exporter](https://hub.docker.com/r/nginx/nginx-prometheus-exporter) (`docker.io/nginx/nginx-prometheus-exporter:1.5.3`)
+- **Container Base:** [ghcr.io/alam00000/bentopdf](https://ghcr.io/alam00000/bentopdf) (`ghcr.io/alam00000/bentopdf:2.8.10`), [docker.io/nginx/nginx-prometheus-exporter](https://hub.docker.com/r/nginx/nginx-prometheus-exporter) (`docker.io/nginx/nginx-prometheus-exporter:1.5.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -88,7 +88,7 @@ timoni -n default delete bentopdf
 | `commonLabels` | `object` | `{}` | Extra resource labels; selector labels are reserved |
 | `replicaCount` | `int` | `1` | Stateless replicas; PDF processing occurs in the browser |
 | `image.repository` | `string` | `"ghcr.io/alam00000/bentopdf"` | BentoPDF container image repository |
-| `image.tag` | `string` | `"2.8.8"` | Verified stable container image tag |
+| `image.tag` | `string` | `"2.8.10"` | Verified stable container image tag |
 | `image.digest` | `string` | `""` | Container image digest |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for private image mirror |
@@ -181,6 +181,13 @@ values: {
 - [BentoPDF HelmForge Documentation](https://helmforge.dev/docs/charts/bentopdf)
 - [Timoni Documentation](https://timoni.sh)
 - [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+
+---
+
+## Changelog
+
+### 0.1.1 - 2026-10-23
+- **Changed:** Upgraded BentoPDF container image from `2.8.8` to `2.8.10` (`ghcr.io/alam00000/bentopdf:2.8.10`).
 
 ---
 
