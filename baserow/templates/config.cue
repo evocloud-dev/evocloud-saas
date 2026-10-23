@@ -93,7 +93,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"baserow/web-frontend" | string
 		pullPolicy: *"Always" | "IfNotPresent" | "Never"
-		tag:        *"2.2.2" | string
+		tag:        *"2.4.1" | string
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
 	podAnnotations: {[string]: string} | *{}
@@ -170,7 +170,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"baserow/backend" | string
 		pullPolicy: *"Always" | "IfNotPresent" | "Never"
-		tag:        *"2.2.2" | string
+		tag:        *"2.4.1" | string
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
 	podAnnotations: {[string]: string} | *{}
@@ -243,7 +243,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"baserow/backend" | string
 		pullPolicy: *"Always" | "IfNotPresent" | "Never"
-		tag:        *"2.2.2" | string
+		tag:        *"2.4.1" | string
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
 	podAnnotations: {[string]: string} | *{}
@@ -300,7 +300,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"baserow/backend" | string
 		pullPolicy: *"Always" | "IfNotPresent" | "Never"
-		tag:        *"2.3.3" | string
+		tag:        *"2.4.1" | string
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
 	priorityClassName:    *"" | string
@@ -429,8 +429,13 @@ import (
 	enabled:      *true | bool
 	image: {
 		registry:   *"docker.io" | string
-		repository: *"minio/minio" | string
-		tag:        *"latest" | string
+		repository: *"bitnamilegacy/minio" | string
+		tag:        *"2025.7.23-debian-12-r5" | string
+	}
+	clientImage: {
+		registry:   *"docker.io" | string
+		repository: *"bitnamilegacy/minio-client" | string
+		tag:        *"2025.7.21-debian-12-r3" | string
 	}
 	auth: {
 		rootUser: *"minioadmin" | string
@@ -471,7 +476,7 @@ import (
 	image: {
 		registry:   *"docker.io" | string
 		repository: *"caddy" | string
-		tag:        *"2.8" | string
+		tag:        *"2.11.7" | string
 	}
 	resources?: corev1.#ResourceRequirements
 }
