@@ -4,20 +4,20 @@
 [Baserow](https://baserow.io/) is an open-source online database tool and no-code data collaboration platform for teams. It allows users to organize data, build powerful applications, and automate business processes without technical experience—lowering the barriers to app creation so that anyone who can work with a spreadsheet can create a database without sacrificing control, privacy, and security.
 
 ## Application Information
-- **Version:** 2.3.3
+- **Version:** 2.4.1
 - **Upstream Project:** [https://github.com/baserow/baserow](https://github.com/baserow/baserow)
-- **Container Base:** [docker.io/baserow](https://hub.docker.com/u/baserow) (`docker.io/baserow/web-frontend:2.3.3`, `docker.io/baserow/backend:2.3.3`)
+- **Container Base:** [docker.io/baserow](https://hub.docker.com/u/baserow) (`docker.io/baserow/web-frontend:2.4.1`, `docker.io/baserow/backend:2.4.1`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Web Frontend (`baserow-frontend`):** Nuxt/Vue.js Single Page Application web interface running `docker.io/baserow/web-frontend:2.3.3` on container port 3000.
+- **Web Frontend (`baserow-frontend`):** Nuxt/Vue.js Single Page Application web interface running `docker.io/baserow/web-frontend:2.4.1` on container port 3000.
 - **Backend WSGI (`baserow-wsgi`):** Django synchronous application server serving the core REST API endpoints and database operations on container port 8000.
 - **Backend ASGI (`baserow-asgi`):** Django Channels ASGI server managing real-time WebSockets, streaming events, and collaboration updates on container port 8000.
 - **Celery Worker (`baserow-celery-worker`):** Asynchronous background worker processing queued events, webhooks, and automation actions.
 - **Celery Export Worker (`baserow-celery-export-worker`):** Dedicated background worker handling resource-intensive table exports (CSV, Excel, JSON).
 - **PostgreSQL Subchart (`baserow-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6`) providing persistent relational storage (`8Gi`).
 - **Redis Subchart (`baserow-redis`):** Dedicated Redis StatefulSet (`docker.io/library/redis:8.8`) managing Celery task queues, caching, and WebSocket channel layers with persistent storage (`8Gi`).
-- **MinIO Object Storage (`baserow-minio`):** S3-compatible object storage StatefulSet (`docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1`) managing uploaded files, images, and user attachments (`8Gi`).
+- **MinIO Object Storage (`baserow-minio`):** S3-compatible object storage StatefulSet (`docker.io/bitnamilegacy/minio:2025.7.23-debian-12-r5`) managing uploaded files, images, and user attachments (`8Gi`).
 - **Caddy Reverse Proxy (`baserow-caddy`):** In-cluster HTTP reverse proxy routing incoming traffic between the frontend, WSGI API, ASGI WebSockets, and MinIO storage.
 - **Database Migration (`baserow-migration`):** Automated pre-install / pre-upgrade Job ensuring database schema migrations are applied before application traffic is served.
 - **Gateway API HTTPRoute (`route`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resources for modern ingress routing.
@@ -91,7 +91,7 @@ timoni -n default delete baserow
 | `global.baserow.objectsDomain` | string | `"objects.localhost:8080"` | Domain name for MinIO media and attachment storage |
 | `global.baserow.assistantLLMModel` | string | `"groq/openai/gpt-oss-120b"` | Default LLM model identifier for AI assistant integrations |
 | `frontend.image.repository` | string | `"baserow/web-frontend"` | Frontend container image repository |
-| `frontend.image.tag` | string | `"2.3.3"` | Frontend container image tag |
+| `frontend.image.tag` | string | `"2.4.1"` | Frontend container image tag |
 | `frontend.replicaCount` | int | `1` | Number of frontend replicas |
 | `frontend.resources.requests.cpu` | string | `"50m"` | CPU request for the frontend pod |
 | `frontend.resources.requests.memory` | string | `"256Mi"` | Memory request for the frontend pod |
@@ -99,7 +99,7 @@ timoni -n default delete baserow
 | `frontend.resources.limits.memory` | string | `"800Mi"` | Memory limit for the frontend pod |
 | `frontend.service.port` | int | `3000` | Port exposed by the frontend Kubernetes Service |
 | `backend.image.repository` | string | `"baserow/backend"` | Backend container image repository |
-| `backend.image.tag` | string | `"2.3.3"` | Backend container image tag |
+| `backend.image.tag` | string | `"2.4.1"` | Backend container image tag |
 | `backend.wsgi.replicaCount` | int | `1` | Number of WSGI API replicas |
 | `backend.wsgi.resources.requests.cpu` | string | `"100m"` | CPU request for WSGI API pods |
 | `backend.wsgi.resources.requests.memory` | string | `"512Mi"` | Memory request for WSGI API pods |
@@ -140,8 +140,10 @@ timoni -n default delete baserow
 | `redis.resources.limits.cpu` | string | `"200m"` | CPU limit for Redis pod |
 | `redis.resources.limits.memory` | string | `"128Mi"` | Memory limit for Redis pod |
 | `minio.enabled` | bool | `true` | Deploy dedicated MinIO object storage subchart |
-| `minio.image.repository` | string | `"minio/minio"` | MinIO container image repository |
-| `minio.image.tag` | string | `"RELEASE.2025-09-07T16-13-09Z-cpuv1"` | MinIO container image tag |
+| `minio.image.repository` | string | `"bitnamilegacy/minio"` | MinIO container image repository |
+| `minio.image.tag` | string | `"2025.7.23-debian-12-r5"` | MinIO container image tag |
+| `minio.clientImage.repository` | string | `"bitnamilegacy/minio-client"` | MinIO client container image repository |
+| `minio.clientImage.tag` | string | `"2025.7.21-debian-12-r3"` | MinIO client container image tag |
 | `minio.persistence.enabled` | bool | `true` | Enable persistent storage for MinIO data |
 | `minio.persistence.resources.requests.storage` | string | `"8Gi"` | Storage size requested for MinIO volumes |
 | `minio.resources.requests.cpu` | string | `"100m"` | CPU request for MinIO pod |
@@ -150,7 +152,7 @@ timoni -n default delete baserow
 | `minio.resources.limits.memory` | string | `"256Mi"` | Memory limit for MinIO pod |
 | `caddy.enabled` | bool | `true` | Deploy internal Caddy reverse proxy |
 | `caddy.image.repository` | string | `"caddy"` | Caddy container image repository |
-| `caddy.image.tag` | string | `"2.11.4"` | Caddy container image tag |
+| `caddy.image.tag` | string | `"2.11.7"` | Caddy container image tag |
 | `caddy.resources.requests.cpu` | string | `"100m"` | CPU request for Caddy reverse proxy |
 | `caddy.resources.requests.memory` | string | `"128Mi"` | Memory request for Caddy reverse proxy |
 | `caddy.resources.limits.cpu` | string | `"200m"` | CPU limit for Caddy reverse proxy |
@@ -188,6 +190,14 @@ values: {
 - [Official Baserow Repository](https://github.com/baserow/baserow)
 - [Baserow Documentation](https://baserow.io/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-23
+- **Changed:** Upgraded Baserow components from `2.3.3` to `2.4.1` (`docker.io/baserow/web-frontend:2.4.1`, `docker.io/baserow/backend:2.4.1` across WSGI, ASGI, Celery Worker, Export Worker, Beat Worker, Flower, and Migration).
+- **Changed:** Upgraded Caddy reverse proxy from `2.11.4` to `2.11.7` (`docker.io/caddy:2.11.7`).
+- **Changed:** Configured MinIO securityContext to run under Bitnami's native non-root user (`1001:1001`).
+- **Fixed:** Updated MinIO container image to `docker.io/bitnamilegacy/minio:2025.7.23-debian-12-r5` and MinIO Client provisioning image to `docker.io/bitnamilegacy/minio-client:2025.7.21-debian-12-r3`, resolving Docker Hub pull failures (September 2026: The `minio/minio` and `minio/mc` repositories were archived and entirely deleted from Docker Hub).
 
 ## Kubesec Scan Scores
 
