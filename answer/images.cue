@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/apache/answer" | string
-		tag:        *"2.0.2" | string
+		tag:        *"2.0.3" | string
 		digest:     *"" | string
 	}
 	postgresql: image: {
@@ -14,7 +14,7 @@ values: {
 	}
 	mysql: image: {
 		repository: *"docker.io/library/mysql" | string
-		tag:        *"9.7.2" | string
+		tag:        *"9.7.4" | string
 		digest:     *"" | string
 	}
 }

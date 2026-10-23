@@ -4,19 +4,19 @@
 [Apache Answer](https://answer.apache.org/) is a free, open-source question-and-answer (Q&A) platform designed for software teams, developer communities, and organizations of all sizes. Built with Go and React, Answer provides community voting, reputation systems, rich markdown editing, content moderation, multilingual localization, and an extensible plugin architecture.
 
 ## Application Information
-- **Version:** 2.0.2
+- **Version:** 2.0.3
 - **Upstream Project:** [https://github.com/apache/answer](https://github.com/apache/answer)
-- **Container Base:** [docker.io/apache/answer](https://hub.docker.com/r/apache/answer) (`docker.io/apache/answer:2.0.2`)
+- **Container Base:** [docker.io/apache/answer](https://hub.docker.com/r/apache/answer) (`docker.io/apache/answer:2.0.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Apache Answer Core (`deployment`):** The primary web and API server container running `docker.io/apache/answer:2.0.2` on container port 80, mounting persistent storage for file uploads, avatars, plugins, and SQLite databases.
+- **Apache Answer Core (`deployment`):** The primary web and API server container running `docker.io/apache/answer:2.0.3` on container port 80, mounting persistent storage for file uploads, avatars, plugins, and SQLite databases.
 - **Kubernetes Secret (`secret` / `admin`):** Securely stores the administrator username and password, mapped to container environment variables via `secretKeyRef` (mirroring upstream security architecture).
 - **PersistentVolumeClaim (`pvc`):** Persistent storage mounted to `/data` (default `5Gi`, ReadWriteOnce) preserving uploaded files, cache, and SQLite database across pod restarts.
 - **Kubernetes Service (`service`):** ClusterIP service exposing port 80 (named `http`) for cluster-internal access and ingress/gateway routing.
 - **Gateway API HTTPRoute (`httproute`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resource enabling modern ingress routing through Envoy Gateway, Traefik, Cilium, or other Gateway API controllers.
 - **PostgreSQL Subchart (`pgDeploy`, `pgSVC`, `pgHeadlessSVC`, `pgSecret`):** Optional dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-trixie`) with persistent volume storage (`8Gi`), headless service, and automated secret generation.
-- **MySQL Subchart (`mysqlDeploy`, `mysqlSVC`, `mysqlHeadlessSVC`, `mysqlSecret`):** Optional dedicated MySQL 9 StatefulSet (`docker.io/library/mysql:9.7.2`) with persistent volume storage (`8Gi`), headless service, and automated secret generation.
+- **MySQL Subchart (`mysqlDeploy`, `mysqlSVC`, `mysqlHeadlessSVC`, `mysqlSecret`):** Optional dedicated MySQL 9 StatefulSet (`docker.io/library/mysql:9.7.4`) with persistent volume storage (`8Gi`), headless service, and automated secret generation.
 - **Database Backup CronJob (`backupCronJob`, `backupCM`):** Optional scheduled CronJob performing database-aware automated backups (full directory tar for SQLite, `pg_dump` for PostgreSQL, or `mysqldump` for MySQL) uploaded to S3-compatible object storage via MinIO Client (`docker.io/helmforge/mc:1.0.0`).
 - **External Secrets Operator (`esAdmin`, `esDatabase`, `esBackup`):** Optional ExternalSecret resources syncing administrator passwords, database credentials, and S3 keys from external secret stores (Vault, AWS Secrets Manager, GCP Secret Manager, Azure Key Vault).
 - **ServiceAccount (`serviceAccount`):** Dedicated unprivileged Kubernetes ServiceAccount for Answer pods.
@@ -103,7 +103,7 @@ timoni -n default delete answer
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docker.io/apache/answer` | Container image repository |
-| `image.tag` | string | `2.0.2` | Pinned container image tag |
+| `image.tag` | string | `2.0.3` | Pinned container image tag |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `image.digest` | string | `""` | Pinned container image digest |
 | `imagePullSecrets` | list | `[]` | Image pull secrets for private registries |
@@ -148,7 +148,7 @@ timoni -n default delete answer
 | `mysql.enabled` | bool | `false` | Deploy MySQL subchart as a dedicated database |
 | `mysql.architecture` | string | `standalone` | MySQL architecture (`standalone` or `replication`) |
 | `mysql.image.repository` | string | `docker.io/library/mysql` | MySQL image repository |
-| `mysql.image.tag` | string | `9.7.2` | MySQL image tag |
+| `mysql.image.tag` | string | `9.7.4` | MySQL image tag |
 | `mysql.auth.database` | string | `answer` | MySQL database name created on first run |
 | `mysql.auth.username` | string | `answer` | MySQL database username created on first run |
 | `mysql.auth.password` | string | `""` | MySQL database password |
@@ -247,6 +247,12 @@ values: {
 - [Official Apache Answer Repository](https://github.com/apache/answer)
 - [Apache Answer Documentation](https://answer.apache.org/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-23
+- **Changed:** Upgraded Apache Answer application container image from `2.0.2` to `2.0.3` (`docker.io/apache/answer:2.0.3`).
+- **Changed:** Upgraded MySQL database container image from `9.7.2` to `9.7.4` (`docker.io/library/mysql:9.7.4`).
 
 ## Kubesec Scan Scores
 
