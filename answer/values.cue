@@ -33,7 +33,7 @@ values: {
 		repository: "docker.io/apache/answer"
 
 		// -- Container image tag
-		tag: "2.0.2"
+		tag: "2.0.3"
 
 		// -- Image pull policy
 		pullPolicy: "IfNotPresent"
@@ -242,7 +242,7 @@ values: {
 
 		image: {
 			repository: "docker.io/library/mysql"
-			tag:        "9.7.2"
+			tag:        "9.7.4"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
@@ -438,7 +438,7 @@ values: {
 
 	gateway: {
 		// -- Enable Gateway API HTTPRoute (alternative to Ingress; requires Gateway API CRDs)
-		enabled: true
+		enabled: false
 
 		// -- Annotations for the HTTPRoute
 		annotations: {}
