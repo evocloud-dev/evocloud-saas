@@ -16,7 +16,7 @@
 - **Automatisch Core (`deploy`):** Primary web and API server running `docker.io/automatischio/automatisch:0.15.0` on port 3000, with an init container that verifies database connectivity prior to startup.
 - **Application Secret (`appSecret`):** Securely stores the cryptographic `ENCRYPTION_KEY`, `APP_SECRET_KEY`, and `WEBHOOK_SECRET_KEY` required by Automatisch to protect encrypted credentials and sign outgoing webhooks.
 - **PostgreSQL Subchart (`pgDeploy`, `pgSVC`, `pgHeadlessSVC`, `pgSecret`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-trixie`) with persistent volume storage (`8Gi`), headless service, and automated secret generation.
-- **Redis Subchart (`redisDeploy`, `redisSVC`, `redisHeadlessSVC`):** Dedicated Redis 8 StatefulSet (`docker.io/library/redis:8.8.2`) managing message broker queues and caching with persistent volume storage (`8Gi`).
+- **Redis Subchart (`redisDeploy`, `redisSVC`, `redisHeadlessSVC`):** Dedicated Redis 8 StatefulSet (`docker.io/library/redis:8.8.3`) managing message broker queues and caching with persistent volume storage (`8Gi`).
 - **Kubernetes Service (`svc`):** ClusterIP service exposing port 80 (named `http`) routing internally to container port 3000.
 - **Ingress (`ingress`):** Optional Ingress resource routing traffic from your cluster ingress controller (e.g. Traefik, NGINX) to the Automatisch service.
 - **ServiceAccount (`sa`):** Dedicated unprivileged Kubernetes ServiceAccount for Automatisch pods.
@@ -167,7 +167,7 @@ timoni -n default delete automatisch
 | `redis.enabled` | bool | `true` | Deploy dedicated Redis subchart |
 | `redis.architecture` | string | `"standalone"` | Redis architecture mode |
 | `redis.image.repository` | string | `"docker.io/library/redis"` | Redis container image repository |
-| `redis.image.tag` | string | `"8.8.2"` | Redis container image tag |
+| `redis.image.tag` | string | `"8.8.3"` | Redis container image tag |
 | `redis.persistence.enabled` | bool | `true` | Enable persistent storage for Redis data |
 | `redis.persistence.size` | string | `"8Gi"` | Persistent Volume size requested for Redis |
 | `redis.resources.requests.cpu` | string | `"50m"` | CPU request for Redis subchart |
@@ -207,6 +207,11 @@ values: {
 - [Official Automatisch Repository](https://github.com/automatisch/automatisch)
 - [Automatisch Documentation](https://automatisch.io/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-23
+- **Changed:** Upgraded Redis subchart container image from `8.8.2` to `8.8.3` (`docker.io/library/redis:8.8.3`).
 
 ## Kubesec Scan Scores
 
