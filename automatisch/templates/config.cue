@@ -176,7 +176,7 @@ import (
 		architecture: *"standalone" | string
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/redis" | string
-			tag:        *"8.8.2" | string
+			tag:        *"8.8.3" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}

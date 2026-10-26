@@ -199,7 +199,7 @@ values: {
 		architecture: "standalone"
 		image: {
 			repository: "docker.io/library/redis"
-			tag:        "8.8.2"
+			tag:        "8.8.3"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
