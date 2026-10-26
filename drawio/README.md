@@ -5,11 +5,11 @@
 [draw.io](https://www.drawio.com/) (formerly diagrams.net) is free, open-source online diagramming and whiteboarding software for creating flowcharts, process diagrams, org charts, UML, ER, and network diagrams.
 
 ## Application Information
-- **Version:** `32.5.5`
+- **Version:** `32.6.1`
 - **Official Website:** [https://www.drawio.com/](https://www.drawio.com/)
 - **Upstream Project:** [https://github.com/jgraph/drawio](https://github.com/jgraph/drawio)
 - **Container Base:**
-  - Drawio Application: [docker.io/jgraph/drawio](https://hub.docker.com/r/jgraph/drawio) (`docker.io/jgraph/drawio:32.5.5@sha256:30fefe1cf6e48c78f8816cdcd969d0a402a6bfd5077252cf5bb0428fd8ceaf69`)
+  - Drawio Application: [docker.io/jgraph/drawio](https://hub.docker.com/r/jgraph/drawio) (`docker.io/jgraph/drawio:32.6.1@sha256:3d0a5a5ffb4f76abcecd9d17ae1373e3eefd0db07b657c545637dc9c6a7412e1`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -102,7 +102,7 @@ timoni -n default delete drawio
 | `metadata.labels` | `object` | `{}` | Additional labels applied to all module resources |
 | `metadata.annotations` | `object` | `{}` | Annotations applied to all module resources |
 | `image.repository` | `string` | `"docker.io/jgraph/drawio"` | Container image repository |
-| `image.tag` | `string` | `"32.5.5@sha256:30fefe1cf6e48c78f8816cdcd969d0a402a6bfd5077252cf5bb0428fd8ceaf69"` | Container image release tag and digest |
+| `image.tag` | `string` | `"32.6.1@sha256:3d0a5a5ffb4f76abcecd9d17ae1373e3eefd0db07b657c545637dc9c6a7412e1"` | Container image release tag and digest |
 | `image.digest` | `string` | `""` | Container image SHA256 digest |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for private mirrors |
@@ -158,9 +158,10 @@ timoni -n default delete drawio
 - [Drawio Docker Hub](https://hub.docker.com/r/jgraph/drawio)
 - [Timoni Documentation](https://timoni.sh)
 
-## Kubesec Scan Scores
+## Changelog
 
-Security validation performed via [Kubesec](https://kubesec.io) static analysis across the Drawio module workloads:
+### 0.1.1 - 2026-10-26
+- **Changed:** Upgraded Drawio container image from `32.5.5` to `32.6.1` (`docker.io/jgraph/drawio:32.6.1@sha256:3d0a5a5ffb4f76abcecd9d17ae1373e3eefd0db07b657c545637dc9c6a7412e1`).
 
 | Workload | Kind | Kubesec Score | Status |
 |---|---|---|---|

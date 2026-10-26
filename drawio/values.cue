@@ -10,7 +10,7 @@ package main
 values: {
 	image: {
 		repository: "docker.io/jgraph/drawio"
-		tag:        "32.5.5@sha256:30fefe1cf6e48c78f8816cdcd969d0a402a6bfd5077252cf5bb0428fd8ceaf69"
+		tag:        "32.6.1@sha256:3d0a5a5ffb4f76abcecd9d17ae1373e3eefd0db07b657c545637dc9c6a7412e1"
 		pullPolicy: "IfNotPresent"
 	}
 	securityContext: {
