@@ -590,7 +590,7 @@ values: {
 		replicaCount: 1
 		varnishd: {
 			image:           "varnish"
-			tag:             "9.0.3"
+			tag:             "9.1.0"
 			imagePullPolicy: "IfNotPresent"
 		}
 		service: {
@@ -826,7 +826,7 @@ values: {
 			  if (resp.status == 700) { # Respond to healthcheck
 			    set resp.status = 200;
 			    set resp.http.Content-Type = "text/plain";
-			    synthetic ( {"OK"} );
+			    set resp.body = "OK";
 			    return (deliver);
 			  }
 			  # elseif (resp.status == 701) { # Respond to splash
