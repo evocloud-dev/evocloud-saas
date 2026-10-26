@@ -24,7 +24,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/docmost/docmost" | string
-		tag:        *"0.95" | string
+		tag:        *"0.97" | string
 		digest:     *"" | string
 	}
 

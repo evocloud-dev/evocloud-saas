@@ -14,7 +14,7 @@ values: {
 
 	image: {
 		repository: "docker.io/docmost/docmost"
-		tag:        "0.95"
+		tag:        "0.97"
 		pullPolicy: "IfNotPresent"
 	}
 
