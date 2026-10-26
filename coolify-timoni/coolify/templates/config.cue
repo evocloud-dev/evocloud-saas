@@ -42,7 +42,7 @@ import (
 		replicaCount: *1 | int & >0
 		image: {
 			repository: *"ghcr.io/coollabsio/coolify" | string
-			tag:        *"4.3.14" | string
+			tag:        *"4.5.0" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		service: {
@@ -149,7 +149,7 @@ import (
 		}
 		image: {
 			repository: *"valkey/valkey" | string
-			tag:        *"9.0-alpine" | string
+			tag:        *"9.2-alpine" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		master: {
@@ -175,7 +175,7 @@ import (
 		replicaCount: *1 | int
 		image: {
 			repository: *"ghcr.io/coollabsio/coolify-realtime" | string
-			tag:        *"1.0.18" | string
+			tag:        *"1.0.20" | string
 			pullPolicy: *"Always" | string
 		}
 		service: {
