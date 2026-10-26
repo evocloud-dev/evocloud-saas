@@ -4,11 +4,11 @@
 [Countly](https://countly.com/) brings first-party product analytics and user engagement together in one privacy-first platform, giving you control over your data, hosting, and customer experience.
 
 ## Application Information
-- **Version:** 25.05.4
+- **Version:** 25.03.55
 - **Upstream Project:** [https://github.com/Countly/countly-server](https://github.com/Countly/countly-server)
 - **Container Base:**
-  - Countly API: [docker.io/countly/api](https://hub.docker.com/r/countly/api) (`docker.io/countly/api:25.05.4`)
-  - Countly Frontend: [docker.io/countly/frontend](https://hub.docker.com/r/countly/frontend) (`docker.io/countly/frontend:25.05.4`)
+  - Countly API: [docker.io/countly/api](https://hub.docker.com/r/countly/api) (`docker.io/countly/api:25.03.55`)
+  - Countly Frontend: [docker.io/countly/frontend](https://hub.docker.com/r/countly/frontend) (`docker.io/countly/frontend:25.03.55`)
   - MongoDB Database: [docker.io/library/mongo](https://hub.docker.com/_/mongo) (`docker.io/library/mongo:7.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
@@ -105,13 +105,13 @@ timoni -n default delete countly
 | `hostname` | string | `localhost` | Fully qualified domain name or hostname for Countly services |
 | `api.image.registry` | string | `docker.io` | Container image registry for Countly API |
 | `api.image.repository` | string | `countly/api` | Container image repository for Countly API |
-| `api.image.tag` | string | `25.05.4` | Pinned container image tag for Countly API |
+| `api.image.tag` | string | `25.03.55` | Pinned container image tag for Countly API |
 | `api.replicaCount` | int | `1` | Number of API replicas |
 | `api.service.port` | int | `3000` | Kubernetes Service port for Countly API |
 | `api.resources` | object | `{requests: {cpu: "200m", memory: "400Mi"}, limits: {cpu: "1000m", memory: "2Gi"}}` | Resource requests and limits for API pods |
 | `frontend.image.registry` | string | `docker.io` | Container image registry for Countly Frontend |
 | `frontend.image.repository` | string | `countly/frontend` | Container image repository for Countly Frontend |
-| `frontend.image.tag` | string | `25.05.4` | Pinned container image tag for Countly Frontend |
+| `frontend.image.tag` | string | `25.03.55` | Pinned container image tag for Countly Frontend |
 | `frontend.replicaCount` | int | `1` | Number of Frontend replicas |
 | `frontend.service.port` | int | `3000` | Kubernetes Service port for Countly Frontend |
 | `frontend.resources` | object | `{requests: {cpu: "100m", memory: "100Mi"}, limits: {cpu: "500m", memory: "500Mi"}}` | Resource requests and limits for Frontend pods |
@@ -150,6 +150,11 @@ values: {
 - [Official Countly Repository](https://github.com/Countly/countly-server)
 - [Countly Documentation](https://resources.count.ly/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-26
+- **Changed:** Upgraded Countly API and Frontend container images from `25.05.4` to `25.03.55` (`docker.io/countly/api:25.03.55` and `docker.io/countly/frontend:25.03.55`).
 
 ## Kubesec Scan Scores
 

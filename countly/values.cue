@@ -20,7 +20,7 @@ values: {
 			// -- image repository
 			repository: "countly/api"
 			// -- Overrides the image tag
-			tag:        "25.05.4"
+			tag:        "25.03.55"
 			// -- image pull policy
 			pullPolicy: "Always"
 		}
@@ -80,7 +80,7 @@ values: {
 		route: {
 			main: {
 				// -- Enables or disables the route
-				enabled:        true
+				enabled:        false
 				// -- Set the route apiVersion, e.g. gateway.networking.k8s.io/v1 or gateway.networking.k8s.io/v1alpha2
 				apiVersion:     "gateway.networking.k8s.io/v1"
 				// -- Set the route kind
@@ -192,7 +192,7 @@ values: {
 			// -- image repository
 			repository: "countly/frontend"
 			// -- Overrides the image tag
-			tag:        "25.05.4"
+			tag:        "25.03.55"
 			// -- image pull policy
 			pullPolicy: "Always"
 		}
@@ -252,7 +252,7 @@ values: {
 		route: {
 			main: {
 				// -- Enables or disables the route
-				enabled:        true
+				enabled:        false
 				// -- Set the route apiVersion, e.g. gateway.networking.k8s.io/v1 or gateway.networking.k8s.io/v1alpha2
 				apiVersion:     "gateway.networking.k8s.io/v1"
 				// -- Set the route kind
