@@ -23,7 +23,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/apache/answer" | string
-		tag:        *"2.0.2" | string
+		tag:        *"2.0.3" | string
 		pullPolicy: *"IfNotPresent" | string
 		digest:     *"" | string
 	}
@@ -103,7 +103,7 @@ import (
 		architecture: *"standalone" | string
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/mysql" | string
-			tag:        *"9.7.2" | string
+			tag:        *"9.7.4" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
