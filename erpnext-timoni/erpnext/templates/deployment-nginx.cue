@@ -120,6 +120,14 @@ import (
 									mountPath: "/home/frappe/frappe-bench/sites"
 									name:      "sites-dir"
 								},
+								{
+									mountPath: "/var/lib/nginx"
+									name:      "nginx-cache"
+								},
+								{
+									mountPath: "/run"
+									name:      "nginx-run"
+								},
 							],
 							if #config.nginx.config != _|_ && #config.nginx.config != "" {
 								[
@@ -130,7 +138,12 @@ import (
 								]
 							},
 							if #config.nginx.config == _|_ || #config.nginx.config == "" {
-								[]
+								[
+									{
+										mountPath: "/etc/nginx/conf.d"
+										name:      "nginx-conf-dir"
+									},
+								]
 							},
 						])
 						resources:       #config.nginx.resources
@@ -156,6 +169,14 @@ import (
 								emptyDir: {}
 							}
 						},
+						{
+							name: "nginx-cache"
+							emptyDir: {}
+						},
+						{
+							name: "nginx-run"
+							emptyDir: {}
+						},
 					],
 					if #config.nginx.config != _|_ && #config.nginx.config != "" {
 						[
@@ -172,7 +193,12 @@ import (
 						]
 					},
 					if #config.nginx.config == _|_ || #config.nginx.config == "" {
-						[]
+						[
+							{
+								name: "nginx-conf-dir"
+								emptyDir: {}
+							},
+						]
 					},
 				])
 				if #config.topologySpreadConstraints != _|_ {

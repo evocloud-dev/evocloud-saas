@@ -10,7 +10,7 @@ values: {
 
 	image: {
 		repository: "frappe/erpnext"
-		tag:        "v16.34.1"
+		tag:        "v16.52.1"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -555,6 +555,7 @@ values: {
 	}
 
 	podSecurityContext: {
+		fsGroup:      1000
 		supplementalGroups: [1000]
 		runAsNonRoot: true
 		runAsUser:    1000
@@ -626,7 +627,7 @@ values: {
 		enabled: false
 		image: {
 			repository: "ghcr.io/dragonflydb/dragonfly"
-			tag:        "v1.40.1"
+			tag:        "v2.0.2"
 		}
 		args: ["--proactor_threads=1"]
 	}
@@ -635,7 +636,7 @@ values: {
 		storage: enabled: true
 		image: {
 			repository: "ghcr.io/dragonflydb/dragonfly"
-			tag:        "v1.40.1"
+			tag:        "v2.0.2"
 		}
 		args: ["--proactor_threads=1"]
 	}

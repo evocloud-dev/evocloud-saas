@@ -4,9 +4,9 @@
 [ERPNext](https://erpnext.com/) is a full-featured, open-source enterprise resource planning (ERP) system built on the Frappe framework. It provides end-to-end business management capabilities including accounting, human resources (HRMS), inventory and warehouse management, CRM, sales, purchasing, manufacturing, project management, and customer support for organizations of all sizes.
 
 ## Application Information
-- **Version:** v16.34.1
+- **Version:** v16.52.1
 - **Upstream Project:** [https://github.com/frappe/erpnext](https://github.com/frappe/erpnext) / [https://erpnext.com](https://erpnext.com)
-- **Container Base:** [frappe/erpnext](https://hub.docker.com/r/frappe/erpnext) (`frappe/erpnext:v16.34.1`)
+- **Container Base:** [frappe/erpnext](https://hub.docker.com/r/frappe/erpnext) (`frappe/erpnext:v16.52.1`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -46,7 +46,7 @@ package main
 values: {
 	image: {
 		repository: "frappe/erpnext"
-		tag:        "v16.34.1"
+		tag:        "v16.52.1"
 	}
 	nginx: {
 		environment: {
@@ -78,7 +78,7 @@ timoni -n default delete erpnext
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `"frappe/erpnext"` | ERPNext container image repository |
-| `image.tag` | string | `"v16.34.1"` | ERPNext container image tag |
+| `image.tag` | string | `"v16.52.1"` | ERPNext container image tag |
 | `nginx.service.port` | int | `8080` | Internal ClusterIP service port for NGINX |
 | `nginx.autoscaling.enabled` | bool | `true` | Enable Horizontal Pod Autoscaling for NGINX |
 | `worker.gunicorn.service.port` | int | `8000` | Internal ClusterIP service port for Gunicorn |
@@ -93,6 +93,8 @@ timoni -n default delete erpnext
 | `valkey-cache.image.tag` | string | `"9.0.6"` | Valkey cache container image tag |
 | `valkey-queue.enabled` | bool | `true` | Deploy dedicated Valkey queue broker |
 | `valkey-queue.image.tag` | string | `"9.0.6"` | Valkey queue container image tag |
+| `dragonfly-cache.image.tag` | string | `"v2.0.2"` | Dragonfly cache container image tag |
+| `dragonfly-queue.image.tag` | string | `"v2.0.2"` | Dragonfly queue container image tag |
 | `ingress.enabled` | bool | `false` | Enable Kubernetes Ingress routing |
 | `httproute.enabled` | bool | `false` | Enable Gateway API HTTPRoute routing |
 
@@ -103,6 +105,7 @@ ERPNext application workloads comply with Kubernetes security standards by runni
 ```cue
 values: {
 	podSecurityContext: {
+		fsGroup:      1000
 		runAsNonRoot: true
 		runAsUser:    1000
 		runAsGroup:   1000
@@ -123,6 +126,13 @@ values: {
 - [Official ERPNext Repository](https://github.com/frappe/erpnext)
 - [Frappe Framework Documentation](https://frappeframework.com/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-26
+- **Changed:** Upgraded ERPNext application container image from `v16.34.1` to `v16.52.1` (`frappe/erpnext:v16.52.1`).
+- **Changed:** Upgraded Dragonfly container image from `v1.40.1` to `v2.0.2` (`ghcr.io/dragonflydb/dragonfly:v2.0.2`).
+- **Fixed:** Configured ephemeral scratch directories for NGINX runtime, configuration, and cache paths (`/etc/nginx/conf.d`, `/var/lib/nginx`, `/run`) to enable unprivileged non-root execution.
 
 ## Kubesec Scan Scores
 
