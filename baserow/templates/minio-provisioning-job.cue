@@ -30,7 +30,7 @@ import (
 				containers: [
 					{
 						name:  "minio-mc"
-						image: "minio/mc:latest"
+						image: "\(#config.minio.clientImage.registry)/\(#config.minio.clientImage.repository):\(#config.minio.clientImage.tag)"
 						command: [
 							"/bin/sh",
 							"-c",

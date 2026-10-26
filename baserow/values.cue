@@ -29,7 +29,7 @@ values: {
 			registry: "docker.io"
 			repository: "baserow/web-frontend"
 			pullPolicy: "Always"
-			tag: "2.3.3"
+			tag: "2.4.1"
 		}
 
 		// -- If defined, uses a Secret to pull an image from a private Docker registry or repository.
@@ -193,7 +193,7 @@ values: {
 				registry: "docker.io"
 				repository: "baserow/backend"
 				pullPolicy: "Always"
-				tag: "2.3.3"
+				tag: "2.4.1"
 			}
 			//  If defined, uses a Secret to pull an image from a private Docker registry or repository.
 			imagePullSecrets: []
@@ -339,7 +339,7 @@ values: {
 					// -- image pull policy
 					pullPolicy: "Always"
 					// -- Overrides the image tag
-					tag: "2.3.3"
+					tag: "2.4.1"
 				}
 				// -- If defined, uses a Secret to pull an image from a private Docker registry or repository.
 				imagePullSecrets: []
@@ -430,7 +430,7 @@ values: {
 					// -- image pull policy
 					pullPolicy: "Always"
 					// -- Overrides the image tag
-					tag: "2.3.3"
+					tag: "2.4.1"
 				}
 				imagePullSecrets: []
 				podAnnotations: {}
@@ -500,7 +500,7 @@ values: {
 					// -- image pull policy
 					pullPolicy: "Always"
 					// -- Overrides the image tag
-					tag: "2.3.3"
+					tag: "2.4.1"
 				}
 				imagePullSecrets: []
 				podAnnotations: {}
@@ -560,7 +560,7 @@ values: {
 					// -- image pull policy
 					pullPolicy: "Always"
 					// -- Overrides the image tag
-					tag: "2.3.3"
+					tag: "2.4.1"
 				}
 				imagePullSecrets: []
 				podAnnotations: {}
@@ -778,7 +778,7 @@ values: {
 				// -- image pull policy
 				pullPolicy: "Always"
 				// -- Overrides the image tag
-				tag: "2.3.3"
+				tag: "2.4.1"
 			}
 			// -- If defined, uses a Secret to pull an image from a private Docker registry or repository.
 			imagePullSecrets: []
@@ -922,7 +922,7 @@ values: {
 			registry: "docker.io"
 			repository: "baserow/backend"
 			pullPolicy: "Always"
-			tag: "2.3.3"
+			tag: "2.4.1"
 		}
 		imagePullSecrets: []
 		priorityClassName: ""
@@ -1110,8 +1110,13 @@ values: {
 		enabled: true
 		image: {
 			registry:   "docker.io"
-			repository: "minio/minio"
-			tag:        "RELEASE.2025-09-07T16-13-09Z-cpuv1"
+			repository: "bitnamilegacy/minio"
+			tag:        "2025.7.23-debian-12-r5"
+		}
+		clientImage: {
+			registry:   "docker.io"
+			repository: "bitnamilegacy/minio-client"
+			tag:        "2025.7.21-debian-12-r3"
 		}
 		auth: {
 			rootUser:     "minioadmin"
@@ -1128,14 +1133,14 @@ values: {
 			}
 		}
 		podSecurityContext: {
-			fsGroup:    65510
-			runAsGroup: 65510
-			runAsUser:  65510
+			fsGroup:    1001
+			runAsGroup: 1001
+			runAsUser:  1001
 		}
 		securityContext: {
-			runAsGroup:   65510
+			runAsGroup:   1001
 			runAsNonRoot: true
-			runAsUser:    65510
+			runAsUser:    1001
 			capabilities: {
 				drop: ["ALL"]
 			}
@@ -1162,7 +1167,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "caddy"
-			tag:        "2.11.4"
+			tag:        "2.11.7"
 		}
 		resources: {
 			limits: {
