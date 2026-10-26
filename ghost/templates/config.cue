@@ -83,7 +83,7 @@ import (
 
 	image: {
 		repository: *"docker.io/library/ghost" | string
-		tag:        *"6.51.0" | string
+		tag:        *"6.72.0" | string
 		pullPolicy: *"IfNotPresent" | string
 		reference:  "\(repository):\(tag)"
 	}
@@ -108,7 +108,7 @@ import (
 		enabled: *true | bool
 		image: {
 			repository: *"docker.io/library/mysql" | string
-			tag:        *"8.4.7" | string
+			tag:        *"8.4.13" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		architecture: *"standalone" | string

@@ -4,14 +4,14 @@
 [Ghost](https://ghost.org/) is a modern, open-source publishing platform built on Node.js designed for professional bloggers, online publications, independent journalists, and content creators. It features a rich editor, built-in member management, subscription payments, automated newsletter distribution, and SEO optimization.
 
 ## Application Information
-- **Version:** 6.62.0
+- **Version:** 6.72.0
 - **Upstream Project:** [https://github.com/TryGhost/Ghost](https://github.com/TryGhost/Ghost) / [https://ghost.org/](https://ghost.org/)
-- **Container Base:** [docker.io/library/ghost](https://hub.docker.com/_/ghost) (`docker.io/library/ghost:6.62.0`)
+- **Container Base:** [docker.io/library/ghost](https://hub.docker.com/_/ghost) (`docker.io/library/ghost:6.72.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Ghost Core Application (`deployment`):** Node.js web and publishing application server running `docker.io/library/ghost:6.62.0` on container port 2368, mounting persistent volume storage for media uploads, themes, and configuration assets.
-- **MySQL Database Subchart (`mysql`):** Dedicated relational database server (`docker.io/library/mysql:8.4.10`) on port 3306 with persistent volume storage (`8Gi`).
+- **Ghost Core Application (`deployment`):** Node.js web and publishing application server running `docker.io/library/ghost:6.72.0` on container port 2368, mounting persistent volume storage for media uploads, themes, and configuration assets.
+- **MySQL Database Subchart (`mysql`):** Dedicated relational database server (`docker.io/library/mysql:8.4.13`) on port 3306 with persistent volume storage (`8Gi`).
 - **Persistent Storage Volumes (`pvc`):** Persistent volume storage (`10Gi`, ReadWriteOnce) mounted to `/var/lib/ghost/content` preserving uploaded images, active themes, and content data across pod restarts.
 - **Kubernetes Service (`service`):** ClusterIP service exposing port 80 (named `http`, routing internally to container port 2368).
 - **Gateway API HTTPRoute (`gateway`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resource enabling modern ingress traffic routing through Envoy Gateway, Traefik, Cilium, or other Gateway API controllers.
@@ -73,13 +73,13 @@ timoni -n default delete ghost
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `"docker.io/library/ghost"` | Ghost container image repository |
-| `image.tag` | string | `"6.62.0"` | Ghost container image tag |
+| `image.tag` | string | `"6.72.0"` | Ghost container image tag |
 | `ghost.url` | string | `"http://localhost:8080"` | Public canonical base URL for Ghost |
 | `persistence.enabled` | bool | `true` | Enable persistent storage for content assets |
 | `persistence.size` | string | `"10Gi"` | Storage size requested for Ghost content volume |
 | `service.port` | int | `80` | Internal ClusterIP service port for Ghost |
 | `mysql.enabled` | bool | `true` | Deploy internal dedicated MySQL StatefulSet |
-| `mysql.image.tag` | string | `"8.4.10"` | MySQL container image tag |
+| `mysql.image.tag` | string | `"8.4.13"` | MySQL container image tag |
 | `mysql.standalone.persistence.size` | string | `"8Gi"` | Persistent storage size for MySQL database |
 | `backup.enabled` | bool | `false` | Enable scheduled automated database backups |
 | `ingress.enabled` | bool | `false` | Enable Kubernetes Ingress routing |
@@ -128,6 +128,12 @@ values: {
 - [Official Ghost Repository](https://github.com/TryGhost/Ghost)
 - [Ghost Documentation](https://ghost.org/docs/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-26
+- **Changed:** Upgraded Ghost application container image from `6.62.0` to `6.72.0` (`docker.io/library/ghost:6.72.0`).
+- **Changed:** Upgraded MySQL container image from `8.4.10` to `8.4.13` (`docker.io/library/mysql:8.4.13`).
 
 ## Kubesec Scan Scores
 
