@@ -11,8 +11,8 @@ values: {
 	image: {
 		repository: "docker.io/collabora/code"
 		pullPolicy: "IfNotPresent"
-		tag:        "26.04.4.1.1"
-		digest:     "sha256:1efda3043e8b9cb437d1b6c6efe20cc3753760e634de012b8dac391da488bf97"
+		tag:        "26.04.5.2.1"
+		digest:     ""
 	}
 
 	imagePullSecrets: []
@@ -203,7 +203,7 @@ values: {
 			}
 			image: {
 				repository: "docker.io/alpine"
-				tag:        "3.22.0"
+				tag:        "3.24.3"
 			}
 			securityContext: {
 				runAsUser: 1001
@@ -251,7 +251,7 @@ values: {
 	}
 
 	route: {
-		enabled:    true
+		enabled:    false
 		apiVersion: "gateway.networking.k8s.io/v1"
 		kind:       "HTTPRoute"
 		annotations: {}
@@ -374,7 +374,7 @@ values: {
 			enabled: true
 			image: {
 				repository: "docker.io/alpine/k8s"
-				tag:        "1.31.1"
+				tag:        "1.34.12"
 				pullPolicy: "IfNotPresent"
 			}
 		}
@@ -441,7 +441,7 @@ values: {
 		}
 		image: {
 			repository: "docker.io/nginx"
-			tag:        "1.25"
+			tag:        "1.30"
 			pullPolicy: "IfNotPresent"
 		}
 		replicaCount:  1

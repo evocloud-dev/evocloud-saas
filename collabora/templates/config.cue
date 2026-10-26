@@ -142,7 +142,7 @@ import (
 			}
 			image: {
 				repository: *"docker.io/alpine" | string
-				tag:        *"3.22.0" | string
+				tag:        *"3.24.3" | string
 			}
 			securityContext?: corev1.#SecurityContext & {
 				runAsUser: *1001 | string
@@ -416,7 +416,7 @@ import (
 			enabled: *true | bool
 			image: {
 				repository: *"docker.io/alpine/k8s" | string
-				tag:        *"1.31.1" | string
+				tag:        *"1.34.12" | string
 				pullPolicy: *"IfNotPresent" | string
 			}
 		}
@@ -455,7 +455,7 @@ import (
 		}
 		image: {
 			repository: *"docker.io/nginx" | string
-			tag:        *"1.25" | string
+			tag:        *"1.30" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		replicaCount:  *1 | int
