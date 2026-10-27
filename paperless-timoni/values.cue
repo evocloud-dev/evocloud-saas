@@ -11,7 +11,7 @@ values: {
 	image: {
 		repository: "ghcr.io/paperless-ngx/paperless-ngx"
 		pullPolicy: "IfNotPresent"
-		tag:        "3.1.3"
+		tag:        "3.3.4"
 	}
 	env: {
 		TZ: "UTC"
