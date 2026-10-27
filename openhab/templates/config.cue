@@ -117,7 +117,7 @@ import (
 	configMaps: {
 		syncImage: timoniv1.#Image & {
 			repository: *"docker.io/library/busybox" | string
-			tag:        *"1.37" | string
+			tag:        *"1.38" | string
 			digest:     *"" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
@@ -224,7 +224,7 @@ import (
 		images: {
 			utility: timoniv1.#Image & {
 				repository: *"docker.io/library/alpine" | string
-				tag:        *"3.22" | string
+				tag:        *"3.24" | string
 				digest:     *"" | string
 				pullPolicy: *"IfNotPresent" | string
 			}

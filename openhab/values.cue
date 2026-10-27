@@ -172,7 +172,7 @@ values: {
 		// -- Image used by the init container that copies ConfigMap files into the conf PVC
 		syncImage: {
 			repository: "docker.io/library/busybox"
-			tag:        "1.37"
+			tag:        "1.38"
 			pullPolicy: "IfNotPresent"
 		}
 		// -- Resource requests/limits for the ConfigMap sync init container
@@ -397,7 +397,7 @@ values: {
 			// -- Backup utility image (provides tar, gzip, cp)
 			utility: {
 				repository: "docker.io/library/alpine"
-				tag:        "3.22"
+				tag:        "3.24"
 				pullPolicy: "IfNotPresent"
 			}
 			// -- S3 uploader image (MinIO client)
