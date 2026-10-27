@@ -4,16 +4,16 @@
 [Immich](https://immich.app/) is a self-hosted photo and video management solution. Easily back up, organize, and manage your photos on your own server. Immich helps you browse, search and organize your photos and videos with ease, without sacrificing your privacy.
 
 ## Application Information
-- **Version:** `v3.1.0`
+- **Version:** `v3.3.4`
 - **Upstream Project:** [https://github.com/immich-app/immich](https://github.com/immich-app/immich)
-- **Container Base:** [ghcr.io/immich-app/immich-server](https://github.com/immich-app/immich/pkgs/container/immich-server) (`ghcr.io/immich-app/immich-server:v3.1.0`)
+- **Container Base:** [ghcr.io/immich-app/immich-server](https://github.com/immich-app/immich/pkgs/container/immich-server) (`ghcr.io/immich-app/immich-server:v3.3.4`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Immich Server (`immich`):** Primary application Deployment running `ghcr.io/immich-app/immich-server:v3.1.0`. Provides the REST API, web UI, background microservices, and job orchestration. Exposes container port `2283` mapped to service port `80`.
-- **Immich Machine Learning (`immich-machine-learning`):** Microservice Deployment running `ghcr.io/immich-app/immich-machine-learning:v3.1.0` on port `3003`. Handles heavy AI workloads including facial detection, CLIP image classification, and vector embeddings.
+- **Immich Server (`immich`):** Primary application Deployment running `ghcr.io/immich-app/immich-server:v3.3.4`. Provides the REST API, web UI, background microservices, and job orchestration. Exposes container port `2283` mapped to service port `80`.
+- **Immich Machine Learning (`immich-machine-learning`):** Microservice Deployment running `ghcr.io/immich-app/immich-machine-learning:v3.3.5` on port `3003`. Handles heavy AI workloads including facial detection, CLIP image classification, and vector embeddings.
 - **PostgreSQL Database (`immich-postgresql`):** Dedicated PostgreSQL 14 StatefulSet running `ghcr.io/immich-app/postgres:14-vectorchord1.1.1-pgvector0.8.5` with VectorChord and pgvector extensions for fast vector indexing.
-- **Valkey In-Memory Cache (`immich-valkey`):** High-performance in-memory datastore StatefulSet running `docker.io/valkey/valkey:8.1.9` on port `6379`. Powers Immich background queues and caching.
+- **Valkey In-Memory Cache (`immich-valkey`):** High-performance in-memory datastore StatefulSet running `docker.io/valkey/valkey:8.1.11` on port `6379`. Powers Immich background queues and caching.
 - **Persistent Storage:**
   - **Upload Library (`library`):** Persistent volume claim (`50Gi`) mounted to `/usr/src/app/upload` storing original photos, videos, and generated thumbnails.
   - **Model Cache (`model-cache`):** Persistent volume claim (`10Gi`) mounted to `/cache` caching downloaded machine learning models.
@@ -84,13 +84,13 @@ timoni -n default delete immich
 | `fullnameOverride` | `string` | `""` | Override the fully qualified release name |
 | `commonLabels` | `{[string]: string}` | `{}` | Additional labels applied to all chart resources |
 | `image.repository` | `string` | `"ghcr.io/immich-app/immich-server"` | Immich server image repository |
-| `image.tag` | `string` | `"v3.1.0"` | Immich server image tag |
+| `image.tag` | `string` | `"v3.3.4"` | Immich server image tag |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | `imagePullSecrets` | `[...timoniv1.ObjectReference]` | `[]` | [Kubernetes image pull secrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod) |
 | `machineLearning.enabled` | `bool` | `true` | Enable the Immich machine-learning service |
 | `machineLearning.replicaCount` | `int` | `1` | Number of machine-learning replicas |
 | `machineLearning.image.repository` | `string` | `"ghcr.io/immich-app/immich-machine-learning"` | Machine-learning image repository |
-| `machineLearning.image.tag` | `string` | `"v3.1.0"` | Machine-learning image tag |
+| `machineLearning.image.tag` | `string` | `"v3.3.5"` | Machine-learning image tag |
 | `machineLearning.image.pullPolicy` | `string` | `"IfNotPresent"` | Machine-learning image pull policy |
 | `machineLearning.service.port` | `int` | `3003` | Machine-learning service port |
 | `machineLearning.persistence.enabled` | `bool` | `true` | Enable persistent model cache |
@@ -122,7 +122,7 @@ timoni -n default delete immich
 | `valkey.internal.enabled` | `bool` | `true` | Enable bundled Valkey/Redis cache |
 | `valkey.architecture` | `string` | `"standalone"` | Redis chart architecture (`standalone` or `replication`) |
 | `valkey.image.repository` | `string` | `"docker.io/valkey/valkey"` | Valkey image repository |
-| `valkey.image.tag` | `string` | `"8.1.9"` | Valkey image tag |
+| `valkey.image.tag` | `string` | `"8.1.11"` | Valkey image tag |
 | `valkey.auth.enabled` | `bool` | `true` | Enable cache password authentication |
 | `valkey.auth.password` | `string` | `"valkey-password"` | Cache authentication password |
 | `valkey.standalone.persistence.size` | `string` | `"5Gi"` | Valkey cache PVC size |
@@ -180,6 +180,13 @@ values: {
 - [Official Immich Repository](https://github.com/immich-app/immich)
 - [Immich Documentation](https://immich.app/docs/overview/introduction)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded Immich Server container image from `v3.1.0` to `v3.3.4` (`ghcr.io/immich-app/immich-server:v3.3.4`).
+- **Changed:** Upgraded Immich Machine Learning container image from `v3.1.0` to `v3.3.5` (`ghcr.io/immich-app/immich-machine-learning:v3.3.5`).
+- **Changed:** Upgraded Valkey container image from `8.1.9` to `8.1.11` (`docker.io/valkey/valkey:8.1.11`).
 
 ## Kubesec Scan Scores
 

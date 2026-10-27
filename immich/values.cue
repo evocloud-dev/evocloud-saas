@@ -21,7 +21,7 @@ values: {
 		// -- Immich server image repository.
 		repository: "ghcr.io/immich-app/immich-server"
 		// -- Immich server image tag.
-		tag: "v3.1.0"
+		tag: "v3.3.4"
 		// -- Immich server image pull policy.
 		pullPolicy: "IfNotPresent"
 	}
@@ -40,7 +40,7 @@ values: {
 			// -- Machine-learning image repository.
 			repository: "ghcr.io/immich-app/immich-machine-learning"
 			// -- Machine-learning image tag.
-			tag: "v3.1.0"
+			tag: "v3.3.5"
 			// -- Machine-learning image pull policy.
 			pullPolicy: "IfNotPresent"
 		}
@@ -290,7 +290,7 @@ values: {
 			// -- Redis/Valkey image repository.
 			repository: "docker.io/valkey/valkey"
 			// -- Redis/Valkey image tag.
-			tag: "8.1.9"
+			tag: "8.1.11"
 			// -- Redis/Valkey image pull policy.
 			pullPolicy: "IfNotPresent"
 		}
