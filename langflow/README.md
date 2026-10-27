@@ -4,13 +4,13 @@
 [Langflow](https://www.langflow.org/) is a dynamic, visual framework and low-code web platform for building, prototyping, and deploying multi-agent applications, Retrieval-Augmented Generation (RAG) pipelines, and Large Language Model (LLM) workflows. With an intuitive drag-and-drop canvas, customizable Python components, and native support for major AI frameworks (including LangChain, LlamaIndex, OpenAI, Anthropic, and Hugging Face), Langflow empowers developers to experiment, iterate, and deploy production-ready generative AI solutions seamlessly.
 
 ## Application Information
-- **Version:** `1.11.5`
+- **Version:** `1.13.0`
 - **Upstream Project:** [https://github.com/langflow-ai/langflow](https://github.com/langflow-ai/langflow)
-- **Container Base:** [docker.io/langflowai/langflow](https://hub.docker.com/r/langflowai/langflow) (`docker.io/langflowai/langflow:1.11.5`)
+- **Container Base:** [docker.io/langflowai/langflow](https://hub.docker.com/r/langflowai/langflow) (`docker.io/langflowai/langflow:1.13.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Langflow Core (`deploy`):** Primary application Deployment running `docker.io/langflowai/langflow:1.11.5` on port `7860`. Serves the visual canvas interface, REST API, WebSocket streams, component registry, and flow execution runtime.
+- **Langflow Core (`deploy`):** Primary application Deployment running `docker.io/langflowai/langflow:1.13.0` on port `7860`. Serves the visual canvas interface, REST API, WebSocket streams, component registry, and flow execution runtime.
 - **Database Engine:** Embedded SQLite database persisted on local storage (`/app/langflow`), with optional out-of-the-box support for external PostgreSQL/MySQL databases via SQLAlchemy connection strings.
 - **Persistent Volume (`pvc`):** Persistent Volume Claim (`5Gi`, default `ReadWriteOnce`) mounted to `/app/langflow` storing flows, local configurations, API credentials, and SQLite database files.
 - **Kubernetes Service (`svc`):** ClusterIP Service exposing port `7860` for internal cluster routing and Gateway API ingress integration.
@@ -83,7 +83,7 @@ timoni -n default delete langflow
 | `fullnameOverride` | `string` | `""` | Override the full release name used in resource names |
 | `commonLabels` | `{[string]: string}` | `{}` | Labels added to every rendered resource |
 | `image.repository` | `string` | `"docker.io/langflowai/langflow"` | Official Langflow image repository |
-| `image.tag` | `string` | `"1.11.5"` | Official Langflow image tag |
+| `image.tag` | `string` | `"1.13.0"` | Official Langflow image tag |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | `imagePullSecrets` | `[...corev1.#LocalObjectReference]` | `[]` | [Kubernetes image pull secrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod) |
 | `replicaCount` | `int` | `1` | Number of Langflow replicas (scaling > 1 requires external DB and RWX storage) |
@@ -163,6 +163,11 @@ values: {
 - [Official Langflow Repository](https://github.com/langflow-ai/langflow)
 - [Langflow Documentation](https://docs.langflow.org/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded Langflow container image from `1.11.5` to `1.13.0` (`docker.io/langflowai/langflow:1.13.0`).
 
 ## Kubesec Scan Scores
 

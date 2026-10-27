@@ -16,7 +16,7 @@ values: {
 		// -- Official Langflow image repository.
 		repository: "docker.io/langflowai/langflow"
 		// -- Official Langflow image tag. Do not use a floating tag.
-		tag: "1.11.5"
+		tag: "1.13.0"
 		// -- Kubernetes image pull policy.
 		pullPolicy: "IfNotPresent"
 	}
