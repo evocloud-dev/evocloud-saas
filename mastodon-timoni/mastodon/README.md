@@ -4,18 +4,18 @@
 [Mastodon](https://joinmastodon.org/) is a free, decentralized, open-source social networking platform built on the W3C ActivityPub open protocol. Operating as a core pillar of the Fediverse, Mastodon enables independent servers ("instances") to interconnect seamlessly, allowing users to follow profiles, publish posts, share media, and interact across independent communities without central corporate control or algorithmic manipulation.
 
 ## Application Information
-- **Version:** `v4.7.1`
+- **Version:** `v4.7.3`
 - **Upstream Project:** [https://github.com/mastodon/mastodon](https://github.com/mastodon/mastodon)
-- **Container Base:** [ghcr.io/mastodon/mastodon](https://github.com/mastodon/mastodon/pkgs/container/mastodon) (`ghcr.io/mastodon/mastodon:v4.7.1`, `ghcr.io/mastodon/mastodon-streaming:v4.7.1`)
+- **Container Base:** [ghcr.io/mastodon/mastodon](https://github.com/mastodon/mastodon/pkgs/container/mastodon) (`ghcr.io/mastodon/mastodon:v4.7.3`, `ghcr.io/mastodon/mastodon-streaming:v4.7.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Mastodon Web (`mastodon-web`):** Primary Ruby on Rails application Deployment running `ghcr.io/mastodon/mastodon:v4.7.1` on port `3000` (exposed via Service port `80`). Serves the web UI, REST API endpoints, ActivityPub federation routes, and OAuth identity services.
-- **Mastodon Streaming API (`mastodon-streaming`):** High-concurrency Node.js WebSocket and Server-Sent Events (SSE) Deployment running `ghcr.io/mastodon/mastodon-streaming:v4.7.1` on port `4000`, dispatching real-time notifications and timeline events to connected clients.
-- **Mastodon Sidekiq Worker (`mastodon-sidekiq`):** Asynchronous background job worker Deployment running `ghcr.io/mastodon/mastodon:v4.7.1` handling media processing, push/pull federation delivery, email notifications, and scheduled tasks.
+- **Mastodon Web (`mastodon-web`):** Primary Ruby on Rails application Deployment running `ghcr.io/mastodon/mastodon:v4.7.3` on port `3000` (exposed via Service port `80`). Serves the web UI, REST API endpoints, ActivityPub federation routes, and OAuth identity services.
+- **Mastodon Streaming API (`mastodon-streaming`):** High-concurrency Node.js WebSocket and Server-Sent Events (SSE) Deployment running `ghcr.io/mastodon/mastodon-streaming:v4.7.3` on port `4000`, dispatching real-time notifications and timeline events to connected clients.
+- **Mastodon Sidekiq Worker (`mastodon-sidekiq`):** Asynchronous background job worker Deployment running `ghcr.io/mastodon/mastodon:v4.7.3` handling media processing, push/pull federation delivery, email notifications, and scheduled tasks.
 - **PostgreSQL Database (`mastodon-postgresql`):** Relational database StatefulSet running `bitnamilegacy/postgresql:17.6.0-debian-12-r4` on port `5432` storing accounts, posts, relationships, and metadata.
 - **Redis In-Memory Cache (`mastodon-redis-master`):** Key-value in-memory data store StatefulSet running `valkey/valkey:9.0.6-alpine` on port `6379` powering timeline caches, Sidekiq job queues, and WebSocket pub/sub messaging.
-- **OpenSearch / Elasticsearch Engine (`mastodon-elasticsearch-master`):** Full-text search engine StatefulSet running `opensearchproject/opensearch:3.8.0` on port `9200` providing full-text search across posts, hashtags, and directory accounts.
+- **OpenSearch / Elasticsearch Engine (`mastodon-elasticsearch-master`):** Full-text search engine StatefulSet running `opensearchproject/opensearch:3.9.0` on port `9200` providing full-text search across posts, hashtags, and directory accounts.
 - **Persistent Storage Volumes:**
   - **Media & System Storage (`system`):** Persistent Volume Claim (`100Gi`, ReadWriteOnce) storing uploaded media, avatars, and cached remote attachments.
   - **Assets Storage (`assets`):** Persistent Volume Claim (`10Gi`, ReadWriteOnce) for compiled assets.
@@ -86,7 +86,7 @@ timoni -n default delete mastodon
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | `string` | `"ghcr.io/mastodon/mastodon"` | Container image repository for Mastodon core |
-| `image.tag` | `string` | `"v4.7.1"` | Container image tag for Mastodon core |
+| `image.tag` | `string` | `"v4.7.3"` | Container image tag for Mastodon core |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | `mastodon.local_domain` | `string` | `"localhost"` | The domain used in user handles (e.g. `@user@example.com`) |
 | `mastodon.web_domain` | `string` | `"localhost:8080"` | The public web domain where the instance is accessible |
@@ -102,7 +102,7 @@ timoni -n default delete mastodon
 | `mastodon.web.port` | `int` | `3000` | Mastodon Rails web server container port |
 | `mastodon.web.resources` | `timoniv1.#ResourceRequirements` | `{requests: {cpu: "100m", memory: "512Mi"}, limits: {cpu: "1", memory: "1536Mi"}}` | Web pod resource requests and limits |
 | `mastodon.streaming.image.repository` | `string` | `"ghcr.io/mastodon/mastodon-streaming"` | Container image repository for Streaming API |
-| `mastodon.streaming.image.tag` | `string` | `"v4.7.1"` | Container image tag for Streaming API |
+| `mastodon.streaming.image.tag` | `string` | `"v4.7.3"` | Container image tag for Streaming API |
 | `mastodon.streaming.replicas` | `int` | `2` | Number of streaming pod replicas |
 | `mastodon.streaming.port` | `int` | `4000` | Streaming API container port |
 | `mastodon.streaming.resources` | `timoniv1.#ResourceRequirements` | `{requests: {cpu: "100m", memory: "256Mi"}, limits: {cpu: "500m", memory: "512Mi"}}` | Streaming pod resource requests and limits |
@@ -118,7 +118,7 @@ timoni -n default delete mastodon
 | `redis.image.tag` | `string` | `"9.0.6-alpine"` | Redis/Valkey container image tag |
 | `elasticsearch.enabled` | `bool` | `true` | Deploy OpenSearch/Elasticsearch full-text search StatefulSet |
 | `elasticsearch.image.repository` | `string` | `"opensearchproject/opensearch"` | OpenSearch container image repository |
-| `elasticsearch.image.tag` | `string` | `"3.8.0"` | OpenSearch container image tag |
+| `elasticsearch.image.tag` | `string` | `"3.9.0"` | OpenSearch container image tag |
 | `elasticsearch.resources` | `timoniv1.#ResourceRequirements` | `{requests: {cpu: "100m", memory: "512Mi"}, limits: {cpu: "1", memory: "2048Mi"}}` | OpenSearch resource requests and limits |
 | `serviceAccount.create` | `bool` | `true` | Create dedicated ServiceAccount |
 | `serviceAccount.name` | `string` | `""` | Override ServiceAccount name |
@@ -159,6 +159,13 @@ values: {
 - [Official Mastodon Repository](https://github.com/mastodon/mastodon)
 - [Mastodon Documentation](https://docs.joinmastodon.org/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.3 - 2026-10-27
+- **Changed:** Upgraded Mastodon core container image from `v4.7.1` to `v4.7.3` (`ghcr.io/mastodon/mastodon:v4.7.3`).
+- **Changed:** Upgraded Mastodon streaming container image from `v4.7.1` to `v4.7.3` (`ghcr.io/mastodon/mastodon-streaming:v4.7.3`).
+- **Changed:** Upgraded OpenSearch container image from `3.8.0` to `3.9.0` (`opensearchproject/opensearch:3.9.0`).
 
 ## Kubesec Scan Scores
 
