@@ -29,7 +29,7 @@ values: {
 		// -- Container image repository
 		repository: "docker.io/n8nio/n8n"
 		// -- Container image tag
-		tag: "2.37.11"
+		tag: "2.46.0"
 		// -- Image pull policy
 		pullPolicy: "IfNotPresent"
 		// -- Container image digest
@@ -87,7 +87,7 @@ values: {
 			// -- External task runner image repository
 			repository: "docker.io/n8nio/runners"
 			// -- External task runner image tag. Empty defaults to image.tag.
-			tag: "2.37.11"
+			tag: "2.46.0"
 			// -- External task runner image pull policy
 			pullPolicy: "IfNotPresent"
 			// -- External task runner image digest
@@ -412,7 +412,7 @@ values: {
 			// -- Redis container image repository
 			repository: "docker.io/library/redis"
 			// -- Redis container image tag
-			tag: "8.10.1"
+			tag: "8.10.3"
 			// -- Redis image pull policy
 			pullPolicy: "IfNotPresent"
 			// -- Redis image digest

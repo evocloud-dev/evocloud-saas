@@ -9,7 +9,7 @@ values: {
 		repository: "docker.io/nginx"
 		tag:        "1-alpine"
 		repository: "docker.io/n8nio/n8n"
-		tag:        "2.35.3"
+		tag:        "2.46.0"
 		digest:     ""
 	}
 	test: {

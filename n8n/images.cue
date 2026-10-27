@@ -4,12 +4,12 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/n8nio/n8n" | string
-		tag:        *"2.37.11" | string
+		tag:        *"2.46.0" | string
 		digest:     *"" | string
 	}
 	taskRunners: image: {
 		repository: *"docker.io/n8nio/runners" | string
-		tag:        *"2.37.11" | string
+		tag:        *"2.46.0" | string
 		digest:     *"" | string
 	}
 	postgresql: image: {
@@ -24,7 +24,7 @@ values: {
 	}
 	redis: image: {
 		repository: *"docker.io/library/redis" | string
-		tag:        *"8.10.1" | string
+		tag:        *"8.10.3" | string
 		digest:     *"" | string
 	}
 }

@@ -4,16 +4,16 @@
 [n8n](https://n8n.io/) is an extensible, open-source workflow automation platform that enables users to connect disparate services, automate complex multi-step processes, and build custom API integrations with both low-code and code-native flexibility. Featuring native queue mode scaling with Redis and support for isolated task runner sidecars, n8n provides an enterprise-ready automation engine that maintains strict data sovereignty and security within Kubernetes clusters.
 
 ## Application Information
-- **Version:** 0.1.0 (App: 2.37.11)
+- **Version:** 0.1.1 (App: 2.46.0)
 - **Upstream Project:** [https://github.com/n8n-io/n8n](https://github.com/n8n-io/n8n)
-- **Container Base:** [docker.io/n8nio/n8n](https://hub.docker.com/r/n8nio/n8n) (`docker.io/n8nio/n8n:2.37.11`), [docker.io/n8nio/runners](https://hub.docker.com/r/n8nio/runners) (`docker.io/n8nio/runners:2.37.11`), [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-alpine`), [docker.io/library/redis](https://hub.docker.com/_/redis) (`docker.io/library/redis:8.10.1`)
+- **Container Base:** [docker.io/n8nio/n8n](https://hub.docker.com/r/n8nio/n8n) (`docker.io/n8nio/n8n:2.46.0`), [docker.io/n8nio/runners](https://hub.docker.com/r/n8nio/runners) (`docker.io/n8nio/runners:2.46.0`), [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-alpine`), [docker.io/library/redis](https://hub.docker.com/_/redis) (`docker.io/library/redis:8.10.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **n8n Core (`deploy` / `n8n-n8n`):** Primary workflow execution server, web UI editor, and webhook listener running `docker.io/n8nio/n8n:2.37.11` on port 5678 (exposed as Service port 80), accompanied by an optional external task runner sidecar (`docker.io/n8nio/runners:2.37.11`) for secure isolated script execution.
-- **n8n Worker (`deployWorker` / `n8n-n8n-worker`):** Scalable background worker Deployment running `docker.io/n8nio/n8n:2.37.11` in queue mode, consuming and executing asynchronous workflow tasks from Redis queues.
+- **n8n Core (`deploy` / `n8n-n8n`):** Primary workflow execution server, web UI editor, and webhook listener running `docker.io/n8nio/n8n:2.46.0` on port 5678 (exposed as Service port 80), accompanied by an optional external task runner sidecar (`docker.io/n8nio/runners:2.46.0`) for secure isolated script execution.
+- **n8n Worker (`deployWorker` / `n8n-n8n-worker`):** Scalable background worker Deployment running `docker.io/n8nio/n8n:2.46.0` in queue mode, consuming and executing asynchronous workflow tasks from Redis queues.
 - **PostgreSQL Database Subchart (`pgDeploy` / `n8n-n8n-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-alpine`) providing persistent relational storage (`8Gi`) with automated `uuid-ossp` extension provisioning.
-- **Redis Subchart (`redisDeploy` / `n8n-n8n-redis`):** Dedicated Redis 8 StatefulSet (`docker.io/library/redis:8.10.1`) managing message broker queues and inter-process event distribution for horizontal worker scaling.
+- **Redis Subchart (`redisDeploy` / `n8n-n8n-redis`):** Dedicated Redis 8 StatefulSet (`docker.io/library/redis:8.10.3`) managing message broker queues and inter-process event distribution for horizontal worker scaling.
 - **Persistent Volume Claim (`pvc`):** Persistent storage (`5Gi`) mounted at `/home/node/.n8n` storing user configurations, custom community nodes, and credentials cache.
 - **Kubernetes Service (`svc`):** ClusterIP service exposing port 80 routing internally to container port 5678.
 - **Gateway API HTTPRoute (`httpRoute`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resource for modern cluster ingress routing.
@@ -76,7 +76,7 @@ timoni -n default delete n8n
 | `fullnameOverride` | string | `""` | Override the full release name used in resource naming |
 | `commonLabels` | map | `{}` | Labels added to every resource created by this module |
 | `image.repository` | string | `"docker.io/n8nio/n8n"` | n8n container image repository |
-| `image.tag` | string | `"2.37.11"` | n8n container image tag |
+| `image.tag` | string | `"2.46.0"` | n8n container image tag |
 | `image.pullPolicy` | string | `"IfNotPresent"` | Kubernetes image pull policy |
 | `n8n.encryptionKey` | string | `"..."` | Encryption key for securing workflow credentials and sensitive data |
 | `n8n.webhookUrl` | string | `""` | Public webhook URL for external access |
@@ -86,7 +86,7 @@ timoni -n default delete n8n
 | `n8n.gracefulShutdownTimeout` | int | `60` | Graceful shutdown timeout in seconds for main and worker processes |
 | `taskRunners.mode` | string | `"external"` | Task runner mode (`internal` or `external` dedicated sidecar) |
 | `taskRunners.image.repository` | string | `"docker.io/n8nio/runners"` | External task runner sidecar container image repository |
-| `taskRunners.image.tag` | string | `"2.37.11"` | External task runner sidecar container image tag |
+| `taskRunners.image.tag` | string | `"2.46.0"` | External task runner sidecar container image tag |
 | `queue.enabled` | bool | `true` | Enable queue mode using Redis for horizontal worker scaling |
 | `queue.workers` | int | `1` | Number of background worker replicas |
 | `queue.concurrency` | int | `10` | Number of concurrent workflow executions per worker |
@@ -126,7 +126,7 @@ timoni -n default delete n8n
 | `postgresql.standalone.resources.limits.memory` | string | `"1Gi"` | Memory limit for PostgreSQL subchart |
 | `redis.enabled` | bool | `true` | Deploy dedicated Redis message broker subchart |
 | `redis.image.repository` | string | `"docker.io/library/redis"` | Redis container image repository |
-| `redis.image.tag` | string | `"8.10.1"` | Redis container image tag |
+| `redis.image.tag` | string | `"8.10.3"` | Redis container image tag |
 | `redis.standalone.persistence.size` | string | `"1Gi"` | Persistent Volume size requested for Redis |
 | `redis.standalone.resources.requests.cpu` | string | `"50m"` | CPU request for Redis subchart |
 | `redis.standalone.resources.requests.memory` | string | `"64Mi"` | Memory request for Redis subchart |
@@ -163,6 +163,13 @@ values: {
 - [Official n8n Repository](https://github.com/n8n-io/n8n)
 - [n8n Documentation](https://docs.n8n.io/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded n8n core and worker container image from `2.37.11` to `2.46.0` (`docker.io/n8nio/n8n:2.46.0`).
+- **Changed:** Upgraded external task runners sidecar container image from `2.37.11` to `2.46.0` (`docker.io/n8nio/runners:2.46.0`).
+- **Changed:** Upgraded Redis container image from `8.10.1` to `8.10.3` (`docker.io/library/redis:8.10.3`).
 
 ## Kubesec Scan Scores
 
