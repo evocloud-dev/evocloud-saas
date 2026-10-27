@@ -8,16 +8,16 @@
 - **Official Website:** [https://jupyter.org/hub](https://jupyter.org/hub)
 - **Upstream Project:** [https://github.com/jupyterhub/jupyterhub](https://github.com/jupyterhub/jupyterhub)
 - **Container Base:**
-  - JupyterHub Hub Application: [quay.io/jupyterhub/k8s-hub](https://quay.io/repository/jupyterhub/k8s-hub) (`quay.io/jupyterhub/k8s-hub:4.4.2`)
+  - JupyterHub Hub Application: [quay.io/jupyterhub/k8s-hub](https://quay.io/repository/jupyterhub/k8s-hub) (`quay.io/jupyterhub/k8s-hub:4.4.4`)
   - Configurable HTTP Proxy: [docker.io/jupyterhub/configurable-http-proxy](https://hub.docker.com/r/jupyterhub/configurable-http-proxy) (`docker.io/jupyterhub/configurable-http-proxy:5.3.0`)
-  - Single-User Notebook: [quay.io/jupyter/base-notebook](https://quay.io/repository/jupyter/base-notebook) (`quay.io/jupyter/base-notebook:2026-10-05`)
+  - Single-User Notebook: [quay.io/jupyter/base-notebook](https://quay.io/repository/jupyter/base-notebook) (`quay.io/jupyter/base-notebook:2026-10-23`)
   - Wait Init Helper: [docker.io/curlimages/curl](https://hub.docker.com/r/curlimages/curl) (`docker.io/curlimages/curl:8.21.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **JupyterHub Hub (`jupyterhub-hub`):** Primary control plane workload (`Deployment/jupyterhub-hub`) running `quay.io/jupyterhub/k8s-hub:4.4.2` managing user authentication, single-user notebook lifecycles via `KubeSpawner`, and proxy routing tables. Includes a `wait-for-proxy-api` init container for proxy readiness verification.
+- **JupyterHub Hub (`jupyterhub-hub`):** Primary control plane workload (`Deployment/jupyterhub-hub`) running `quay.io/jupyterhub/k8s-hub:4.4.4` managing user authentication, single-user notebook lifecycles via `KubeSpawner`, and proxy routing tables. Includes a `wait-for-proxy-api` init container for proxy readiness verification.
 - **Configurable HTTP Proxy (`jupyterhub-proxy`):** Dynamic reverse proxy workload (`Deployment/jupyterhub-proxy`) running `docker.io/jupyterhub/configurable-http-proxy:5.3.0` routing incoming web traffic to the Hub or active single-user notebook servers.
-- **Single-User Notebooks (`jupyter-<username>`):** Dynamically spawned user pods running `quay.io/jupyter/base-notebook:2026-10-05` provisioned on-demand via `KubeSpawner` with optional per-user persistent storage and resource constraints.
+- **Single-User Notebooks (`jupyter-<username>`):** Dynamically spawned user pods running `quay.io/jupyter/base-notebook:2026-10-23` provisioned on-demand via `KubeSpawner` with optional per-user persistent storage and resource constraints.
 - **JupyterHub Services (`jupyterhub`, `jupyterhub-hub`, `jupyterhub-proxy-api`):** Internal and public ClusterIP services exposing the configurable HTTP proxy (port 80), internal proxy REST API (port 8001), and Hub control plane (port 8081).
 - **Persistent Storage:** PersistentVolumeClaims providing dedicated storage for Hub SQLite state (`/srv/jupyterhub`, default `10Gi`), and optional per-user home directories (`/home/jovyan`).
 - **Gateway API HTTPRoute (`gateway`):** Optional Gateway API HTTPRoute (`gateway.networking.k8s.io/v1`) routing external traffic to the JupyterHub proxy service.
@@ -76,7 +76,7 @@ values: {
 	singleuser: {
 		image: {
 			name: "quay.io/jupyter/base-notebook"
-			tag:  "2026-10-05"
+			tag:  "2026-10-23"
 		}
 		storage: {
 			enabled:  true
@@ -119,7 +119,7 @@ timoni -n default delete jupyterhub
 | `commonLabels` | object | `{}` | Additional labels applied to all chart resources |
 | `hub.replicaCount` | int | `1` | Number of Hub replicas (keep at 1 when using SQLite) |
 | `hub.image.repository` | string | `quay.io/jupyterhub/k8s-hub` | Hub container image repository |
-| `hub.image.tag` | string | `4.4.2` | Pinned Hub container image tag |
+| `hub.image.tag` | string | `4.4.4` | Pinned Hub container image tag |
 | `hub.image.digest` | string | `""` | Hub container image digest |
 | `hub.image.pullPolicy` | string | `IfNotPresent` | Hub image pull policy |
 | `hub.baseUrl` | string | `/` | Base URL prefix for JupyterHub |
@@ -151,7 +151,7 @@ timoni -n default delete jupyterhub
 | `auth.dummyPassword` | string | `Changeme123` | Default bootstrap password for DummyAuthenticator |
 | `auth.allowInsecureDummy` | bool | `false` | Explicitly allow exposing Hub with unauthenticated dummy login |
 | `singleuser.image.name` | string | `quay.io/jupyter/base-notebook` | Default single-user notebook image repository |
-| `singleuser.image.tag` | string | `2026-10-05` | Pinned single-user notebook image tag |
+| `singleuser.image.tag` | string | `2026-10-23` | Pinned single-user notebook image tag |
 | `singleuser.image.pullPolicy` | string | `IfNotPresent` | Notebook image pull policy |
 | `singleuser.cpu.guarantee` | number | `0.1` | Guaranteed CPU request for single-user pods |
 | `singleuser.cpu.limit` | number | `1` | CPU limit for single-user pods |
@@ -225,6 +225,12 @@ values: {
 - [JupyterHub Documentation](https://jupyterhub.readthedocs.io/)
 - [Zero to JupyterHub on Kubernetes](https://z2jh.jupyter.org/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded JupyterHub Hub container image from `4.4.2` to `4.4.4` (`quay.io/jupyterhub/k8s-hub:4.4.4`).
+- **Changed:** Upgraded Single-User Notebook container image from `2026-10-05` to `2026-10-23` (`quay.io/jupyter/base-notebook:2026-10-23`).
 
 ## Kubesec Scan Scores
 
