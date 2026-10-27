@@ -153,7 +153,7 @@ values: {
 		image: {
 			registry: "docker.io"
 			repository: "daveearley/hi.events-backend"
-			tag: "v1.11.1-beta"
+			tag: "v1.11.3-beta"
 			digest: ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -226,7 +226,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "daveearley/hi.events-frontend"
-			tag:        "v1.11.1-beta"
+			tag:        "v1.11.3-beta"
 			digest:     ""
 			pullPolicy: "IfNotPresent"
 		}
@@ -435,7 +435,7 @@ values: {
 		}
 		redis: {
 			enabled: true
-			image: "redis:8-alpine"
+			image: "redis:8.8-alpine"
 			imagePullPolicy: "IfNotPresent"
 		}
 	}
