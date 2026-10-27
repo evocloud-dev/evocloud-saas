@@ -4,10 +4,10 @@
 [Hoppscotch](https://hoppscotch.io/) is a lightweight, open-source API development ecosystem. Built from the ground up as a fast, privacy-first alternative to tools like Postman and Insomnia, it enables developers and teams to create, test, and document REST, GraphQL, and WebSocket APIs directly from the browser or desktop application.
 
 ## Application Information
-- **Version:** 2026.8.0
+- **Version:** 2026.9.0
 - **Upstream Project:** [https://github.com/hoppscotch/hoppscotch](https://github.com/hoppscotch/hoppscotch)
 - **Container Base:**
-  - Hoppscotch: [docker.io/hoppscotch/hoppscotch](https://hub.docker.com/r/hoppscotch/hoppscotch) (`docker.io/hoppscotch/hoppscotch:2026.8.0`)
+  - Hoppscotch: [docker.io/hoppscotch/hoppscotch](https://hub.docker.com/r/hoppscotch/hoppscotch) (`docker.io/hoppscotch/hoppscotch:2026.9.0`)
   - PostgreSQL Database: [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-trixie`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
@@ -82,7 +82,7 @@ timoni -n default delete hoppscotch
 | `fullnameOverride` | string | `""` | Override the full release name used in resource naming |
 | `commonLabels` | map | `{}` | Labels added to every resource created by this module |
 | `image.repository` | string | `"docker.io/hoppscotch/hoppscotch"` | Hoppscotch container image repository |
-| `image.tag` | string | `"2026.8.0"` | Pinned container image tag |
+| `image.tag` | string | `"2026.9.0"` | Pinned container image tag |
 | `image.pullPolicy` | string | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | list | `[]` | Secrets for authenticating against private container registries |
 | `baseUrl` | string | `"http://localhost:3000"` | Public web client application URL |
@@ -134,6 +134,11 @@ values: {
 - [Official Hoppscotch Repository](https://github.com/hoppscotch/hoppscotch)
 - [Hoppscotch Documentation](https://docs.hoppscotch.io/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-26
+- **Changed:** Upgraded Hoppscotch container image from `2026.8.0` to `2026.9.0` (`docker.io/hoppscotch/hoppscotch:2026.9.0`).
 
 ## Kubesec Scan Scores
 

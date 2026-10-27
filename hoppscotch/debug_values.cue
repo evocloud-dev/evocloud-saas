@@ -10,7 +10,7 @@ values: {
 	}
 	image: {
 		repository: "docker.io/hoppscotch/hoppscotch"
-		tag:        "2026.5.0"
+		tag:        "2026.9.0"
 		pullPolicy: "IfNotPresent"
 	}
 }
