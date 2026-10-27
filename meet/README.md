@@ -4,27 +4,27 @@
 [Meet](https://github.com/suitenumerique/meet) is an open-source, sovereign video conferencing web application developed by La Suite Numérique (French inter-ministerial digital team). Designed for seamless and secure remote collaboration, Meet provides high-performance real-time audio and video conferencing powered by LiveKit WebRTC, comprehensive meeting intelligence features (including automated speech transcription and AI summarization via Celery workers), media storage with MinIO, and identity federation using Keycloak OIDC.
 
 ## Application Information
-- **Version:** 1.0.1 (App: v1.23.0)
+- **Version:** 1.0.2 (App: v1.36.3)
 - **Upstream Project:** [https://github.com/suitenumerique/meet](https://github.com/suitenumerique/meet)
 - **Container Base:** [lasuite/meet-backend](https://hub.docker.com/r/lasuite/meet-backend), [lasuite/meet-frontend](https://hub.docker.com/r/lasuite/meet-frontend), [lasuite/meet-summary](https://hub.docker.com/r/lasuite/meet-summary), [lasuite/meet-agents](https://hub.docker.com/r/lasuite/meet-agents)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Meet Frontend (`meet-frontend`):** Web user interface running `lasuite/meet-frontend:v1.23.0` serving the client-side SPA.
-- **Meet Backend API (`meet-backend`):** Core Django application server running `lasuite/meet-backend:v1.23.0` handling rooms, meeting permissions, recordings, and REST API services.
-- **Meet Summary (`meet-summary`):** Meeting intelligence and summarization web service running `lasuite/meet-summary:v1.23.0`.
+- **Meet Frontend (`meet-frontend`):** Web user interface running `lasuite/meet-frontend:v1.36.3` serving the client-side SPA.
+- **Meet Backend API (`meet-backend`):** Core Django application server running `lasuite/meet-backend:v1.36.3` handling rooms, meeting permissions, recordings, and REST API services.
+- **Meet Summary (`meet-summary`):** Meeting intelligence and summarization web service running `lasuite/meet-summary:v1.36.3`.
 - **Celery Backend Worker (`meet-celery-backend`):** Celery background worker processing asynchronous tasks and notifications for the core backend.
 - **Celery Transcribe Worker (`meet-celery-transcribe-default`):** Celery worker processing audio transcription queues (`transcribe-queue`, `transcribe-queue-v2`).
 - **Celery Summarize Worker (`meet-celery-summarize`):** Celery worker processing meeting summary and LLM pipelines (`summarize-queue`, `summarize-queue-v2`).
 - **Celery Summary Backend Worker (`meet-celery-summary-backend`):** Celery worker handling webhook callbacks (`call-webhook-queue-v2`).
-- **Meet Agent Subtitles (`meet-agent-subtitles`):** Real-time subtitles and transcription agent running `lasuite/meet-agents:v1.23.0`.
-- **Meet Agent Metadata (`meet-agent-metadata`):** Live meeting participant and metadata tracking agent running `lasuite/meet-agents:v1.23.0`.
-- **PostgreSQL Database (`postgresql`):** Dedicated PostgreSQL 17 StatefulSet (`postgres:17-alpine`) providing persistent relational storage for Meet.
-- **Keycloak PostgreSQL Database (`kc-postgresql`):** Dedicated PostgreSQL 17 StatefulSet (`postgres:17-alpine`) managing authentication and identity data for Keycloak.
+- **Meet Agent Subtitles (`meet-agent-subtitles`):** Real-time subtitles and transcription agent running `lasuite/meet-agents:v1.36.3`.
+- **Meet Agent Metadata (`meet-agent-metadata`):** Live meeting participant and metadata tracking agent running `lasuite/meet-agents:v1.36.3`.
+- **PostgreSQL Database (`postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`postgres:18-alpine`) providing persistent relational storage for Meet.
+- **Keycloak PostgreSQL Database (`kc-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`postgres:18-alpine`) managing authentication and identity data for Keycloak.
 - **Redis Cache & Broker (`redis`):** In-memory cache and Celery task broker running `redis:8.8-alpine`.
-- **Keycloak IAM (`keycloak`):** OpenID Connect (OIDC) identity provider StatefulSet running `quay.io/keycloak/keycloak:26.7.0` configured with the pre-provisioned Meet realm.
+- **Keycloak IAM (`keycloak`):** OpenID Connect (OIDC) identity provider StatefulSet running `quay.io/keycloak/keycloak:26.8.1` configured with the pre-provisioned Meet realm.
 - **MinIO Object Storage (`meet-minio`):** S3-compatible object storage managing meeting recordings, transcripts, and media files.
-- **LiveKit Server (`livekit`):** Scalable, high-performance real-time WebRTC media and signaling server running `livekit/livekit-server:v1.13.3`.
+- **LiveKit Server (`livekit`):** Scalable, high-performance real-time WebRTC media and signaling server running `livekit/livekit-server:v1.13.11`.
 
 ## Prerequisites
 - Kubernetes cluster v1.20+ (recommended v1.26+)
@@ -79,7 +79,7 @@ timoni -n default delete meet
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `"lasuite/meet-backend"` | Default backend container image repository |
-| `image.tag` | string | `"v1.23.0"` | Default backend container image tag |
+| `image.tag` | string | `"v1.36.3"` | Default backend container image tag |
 | `image.pullPolicy` | string | `"IfNotPresent"` | Container image pull policy |
 | `nameOverride` | string | `""` | Override the module name used in resource naming |
 | `fullnameOverride` | string | `""` | Override the full release name used in resource naming |
@@ -110,20 +110,20 @@ timoni -n default delete meet
 | `agentMetadata.replicas` | int | `1` | Number of agent metadata replicas |
 | `agentSubtitles.replicas` | int | `1` | Number of agent subtitles replicas |
 | `postgresql.enabled` | bool | `true` | Deploy internal PostgreSQL database for Meet |
-| `postgresql.image.tag` | string | `"17-alpine"` | PostgreSQL image tag |
+| `postgresql.image.tag` | string | `"18-alpine"` | PostgreSQL image tag |
 | `postgresql.database` | string | `"meet"` | PostgreSQL database name |
 | `postgresql.username` | string | `"dinum"` | PostgreSQL user |
 | `kc_postgresql.enabled` | bool | `true` | Deploy internal PostgreSQL database for Keycloak |
-| `kc_postgresql.image.tag` | string | `"17-alpine"` | Keycloak PostgreSQL image tag |
+| `kc_postgresql.image.tag` | string | `"18-alpine"` | Keycloak PostgreSQL image tag |
 | `kc_postgresql.database` | string | `"keycloak"` | Keycloak database name |
 | `redis.enabled` | bool | `true` | Deploy internal Redis broker and cache |
 | `redis.image.tag` | string | `"8.8-alpine"` | Redis image tag |
 | `keycloak.enabled` | bool | `true` | Deploy Keycloak identity and access management |
-| `keycloak.image.tag` | string | `"26.7.0"` | Keycloak container image tag |
+| `keycloak.image.tag` | string | `"26.8.1"` | Keycloak container image tag |
 | `keycloak.host` | string | `"keycloak.127.0.0.1.nip.io"` | Keycloak hostname |
 | `minio.enabled` | bool | `true` | Deploy MinIO object storage for media and recordings |
 | `livekit.enabled` | bool | `true` | Deploy LiveKit WebRTC server |
-| `livekit.image.tag` | string | `"v1.13.3"` | LiveKit container image tag |
+| `livekit.image.tag` | string | `"v1.13.11"` | LiveKit container image tag |
 | `livekit.host` | string | `"livekit.127.0.0.1.nip.io"` | LiveKit server hostname |
 
 ## Recommended values
@@ -156,6 +156,14 @@ values: {
 - [LiveKit Documentation](https://docs.livekit.io/)
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 1.0.2 - 2026-10-27
+- **Changed:** Upgraded Meet backend, frontend, summary, and agents images from `v1.23.0` to `v1.36.3` (`lasuite/meet-backend`, `lasuite/meet-frontend`, `lasuite/meet-summary`, `lasuite/meet-agents`).
+- **Changed:** Upgraded PostgreSQL database images from `17-alpine` to `18-alpine` (`postgres:18-alpine`).
+- **Changed:** Upgraded Keycloak container image from `26.7.0` to `26.8.1` (`quay.io/keycloak/keycloak:26.8.1`).
+- **Changed:** Upgraded LiveKit Server container image from `v1.13.3` to `v1.13.11` (`livekit/livekit-server:v1.13.11`).
 
 ## Kubesec Scan Scores
 

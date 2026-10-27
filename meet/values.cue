@@ -9,7 +9,7 @@ values: {
 	image: {
 		repository: "lasuite/meet-backend"
 		pullPolicy: "IfNotPresent"
-		tag:        "v1.23.0"
+		tag:        "v1.36.3"
 	}
 
 	nameOverride:     ""
@@ -324,7 +324,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-frontend"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations:         {}
 		command:               []
@@ -432,7 +432,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-summary"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations:         {}
 		command:               []
@@ -563,7 +563,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-summary"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations: {}
 		command: [
@@ -636,7 +636,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-summary"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations: {}
 		command: [
@@ -703,7 +703,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-summary"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations: {}
 		command: [
@@ -770,7 +770,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-agents"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations:         {}
 		command:               []
@@ -820,7 +820,7 @@ values: {
 		image: {
 			repository: "lasuite/meet-agents"
 			pullPolicy: "IfNotPresent"
-			tag:        "v1.23.0"
+			tag:        "v1.36.3"
 		}
 		dpAnnotations:         {}
 		command:               []
@@ -880,7 +880,7 @@ values: {
 		}
 		image: {
 			repository: "postgres"
-			tag:        "17-alpine"
+			tag:        "18-alpine"
 		}
 		host:     "postgres"
 		database: "meet"
@@ -919,7 +919,7 @@ values: {
 		}
 		image: {
 			repository: "postgres"
-			tag:        "17-alpine"
+			tag:        "18-alpine"
 		}
 		host:     "kc-postgres"
 		database: "keycloak"
@@ -993,7 +993,7 @@ values: {
 		}
 		image: {
 			repository: "quay.io/keycloak/keycloak"
-			tag:        "26.7.0"
+			tag:        "26.8.1"
 		}
 		adminUser: "su"
 		adminPassword: "su"
@@ -3392,7 +3392,7 @@ S21E
 		}
 		image: {
 			repository: "livekit/livekit-server"
-			tag:        "v1.13.3"
+			tag:        "v1.13.11"
 		}
 		host:      "livekit.127.0.0.1.nip.io"
 		apiKey:    "devkey"
