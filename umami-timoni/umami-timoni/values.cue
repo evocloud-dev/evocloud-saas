@@ -21,7 +21,7 @@ values: {
 		// -- image pull policy
 		pullPolicy: "Always"
 		// --Overrides the image tag
-		tag: "3.3.1"
+		tag: "3.4.1"
 	}
 
 

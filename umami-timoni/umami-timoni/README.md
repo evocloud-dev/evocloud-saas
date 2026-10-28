@@ -4,11 +4,11 @@
 [Umami](https://umami.is/) is an open-source, privacy-preserving web analytics solution designed as an independent alternative to Google Analytics. It tracks page views, unique visitors, bounce rates, traffic sources, client devices, and custom event goals without collecting personal data, using cookies, or tracking users across websites, ensuring default compliance with GDPR, CCPA, and PECR.
 
 ## Application Information
-- **Version:** `3.3.1`
+- **Version:** `3.4.1`
 - **Official Website:** [https://umami.is/](https://umami.is/)
 - **Upstream Project:** [https://github.com/umami-software/umami](https://github.com/umami-software/umami)
 - **Container Base:**
-  - Umami Application: [ghcr.io/umami-software/umami](https://github.com/umami-software/umami/pkgs/container/umami) (`ghcr.io/umami-software/umami:3.3.1`)
+  - Umami Application: [ghcr.io/umami-software/umami](https://github.com/umami-software/umami/pkgs/container/umami) (`ghcr.io/umami-software/umami:3.4.1`)
   - PostgreSQL Database: `bitnamilegacy/postgresql` (`bitnamilegacy/postgresql:14`)
   - MySQL Database (Optional): `bitnamilegacy/mysql` (`bitnamilegacy/mysql:8.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
@@ -93,7 +93,7 @@ timoni -n default delete um
 |---|---|---|---|
 | `image.registry` | string | `ghcr.io` | Container image registry |
 | `image.repository` | string | `umami-software/umami` | Container image repository |
-| `image.tag` | string | `3.3.1` | Pinned container image tag |
+| `image.tag` | string | `3.4.1` | Pinned container image tag |
 | `image.pullPolicy` | string | `Always` | Kubernetes image pull policy |
 | `replicaCount` | int | `1` | Number of Umami application replicas |
 | `service.port` | int | `3000` | Kubernetes service listening port |
@@ -146,6 +146,11 @@ values: {
 - [Official Umami Repository](https://github.com/umami-software/umami)
 - [Umami Documentation](https://umami.is/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-28
+- **Changed:** Upgraded Umami application container image from `3.3.1` to `3.4.1` (`ghcr.io/umami-software/umami:3.4.1`).
 
 ## Kubesec Scan Scores
 
