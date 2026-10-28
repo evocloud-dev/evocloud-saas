@@ -13,7 +13,7 @@ values: {
 
 	image: {
 		repository: "docker.io/library/ghost"
-		tag:        "6.62.0"
+		tag:        "6.72.0"
 		pullPolicy: "IfNotPresent"
 	}
 	imagePullSecrets: []
@@ -166,7 +166,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "docker.io/library/mysql"
-			tag:        "8.4.10"
+			tag:        "8.4.13"
 			pullPolicy: "IfNotPresent"
 		}
 		architecture: "standalone"
@@ -214,7 +214,7 @@ values: {
 	}
 
 	gateway: {
-		enabled:     true
+		enabled:     false
 		annotations: {}
 		parentRefs: []
 		hostnames: []
