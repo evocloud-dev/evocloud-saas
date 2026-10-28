@@ -4,14 +4,15 @@
 [Readeck](https://readeck.org/) is a self-hosted read-it-later and bookmarking tool designed for reading without distractions. It strips web pages of ads and clutter to extract and archive articles, bookmarks, and images for easy reading and reference.
 
 ## Application Information
-- **Version:** 0.23.2
+- **Version:** 0.23.5
+- **Timoni Version:** 0.1.2
 - **Official Website:** [https://readeck.org/](https://readeck.org/)
 - **Upstream Project:** [https://codeberg.org/readeck/readeck](https://codeberg.org/readeck/readeck)
-- **Container Base:** [codeberg.org/readeck/readeck](https://codeberg.org/readeck/readeck) (`codeberg.org/readeck/readeck:0.23.2`)
+- **Container Base:** [codeberg.org/readeck/readeck](https://codeberg.org/readeck/readeck) (`codeberg.org/readeck/readeck:0.23.5`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Readeck Core Application (`read`):** Lightweight web application server running `codeberg.org/readeck/readeck:0.23.2` on container port 8000. Configured with a read-only root filesystem, dropped kernel capabilities (`ALL`), and running as non-root user UID `1000`.
+- **Readeck Core Application (`read`):** Lightweight web application server running `codeberg.org/readeck/readeck:0.23.5` on container port 8000. Configured with a read-only root filesystem, dropped kernel capabilities (`ALL`), and running as non-root user UID `1000`.
 - **Kubernetes Service (`svc`):** ClusterIP Service routing incoming traffic on port 8000 for internal access and reverse proxy integration.
 - **Persistent Data Storage (`pvc`):** PersistentVolumeClaim (`100Mi`, ReadWriteOnce) mounted to `/readeck` for storing SQLite database files, bookmarks, article extracts, and cached media.
 
@@ -73,7 +74,7 @@ timoni -n default delete readeck
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `codeberg.org/readeck/readeck` | Container image repository |
-| `image.tag` | string | `0.23.2` | Container image tag |
+| `image.tag` | string | `0.23.5` | Container image tag |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `resources.requests.cpu` | string | `200m` | Minimum CPU requested |
 | `resources.requests.memory` | string | `256Mi` | Minimum memory requested |
@@ -115,6 +116,11 @@ values: {
 - [Official Readeck Website](https://readeck.org/)
 - [Official Readeck Repository](https://codeberg.org/readeck/readeck)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-27
+- **Changed:** Upgraded Readeck container image from `0.23.2` to `0.23.5` (`codeberg.org/readeck/readeck:0.23.5`).
 
 ## Kubesec Scan Scores
 
