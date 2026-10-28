@@ -4,18 +4,18 @@
 [Twenty](https://twenty.com/) is an open-source CRM (Customer Relationship Management) designed as a modern, customizable alternative to Salesforce. It features visual pipeline tracking, contact and company relationship management, custom objects and fields, notes and task logging, role-based permissions, and bi-directional API integrations.
 
 ## Application Information
-- **Version:** `v2.17.0`
+- **Version:** `v2.52.0`
 - **Official Website:** [https://twenty.com/](https://twenty.com/)
 - **Upstream Project:** [https://github.com/twentyhq/twenty](https://github.com/twentyhq/twenty)
 - **Container Base:**
-  - Twenty Core Application: [twentycrm/twenty](https://hub.docker.com/r/twentycrm/twenty) (`twentycrm/twenty:v2.17.0`)
+  - Twenty Core Application: [twentycrm/twenty](https://hub.docker.com/r/twentycrm/twenty) (`twentycrm/twenty:v2.52.0`)
   - PostgreSQL Database: [ghcr.io/zalando/spilo-16](https://github.com/zalando/spilo) (`ghcr.io/zalando/spilo-16:3.3-p2`)
   - Redis Server: [redis/redis-stack-server](https://hub.docker.com/r/redis/redis-stack-server) (`redis/redis-stack-server:7.2.0-v20`)
   - Utility Image: `postgres:18-alpine`
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Twenty Server (`tw-server`):** Core application server (`Deployment/tw-server`) running `twentycrm/twenty:v2.17.0` on internal port 3000. Includes automated database readiness probes and migration init containers.
+- **Twenty Server (`tw-server`):** Core application server (`Deployment/tw-server`) running `twentycrm/twenty:v2.52.0` on internal port 3000. Includes automated database readiness probes and migration init containers.
 - **Twenty Worker (`tw-worker`):** Asynchronous background worker (`Deployment/tw-worker`) executing scheduled tasks, webhook dispatching, email processing, and workflow triggers.
 - **PostgreSQL Database (`tw-db`):** Dedicated relational database deployment (`Deployment/tw-db`) powered by Zalando Spilo 16 with persistent volume storage (`10Gi`), automated schema creation, and database user initialization.
 - **Redis Cache & Broker (`tw-redis`):** Dedicated Redis Stack Server deployment (`Deployment/tw-redis`) managing queue distribution, event broadcasting, and high-speed in-memory caching on port 6379.
@@ -91,7 +91,7 @@ timoni -n default delete tw
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `twentycrm/twenty` | Container image repository for Twenty CRM |
-| `image.tag` | string | `v2.17.0` | Pinned container image tag for Twenty CRM |
+| `image.tag` | string | `v2.52.0` | Pinned container image tag for Twenty CRM |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `server.replicaCount` | int | `2` | Number of replicas for the Twenty server |
 | `server.service.port` | int | `3000` | HTTP container listening port |
@@ -198,6 +198,11 @@ values: {
 - [Official Twenty CRM Repository](https://github.com/twentyhq/twenty)
 - [Twenty CRM Documentation](https://docs.twenty.com/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.3 - 2026-10-28
+- **Changed:** Upgraded Twenty CRM container image from `v2.17.0` to `v2.52.0` (`docker.io/twentycrm/twenty:v2.52.0`).
 
 ## Kubesec Scan Scores
 

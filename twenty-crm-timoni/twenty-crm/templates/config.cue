@@ -44,7 +44,7 @@ import (
 	_image: image
 	image: {
 		repository: *"twentycrm/twenty" | string
-		tag:        *"v1.19.1" | string
+		tag:        *"v2.52.0" | string
 		pullPolicy: *"IfNotPresent" | string
 	}
 

@@ -9,7 +9,7 @@ package main
 values: {
 	image: {
 		repository: "twentycrm/twenty"
-		tag:        "v2.17.0"
+		tag:        "v2.52.0"
 		pullPolicy: "IfNotPresent"
 	}
 
