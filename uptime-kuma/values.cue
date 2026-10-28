@@ -25,7 +25,7 @@ values: {
 		// Uptime Kuma container image
 		repository: "docker.io/louislam/uptime-kuma"
 		// Image tag
-		tag:        "2.5.5"
+		tag:        "2.5.8"
 		digest:     ""
 		pullPolicy: "IfNotPresent"
 	}

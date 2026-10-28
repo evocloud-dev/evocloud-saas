@@ -6,10 +6,10 @@
 
 ## Application Information
 
-- **Version:** 2.5.5
+- **Version:** 2.5.8
 - **Official Website:** [https://uptime.kuma.pet](https://uptime.kuma.pet)
 - **Upstream Project:** [https://github.com/louislam/uptime-kuma](https://github.com/louislam/uptime-kuma)
-- **Container Base:** [docker.io/louislam/uptime-kuma](https://hub.docker.com/r/louislam/uptime-kuma) (`docker.io/louislam/uptime-kuma:2.5.5`)
+- **Container Base:** [docker.io/louislam/uptime-kuma](https://hub.docker.com/r/louislam/uptime-kuma) (`docker.io/louislam/uptime-kuma:2.5.8`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -93,7 +93,7 @@ timoni -n default delete uptime-kuma
 | `fullnameOverride` | `string` | `""` | Override the complete resource name |
 | `commonLabels` | `object` | `{}` | Additional labels applied to all module resources |
 | `image.repository` | `string` | `"docker.io/louislam/uptime-kuma"` | Uptime Kuma container image repository |
-| `image.tag` | `string` | `"2.5.5"` | Uptime Kuma container image release tag |
+| `image.tag` | `string` | `"2.5.8"` | Uptime Kuma container image release tag |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for private container mirrors |
 | `uptimeKuma.port` | `int` | `3001` | Application container HTTP port |
@@ -224,6 +224,13 @@ values: {
 - [Official Uptime Kuma GitHub Repository](https://github.com/louislam/uptime-kuma)
 - [Uptime Kuma HelmForge Repository](https://github.com/helmforgedev/charts/tree/main/charts/uptime-kuma)
 - [Timoni Documentation](https://timoni.sh)
+
+---
+
+## Changelog
+
+### 0.1.1 - 2026-10-28
+- **Changed:** Upgraded Uptime Kuma container image from `2.5.5` to `2.5.8` (`docker.io/louislam/uptime-kuma:2.5.8`).
 
 ---
 
