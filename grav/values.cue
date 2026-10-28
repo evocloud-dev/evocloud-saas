@@ -11,8 +11,8 @@ values: {
 	image: {
 		repository: "ghcr.io/linuxserver/grav"
 		pullPolicy: "IfNotPresent"
-		tag:        "2.2.9"
-		digest:     "sha256:4946e4f4f362efe45eafad32ceedde863229a3b84465e4818535f913763c880a"
+		tag:        "2.2.13"
+		digest:     "sha256:a355dd195ae6245bcae467fdfa10b71ae54f0f93c423eb54e3e4c1f920c6fce7"
 	}
 	service: {
 		main: {
@@ -54,7 +54,7 @@ values: {
 	// -- Gateway API HTTPRoute exposure to an existing Gateway.
 	gatewayAPI: {
 		// -- Enable this capability.
-		enabled: true
+		enabled: false
 		// -- GatewayClass name.
 		gatewayClassName: ""
 		// -- Route definitions with parentRefs, hostnames, rules, labels and annotations.
