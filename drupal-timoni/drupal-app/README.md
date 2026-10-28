@@ -13,7 +13,7 @@
 ## Components
 - **Drupal Core Application (`drupal`):** PHP-FPM application container (`drupalwxt/site-wxt:6.1.4`) executing the Drupal application runtime on port 9000.
 - **NGINX Web Server (`drupal-nginx`):** Frontend reverse proxy and static asset server (`drupalwxt/site-wxt:6.1.4-nginx`) serving incoming HTTP/HTTPS traffic on ports 8080 and 8443.
-- **Varnish HTTP Cache (`drupal-varnish`):** High-performance reverse HTTP proxy accelerator (`varnish:9.0.3`) handling edge caching and header normalization on port 8080.
+- **Varnish HTTP Cache (`drupal-varnish`):** High-performance reverse HTTP proxy accelerator (`varnish:9.1.0`) handling edge caching and header normalization on port 8080.
 - **PostgreSQL Database (`drupal-postgresql`):** Dedicated relational database workload (`bitnamilegacy/postgresql:16`) for site data and module content.
 - **MySQL Database (`drupal-mysql`):** Dedicated relational database workload (`bitnamilegacy/mysql:8.0`) serving as an alternative database engine on port 3306.
 - **Redis In-Memory Cache (`drupal-redis`):** In-memory key-value data store (`bitnamilegacy/redis:7.0`) on port 6379 for backend caching and session management.
@@ -104,7 +104,7 @@ timoni -n default delete drupal
 | `nginx.replicas` | int | `1` | Number of NGINX reverse proxy replicas |
 | `varnish.enabled` | bool | `true` | Deploy Varnish reverse proxy cache |
 | `varnish.varnishd.image` | string | `"varnish"` | Varnish container image repository |
-| `varnish.varnishd.tag` | string | `"9.0.3"` | Varnish container image tag |
+| `varnish.varnishd.tag` | string | `"9.1.0"` | Varnish container image tag |
 | `varnish.memorySize` | string | `"100M"` | In-memory cache allocated for Varnish |
 | `mysql.enabled` | bool | `true` | Deploy dedicated MySQL database instance |
 | `mysql.image.repository` | string | `"bitnamilegacy/mysql"` | MySQL container image repository |
@@ -158,6 +158,11 @@ values: {
 - [Drupal WxT GitHub Repository](https://github.com/drupalwxt/wxt)
 - [Official Drupal Website](https://www.drupal.org/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-26
+- **Changed:** Upgraded Varnish HTTP Cache container image from `9.0.3` to `9.1.0` (`varnish:9.1.0`).
 
 ## Kubesec Scan Scores
 
