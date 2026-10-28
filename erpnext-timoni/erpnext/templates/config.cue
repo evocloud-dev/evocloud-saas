@@ -200,7 +200,7 @@ import (
 
 	image: {
 		repository:  *"frappe/erpnext" | string
-		tag:         *"v16.34.1" | string
+		tag:         *"v16.52.1" | string
 		digest:      *"" | string
 		pullPolicy:  *"IfNotPresent" | string
 		reference:   *"\(repository):\(tag)" | string
@@ -590,7 +590,7 @@ import (
 		enabled: *false | bool
 		image: {
 			repository: *"ghcr.io/dragonflydb/dragonfly" | string
-			tag:        *"v1.40.1" | string
+			tag:        *"v2.0.2" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		args?: [...string]
@@ -604,7 +604,7 @@ import (
 		}
 		image: {
 			repository: *"ghcr.io/dragonflydb/dragonfly" | string
-			tag:        *"v1.40.1" | string
+			tag:        *"v2.0.2" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		args?: [...string]
