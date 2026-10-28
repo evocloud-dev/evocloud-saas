@@ -182,7 +182,7 @@ import (
 	backend: {
 		enabled:      *true | bool
 		replicaCount: *1 | int
-		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-backend" | string, tag: *"v1.11.1-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-backend" | string, tag: *"v1.11.3-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
 		command: *[] | [...string]
 		args:    *[] | [...string]
 		service: {type: *"ClusterIP" | string, port: *80 | int, targetPort: *8080 | int}
@@ -221,7 +221,7 @@ import (
 	frontend: {
 		enabled:      *true | bool
 		replicaCount: *1 | int
-		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-frontend" | string, tag: *"v1.11.1-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
+		image: {registry: *"docker.io" | string, repository: *"daveearley/hi.events-frontend" | string, tag: *"v1.11.3-beta" | string, digest: *"" | string, pullPolicy: *"IfNotPresent" | string}
 		command: *[] | [...string]
 		args:    *[] | [...string]
 		env: viteApiUrlServer: *"" | string
@@ -314,7 +314,7 @@ import (
 	}
 	initContainers: {
 		postgresql: {enabled: *true | bool, image: *"postgres:18-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
-		redis:      {enabled: *true | bool, image: *"redis:8-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
+		redis:      {enabled: *true | bool, image: *"redis:8.8-alpine" | string, imagePullPolicy: *"IfNotPresent" | string}
 	}
 	postgresql: {
 		enabled: *true | bool

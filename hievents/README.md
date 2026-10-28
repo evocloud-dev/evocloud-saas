@@ -6,12 +6,12 @@
 
 ## Application Information
 
-- **Version:** 1.11.1-beta
+- **Version:** 1.11.3-beta
 - **Official Website:** [https://hi.events/](https://hi.events/)
 - **Upstream Project:** [https://github.com/HiEventsDev/hi.events](https://github.com/HiEventsDev/hi.events)
 - **Container Base:**
-  - Backend / Worker: `docker.io/daveearley/hi.events-backend:v1.11.1-beta`
-  - Frontend: `docker.io/daveearley/hi.events-frontend:v1.11.1-beta`
+  - Backend / Worker: `docker.io/daveearley/hi.events-backend:v1.11.3-beta`
+  - Frontend: `docker.io/daveearley/hi.events-frontend:v1.11.3-beta`
   - Web Proxy: `docker.io/nginx:1.30-alpine`
   - PostgreSQL: `docker.io/postgres:18-alpine`
   - Valkey / Redis: `docker.io/valkey/valkey:9.1.2-alpine`
@@ -92,10 +92,10 @@ timoni -n default delete hievents
 | `hieventsConfig.app.url` | `string` | `"http://localhost:8080"` | Base URL for API endpoints |
 | `hieventsConfig.app.frontendUrl` | `string` | `"http://localhost:8080"` | Base URL for frontend interface |
 | `backend.image.repository` | `string` | `"daveearley/hi.events-backend"` | Backend container image repository |
-| `backend.image.tag` | `string` | `"v1.11.1-beta"` | Backend container image tag |
+| `backend.image.tag` | `string` | `"v1.11.3-beta"` | Backend container image tag |
 | `backend.replicaCount` | `int` | `2` | Number of backend API replicas |
 | `frontend.image.repository` | `string` | `"daveearley/hi.events-frontend"` | Frontend container image repository |
-| `frontend.image.tag` | `string` | `"v1.11.1-beta"` | Frontend container image tag |
+| `frontend.image.tag` | `string` | `"v1.11.3-beta"` | Frontend container image tag |
 | `frontend.replicaCount` | `int` | `2` | Number of frontend replicas |
 | `webProxy.image.repository` | `string` | `"nginx"` | Reverse proxy image repository |
 | `webProxy.image.tag` | `string` | `"1.30-alpine"` | Reverse proxy image tag |
@@ -136,6 +136,15 @@ values: {
 - [Official Hi.Events Repository](https://github.com/HiEventsDev/hi.events)
 - [Hi.Events Documentation](https://hi.events/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+---
+
+## Changelog
+
+### 0.1.3 - 2026-10-26
+- **Changed:** Upgraded Hi.Events backend and worker container image from `v1.11.1-beta` to `v1.11.3-beta` (`daveearley/hi.events-backend:v1.11.3-beta`).
+- **Changed:** Upgraded Hi.Events frontend container image from `v1.11.1-beta` to `v1.11.3-beta` (`daveearley/hi.events-frontend:v1.11.3-beta`).
+- **Changed:** Upgraded Redis initContainer image from `8-alpine` to `8.8-alpine` (`redis:8.8-alpine`).
 
 ---
 
