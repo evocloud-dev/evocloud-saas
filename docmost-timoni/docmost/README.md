@@ -4,16 +4,16 @@
 [Docmost](https://docmost.com/) is an open-source collaborative wiki and document sharing platform designed for technical teams and organizations. It provides real-time collaborative rich-text editing, organized knowledge spaces, permissions management, and diagrams integration as an open alternative to Notion, Confluence, and Slite.
 
 ## Application Information
-- **Version:** 0.95
+- **Version:** 0.97
 - **Upstream Project:** [https://github.com/docmost/docmost](https://github.com/docmost/docmost)
 - **Container Base:**
-  - Docmost App: [docker.io/docmost/docmost](https://hub.docker.com/r/docmost/docmost) (`docker.io/docmost/docmost:0.95`)
+  - Docmost App: [docker.io/docmost/docmost](https://hub.docker.com/r/docmost/docmost) (`docker.io/docmost/docmost:0.97`)
   - PostgreSQL Database: [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-trixie`)
   - Redis / Valkey Cache: [docker.io/valkey/valkey](https://hub.docker.com/r/valkey/valkey) (`docker.io/valkey/valkey:9.1.2-alpine`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Docmost Application (`docmost`):** Core collaborative documentation and wiki server running `docker.io/docmost/docmost:0.95` on container port 3000, managing real-time collaboration, document spaces, and rich-text editing.
+- **Docmost Application (`docmost`):** Core collaborative documentation and wiki server running `docker.io/docmost/docmost:0.97` on container port 3000, managing real-time collaboration, document spaces, and rich-text editing.
 - **PostgreSQL Database (`docmost-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-trixie`) with persistent volume storage (`8Gi`), headless service, and automated database initialization with `pg_trgm` and `unaccent` extensions.
 - **Valkey / Redis Cache & Pub/Sub (`docmost-redis`):** Dedicated Valkey/Redis StatefulSet (`docker.io/valkey/valkey:9.1.2-alpine`) with persistent storage (`1Gi`) handling caching, session storage, and real-time collaboration channels.
 - **Docmost Service (`docmost`):** ClusterIP service exposing port 80 (routing to container port 3000) for internal access and gateway/ingress routing.
@@ -100,7 +100,7 @@ timoni -n default delete docmost
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docker.io/docmost/docmost` | Container image repository for Docmost |
-| `image.tag` | string | `0.95` | Pinned container image tag for Docmost |
+| `image.tag` | string | `0.97` | Pinned container image tag for Docmost |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `docmost.appUrl` | string | `""` | Full external base URL of the Docmost application |
 | `docmost.appSecret` | string | `""` | Secret key used for cryptographic signing and sessions |
@@ -144,6 +144,11 @@ values: {
 - [Official Docmost Repository](https://github.com/docmost/docmost)
 - [Docmost Documentation](https://docmost.com/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-26
+- **Changed:** Upgraded Docmost container image from `0.95` to `0.97` (`docker.io/docmost/docmost:0.97`).
 
 ## Kubesec Scan Scores
 
