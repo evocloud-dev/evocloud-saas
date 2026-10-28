@@ -10,7 +10,7 @@ import (
 // Define the module metadata.
 module: {
 	name:        "evo-umami"
-	version:     "0.1.1"
+	version:     "0.1.2"
 }
 
 
