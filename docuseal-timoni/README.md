@@ -4,13 +4,13 @@
 [DocuSeal](https://www.docuseal.com/) is an open-source platform for digital document signing and automated processing workflows. It provides an intuitive web interface and API for creating, sending, filling, and signing PDF documents online as an open-source alternative to DocuSign and PandaDoc.
 
 ## Application Information
-- **Version:** 3.2.3
+- **Version:** 3.3.4
 - **Upstream Project:** [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal)
-- **Container Base:** [docker.io/docuseal/docuseal](https://hub.docker.com/r/docuseal/docuseal) (`docker.io/docuseal/docuseal:3.2.3`)
+- **Container Base:** [docker.io/docuseal/docuseal](https://hub.docker.com/r/docuseal/docuseal) (`docker.io/docuseal/docuseal:3.3.4`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **DocuSeal Application (`docuseal`):** Core web server and document engine running `docker.io/docuseal/docuseal:3.2.3` on container port 3000 handling document generation, email delivery, and electronic signatures.
+- **DocuSeal Application (`docuseal`):** Core web server and document engine running `docker.io/docuseal/docuseal:3.3.4` on container port 3000 handling document generation, email delivery, and electronic signatures.
 - **Kubernetes Service (`svc`):** ClusterIP service routing HTTP traffic to container port 3000.
 - **Persistent Storage (`pvc`):** PersistentVolumeClaim mounted to `/data` preserving PDF documents, signing assets, cryptographic keys, and SQLite database files across pod restarts.
 - **Ingress (`ingress`):** Optional Kubernetes Ingress resource for routing external traffic and configuring TLS termination.
@@ -74,7 +74,7 @@ timoni -n default delete docuseal
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docuseal/docuseal` | Container image repository for DocuSeal |
-| `image.tag` | string | `3.2.3` | Pinned container image tag for DocuSeal |
+| `image.tag` | string | `3.3.4` | Pinned container image tag for DocuSeal |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `service.main.ports.http.port` | int | `3000` | Kubernetes Service HTTP port |
 | `ingress.main.enabled` | bool | `false` | Enable Kubernetes Ingress resource |
@@ -107,6 +107,11 @@ values: {
 - [Official DocuSeal Repository](https://github.com/docusealco/docuseal)
 - [DocuSeal Documentation](https://www.docuseal.com/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-26
+- **Changed:** Upgraded DocuSeal container image from `3.2.3` to `3.3.4` (`docker.io/docuseal/docuseal:3.3.4`).
 
 ## Kubesec Scan Scores
 
