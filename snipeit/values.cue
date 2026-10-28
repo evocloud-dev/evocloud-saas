@@ -21,7 +21,7 @@ values: {
 	image: {
 		repository: "snipe/snipe-it"
 		pullPolicy: "IfNotPresent"
-		tag:        "v8.7.2"
+		tag:        "v8.8.3"
 	}
 
 	service: {

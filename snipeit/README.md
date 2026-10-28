@@ -4,17 +4,17 @@
 [Snipe-IT](https://snipeitapp.com/) is an open-source, web-based IT asset management system designed for tracking computer hardware, software licenses, accessories, and consumables. Built on Laravel and PHP, Snipe-IT features QR and barcode label generation, employee check-in and check-out workflows, automated email alerts for expiring warranties and licenses, audit logging, and reporting tools.
 
 ## Application Information
-- **Version:** `v8.7.2`
+- **Version:** `v8.8.3`
 - **Official Website:** [https://snipeitapp.com/](https://snipeitapp.com/)
 - **Upstream Project:** [https://github.com/snipe/snipe-it](https://github.com/snipe/snipe-it)
 - **Container Base:**
-  - Snipe-IT App: [docker.io/snipe/snipe-it](https://hub.docker.com/r/snipe/snipe-it) (`snipe/snipe-it:v8.7.2`)
+  - Snipe-IT App: [docker.io/snipe/snipe-it](https://hub.docker.com/r/snipe/snipe-it) (`snipe/snipe-it:v8.8.3`)
   - MySQL Database: [docker.io/library/mysql](https://hub.docker.com/_/mysql) (`mysql:9.7.2`)
   - MySQL Backup (optional): `quay.io/yeebase/mysql-client:gcloud-sdk`
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Snipe-IT Application (`snipeit`):** Core asset management web application (`Deployment/snipeit`) running `snipe/snipe-it:v8.7.2` on internal port 8080. Includes an unprivileged init container that configures Apache to listen on port 8080 and sets up environment shims.
+- **Snipe-IT Application (`snipeit`):** Core asset management web application (`Deployment/snipeit`) running `snipe/snipe-it:v8.8.3` on internal port 8080. Includes an unprivileged init container that configures Apache to listen on port 8080 and sets up environment shims.
 - **MySQL Database (`snipeit-mysql`):** Dedicated relational database deployment (`Deployment/snipeit-mysql`) running `mysql:9.7.2` with persistent storage (`8Gi`), initialization hooks, and credentials management.
 - **Snipe-IT Service (`snipeit`):** ClusterIP service exposing port 80 (routing to container port 8080) for internal access and ingress routing.
 - **MySQL Service (`snipeit-mysql`):** ClusterIP service exposing port 3306 for internal database connections.
@@ -91,7 +91,7 @@ timoni -n default delete snipeit
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `snipe/snipe-it` | Container image repository for Snipe-IT |
-| `image.tag` | string | `v8.7.2` | Pinned container image tag for Snipe-IT |
+| `image.tag` | string | `v8.8.3` | Pinned container image tag for Snipe-IT |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `config.snipeit.env` | string | `production` | Application runtime environment (`production` or `development`) |
 | `config.snipeit.url` | string | `http://localhost:8080` | External URL used for accessing the Snipe-IT application |
@@ -138,6 +138,11 @@ values: {
 - [Official Snipe-IT Repository](https://github.com/snipe/snipe-it)
 - [Snipe-IT Documentation](https://snipe-it.readme.io/docs)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.3 - 2026-10-28
+- **Changed:** Upgraded Snipe-IT container image from `v8.7.2` to `v8.8.3` (`docker.io/snipe/snipe-it:v8.8.3`).
 
 ## Kubesec Scan Scores
 
