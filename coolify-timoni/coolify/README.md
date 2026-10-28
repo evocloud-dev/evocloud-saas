@@ -4,16 +4,16 @@
 [Coolify](https://coolify.io/) is an open-source & self-hostable alternative to Vercel, Heroku, Netlify and Railway for easily deploying websites, databases, web applications and 280+ one-click services to your own server.
 
 ## Application Information
-- **Version:** 4.3.14
+- **Version:** 4.5.0
 - **Upstream Project:** [https://github.com/coollabsio/coolify](https://github.com/coollabsio/coolify)
-- **Container Base:** [ghcr.io/coollabsio/coolify](https://github.com/coollabsio/coolify/pkgs/container/coolify) (`ghcr.io/coollabsio/coolify:4.3.14`)
+- **Container Base:** [ghcr.io/coollabsio/coolify](https://github.com/coollabsio/coolify/pkgs/container/coolify) (`ghcr.io/coollabsio/coolify:4.5.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
 - **Coolify Application Server (`coolify-app`):** Core Laravel, PHP-FPM, and NGINX web dashboard and deployment engine serving traffic on container port 8080 (exposed on port 8000).
-- **Soketi Realtime Server (`coolify-soketi`):** High-performance WebSockets server (`ghcr.io/coollabsio/coolify-realtime:1.0.18`) handling live terminal streaming, build progress, and event subscriptions on container ports 6001 and 6002.
+- **Soketi Realtime Server (`coolify-soketi`):** High-performance WebSockets server (`ghcr.io/coollabsio/coolify-realtime:1.0.20`) handling live terminal streaming, build progress, and event subscriptions on container ports 6001 and 6002.
 - **PostgreSQL Database (`coolify-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`postgres:18-alpine`) with persistent storage (`8Gi`) managing team projects, server registrations, and deployment metadata.
-- **Redis Cache & Queue (`coolify-redis-master`):** Dedicated Redis/Valkey StatefulSet (`valkey/valkey:9.0-alpine`) managing job queuing, background tasks, and real-time Pub/Sub broadcasts with persistent storage (`2Gi`).
+- **Redis Cache & Queue (`coolify-redis-master`):** Dedicated Redis/Valkey StatefulSet (`valkey/valkey:9.2-alpine`) managing job queuing, background tasks, and real-time Pub/Sub broadcasts with persistent storage (`2Gi`).
 - **Coolify App Service (`coolify-app-svc`):** ClusterIP service routing inbound HTTP traffic to container port 8080.
 - **Soketi Service (`coolify-soketi`):** ClusterIP service routing WebSocket connections (port 6001) and Prometheus/health metrics (port 6002).
 - **Shared Data Storage (`shared-data-pvc`):** PersistentVolumeClaim (`1Gi`, ReadWriteOnce) persisting SSH keys, project repositories, build logs, and temporary build assets.
@@ -96,7 +96,7 @@ timoni -n default delete coolify
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `coolifyApp.image.repository` | string | `"ghcr.io/coollabsio/coolify"` | Coolify application container image repository |
-| `coolifyApp.image.tag` | string | `"4.3.14"` | Coolify application container image tag |
+| `coolifyApp.image.tag` | string | `"4.5.0"` | Coolify application container image tag |
 | `coolifyApp.image.pullPolicy` | string | `"IfNotPresent"` | Kubernetes image pull policy |
 | `coolifyApp.replicaCount` | int | `1` | Number of Coolify core application replicas |
 | `coolifyApp.resources.requests.cpu` | string | `"250m"` | CPU request for Coolify core container |
@@ -107,7 +107,7 @@ timoni -n default delete coolify
 | `coolifyApp.service.targetPort` | int | `8080` | Internal container port for Coolify NGINX proxy |
 | `soketi.enabled` | bool | `true` | Deploy Soketi WebSocket subchart |
 | `soketi.image.repository` | string | `"ghcr.io/coollabsio/coolify-realtime"` | Soketi container image repository |
-| `soketi.image.tag` | string | `"1.0.18"` | Soketi container image tag |
+| `soketi.image.tag` | string | `"1.0.20"` | Soketi container image tag |
 | `soketi.replicaCount` | int | `1` | Number of Soketi WebSocket pod replicas |
 | `soketi.resources.requests.cpu` | string | `"100m"` | CPU request for Soketi container |
 | `soketi.resources.requests.memory` | string | `"256Mi"` | Memory request for Soketi container |
@@ -125,7 +125,7 @@ timoni -n default delete coolify
 | `postgresql.primary.resources.limits.memory` | string | `"1Gi"` | Memory limit for PostgreSQL container |
 | `redis.enabled` | bool | `true` | Deploy dedicated Redis/Valkey cache subchart |
 | `redis.image.repository` | string | `"valkey/valkey"` | Valkey container image repository |
-| `redis.image.tag` | string | `"9.0-alpine"` | Valkey container image tag |
+| `redis.image.tag` | string | `"9.2-alpine"` | Valkey container image tag |
 | `redis.persistence.size` | string | `"2Gi"` | Persistent volume storage requested for Redis/Valkey |
 | `redis.master.resources.requests.cpu` | string | `"100m"` | CPU request for Redis master container |
 | `redis.master.resources.requests.memory` | string | `"128Mi"` | Memory request for Redis master container |
@@ -170,6 +170,11 @@ values: {
 - [Timoni Documentation](https://timoni.sh)
 
 ## Changelog
+
+### 0.1.3 - 2026-10-26
+- **Changed:** Upgraded Coolify application container image from `4.3.14` to `4.5.0` (`ghcr.io/coollabsio/coolify:4.5.0`).
+- **Changed:** Upgraded Valkey container image from `9.0-alpine` to `9.2-alpine` (`valkey/valkey:9.2-alpine`).
+- **Changed:** Upgraded Coolify Realtime (Soketi) container image from `1.0.18` to `1.0.20` (`ghcr.io/coollabsio/coolify-realtime:1.0.20`).
 
 ### [0.1.2] - 2026-09-22
 - **Security:** Added dedicated `ServiceAccount` and configured `serviceAccountName: #config.metadata.name` across all module workloads (`coolify-app`, `coolify-soketi`, `coolify-postgresql`, and `coolify-redis-master`).

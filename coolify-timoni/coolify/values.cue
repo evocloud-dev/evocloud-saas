@@ -14,7 +14,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify"
-			tag:        "4.3.14"
+			tag:        "4.5.0"
 			pullPolicy: "IfNotPresent"
 		}
 		service: {
@@ -162,7 +162,7 @@ values: {
 		}
 		image: {
 			repository: "valkey/valkey"
-			tag:        "9.0-alpine"
+			tag:        "9.2-alpine"
 			pullPolicy: "IfNotPresent"
 		}
 		master: {
@@ -200,7 +200,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify-realtime"
-			tag:        "1.0.18"
+			tag:        "1.0.20"
 			pullPolicy: "Always"
 		}
 		service: {
