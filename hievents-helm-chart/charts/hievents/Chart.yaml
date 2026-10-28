@@ -2,8 +2,8 @@ apiVersion: v2
 name: hievents
 description: A Helm chart for deploying Hi.Events on Kubernetes
 type: application
-version: 0.1.1
-appVersion: "v1.11.1-beta"
+version: 0.1.2
+appVersion: "v1.11.3-beta"
 keywords:
   - hievents
   - laravel
