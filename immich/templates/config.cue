@@ -33,7 +33,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"ghcr.io/immich-app/immich-server" | string
-		tag:        *"v2.7.5" | string
+		tag:        *"v3.3.4" | string
 		pullPolicy: *"IfNotPresent" | string
 	}
 
@@ -45,7 +45,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"ghcr.io/immich-app/immich-machine-learning" | string
-			tag:        *"v2.7.5" | string
+			tag:        *"v3.3.5" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		service: {
@@ -194,7 +194,7 @@ import (
 		architecture:     *"standalone" | string
 		image: timoniv1.#Image & {
 			repository: *"docker.io/valkey/valkey" | string
-			tag:        *"8.1.9" | string
+			tag:        *"8.1.11" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {
