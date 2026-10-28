@@ -14,7 +14,7 @@ values: {
 	
 	image: {
 		repository: "docker.io/wallabag/wallabag"
-		tag:        "2.6.14"
+		tag:        "2.6.14.1"
 		pullPolicy: "IfNotPresent"
 	}
 	imagePullSecrets: []
@@ -229,7 +229,7 @@ values: {
 		}
 		image: {
 			repository: "docker.io/library/redis"
-			tag:        "8.10.1"
+			tag:        "8.10.3"
 			pullPolicy: "IfNotPresent"
 			digest:     ""
 		}
