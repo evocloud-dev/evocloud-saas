@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/louislam/uptime-kuma" | string
-		tag:        *"2.5.4" | string
+		tag:        *"2.5.8" | string
 		digest:     *"" | string
 	}
 	backup: images: {
