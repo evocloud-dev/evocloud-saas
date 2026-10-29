@@ -48,7 +48,7 @@ import (
 	// Image configuration
 	image: timoniv1.#Image & {
 		repository: *"docker.io/n8nio/n8n" | string
-		tag:        *"2.37.11" | string
+		tag:        *"2.46.0" | string
 		pullPolicy: *"IfNotPresent" | string
 		digest:     *"" | string
 	}
@@ -71,7 +71,7 @@ import (
 		mode: *"external" | "internal"
 		image: timoniv1.#Image & {
 			repository: *"docker.io/n8nio/runners" | string
-			tag:        *"2.37.11" | string
+			tag:        *"2.46.0" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
@@ -269,7 +269,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/redis" | string
-			tag:        *"8.10.1" | string
+			tag:        *"8.10.3" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
