@@ -4,13 +4,13 @@
 [Wallabag](https://wallabag.org/) is an open-source, self-hosted read-it-later web application that allows users to save articles, blog posts, and web pages for offline reading. It extracts clean article content (removing advertisements and distracting layout elements), supports tagging, full-text search, annotations, RSS feeds, and multi-format exports (PDF, EPUB, MOBI), and integrates seamlessly with official browser extensions and mobile applications for iOS and Android.
 
 ## Application Information
-- **Version:** `2.6.14`
+- **Version:** `2.6.14.1`
 - **Official Website:** [https://wallabag.org/](https://wallabag.org/)
 - **Upstream Project:** [https://github.com/wallabag/wallabag](https://github.com/wallabag/wallabag)
 - **Container Base:**
-  - Wallabag Application: `docker.io/wallabag/wallabag` (`docker.io/wallabag/wallabag:2.6.14`)
+  - Wallabag Application: `docker.io/wallabag/wallabag` (`docker.io/wallabag/wallabag:2.6.14.1`)
   - PostgreSQL Database: `docker.io/library/postgres` (`docker.io/library/postgres:18.6-trixie`)
-  - Redis Cache & Queue: `docker.io/library/redis` (`docker.io/library/redis:8.10.1`)
+  - Redis Cache & Queue: `docker.io/library/redis` (`docker.io/library/redis:8.10.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -106,7 +106,7 @@ timoni -n default delete walla
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docker.io/wallabag/wallabag` | Container image repository |
-| `image.tag` | string | `2.6.14` | Pinned container image tag |
+| `image.tag` | string | `2.6.14.1` | Pinned container image tag |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `replicaCount` | int | `1` | Number of Wallabag application replicas |
 | `wallabag.port` | int | `80` | Wallabag HTTP service port |
@@ -123,7 +123,7 @@ timoni -n default delete walla
 | `postgresql.persistence.size` | string | `8Gi` | PostgreSQL volume storage capacity |
 | `redis.enabled` | bool | `true` | Deploy internal Redis cache and queue |
 | `redis.image.repository` | string | `docker.io/library/redis` | Redis container image |
-| `redis.image.tag` | string | `8.10.1` | Redis container image tag |
+| `redis.image.tag` | string | `8.10.3` | Redis container image tag |
 | `redis.persistence.size` | string | `8Gi` | Redis volume storage capacity |
 | `backup.enabled` | bool | `false` | Enable scheduled automated database backups |
 
@@ -187,6 +187,12 @@ values: {
 - [Official Wallabag Repository](https://github.com/wallabag/wallabag)
 - [Wallabag Documentation](https://doc.wallabag.org/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-28
+- **Changed:** Upgraded Wallabag container image from `2.6.14` to `2.6.14.1` (`docker.io/wallabag/wallabag:2.6.14.1`).
+- **Changed:** Upgraded Redis container image from `8.10.1` to `8.10.3` (`docker.io/library/redis:8.10.3`).
 
 ## Kubesec Scan Scores
 
