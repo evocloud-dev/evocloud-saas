@@ -24,7 +24,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/langflowai/langflow" | string
-		tag:        *"1.11.1" | string
+		tag:        *"1.13.0" | string
 		pullPolicy: *"IfNotPresent" | string
 	}
 
