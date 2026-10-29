@@ -4,9 +4,9 @@
 [openHAB](https://www.openhab.org/) is a vendor-neutral, open-source smart home automation platform designed to integrate diverse home automation devices, protocols, and technologies into a single unified system with local data sovereignty and flexible automation rule engines.
 
 ## Application Information
-- **Version:** 0.1.0 (App: 5.2.1)
+- **Version:** 0.1.1 (App: 5.2.1)
 - **Upstream Project:** [https://github.com/openhab/openhab-distro](https://github.com/openhab/openhab-distro)
-- **Container Base:** [docker.io/openhab/openhab](https://hub.docker.com/r/openhab/openhab) (`docker.io/openhab/openhab:5.2.1`), [docker.io/library/busybox](https://hub.docker.com/_/busybox) (`docker.io/library/busybox:1.37`), [docker.io/library/alpine](https://hub.docker.com/_/alpine) (`docker.io/library/alpine:3.22`), [docker.io/helmforge/mc](https://hub.docker.com/r/helmforge/mc) (`docker.io/helmforge/mc:1.0.0`)
+- **Container Base:** [docker.io/openhab/openhab](https://hub.docker.com/r/openhab/openhab) (`docker.io/openhab/openhab:5.2.1`), [docker.io/library/busybox](https://hub.docker.com/_/busybox) (`docker.io/library/busybox:1.38`), [docker.io/library/alpine](https://hub.docker.com/_/alpine) (`docker.io/library/alpine:3.24`), [docker.io/helmforge/mc](https://hub.docker.com/r/helmforge/mc) (`docker.io/helmforge/mc:1.0.0`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -128,6 +128,12 @@ values: {
 - [Official openHAB Community](https://community.openhab.org/)
 - [openHAB Documentation](https://www.openhab.org/docs/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded ConfigMap sync BusyBox container image from `1.37` to `1.38` (`docker.io/library/busybox:1.38`).
+- **Changed:** Upgraded backup utility Alpine container image from `3.22` to `3.24` (`docker.io/library/alpine:3.24`).
 
 ## Kubesec Scan Scores
 
