@@ -4,13 +4,13 @@
 [Matomo](https://matomo.org/) (formerly Piwik) is the leading open-source web analytics platform, delivering privacy-centric metrics with 100% data ownership. Offering an ethical alternative to Google Analytics, Matomo provides real-time visitor reporting, heatmaps, session recordings, conversion funnels, custom dimensions, and campaign tracking while strictly complying with global privacy laws such as GDPR, HIPAA, and CCPA.
 
 ## Application Information
-- **Version:** `5.13.0`
+- **Version:** `5.14.2`
 - **Upstream Project:** [https://github.com/matomo-org/matomo](https://github.com/matomo-org/matomo)
-- **Container Base:** [docker.io/library/matomo](https://hub.docker.com/_/matomo) (`docker.io/library/matomo:5.13.0-apache`)
+- **Container Base:** [docker.io/library/matomo](https://hub.docker.com/_/matomo) (`docker.io/library/matomo:5.14.2-apache`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Matomo Application Core (`matomo`):** Web server Deployment running Apache and PHP (`docker.io/library/matomo:5.13.0-apache`) on container port `8080` (exposed via Service port `80`). Serves the web dashboard, tracking endpoint (`matomo.php`), and REST reporting APIs.
+- **Matomo Application Core (`matomo`):** Web server Deployment running Apache and PHP (`docker.io/library/matomo:5.14.2-apache`) on container port `8080` (exposed via Service port `80`). Serves the web dashboard, tracking endpoint (`matomo.php`), and REST reporting APIs.
 - **MySQL Database (`matomo-mysql`):** Dedicated relational database StatefulSet running `library/mysql:9.7` with persistent volume storage (`8Gi`) storing visitor logs, aggregated reports, goals, and user profiles.
 - **Matomo Archiver (`archiver`):** Background CronJob running every hour (`5 * * * *`) that executes `core:archive` to pre-calculate reports, ensuring instant dashboard rendering and fast querying.
 - **Persistent Storage Volumes:**
@@ -83,7 +83,7 @@ timoni -n default delete matomo
 | `fullnameOverride` | `string` | `""` | Override the fully qualified release name |
 | `replicaCount` | `int` | `1` | Number of Matomo application replicas |
 | `image.repository` | `string` | `"docker.io/library/matomo"` | Matomo container image repository |
-| `image.tag` | `string` | `"5.13.0-apache"` | Matomo container image tag |
+| `image.tag` | `string` | `"5.14.2-apache"` | Matomo container image tag |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | `matomo.siteUrl` | `string` | `""` | External public URL of the Matomo instance |
 | `matomo.trustedHost` | `string` | `""` | Trusted host domain for Matomo headers |
@@ -150,6 +150,11 @@ values: {
 - [Official Matomo Repository](https://github.com/matomo-org/matomo)
 - [Matomo Documentation](https://matomo.org/docs/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 1.0.3 - 2026-10-27
+- **Changed:** Upgraded Matomo container image from `5.13.0-apache` to `5.14.2-apache` (`docker.io/library/matomo:5.14.2-apache`).
 
 ## Kubesec Scan Scores
 
