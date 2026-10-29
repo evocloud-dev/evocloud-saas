@@ -6,18 +6,18 @@
 
 ## Application Information
 
-- **Version:** 3.1.3
+- **Version:** 0.1.2 (App: 3.3.4)
 - **Official Website:** [https://docs.paperless-ngx.com/](https://docs.paperless-ngx.com/)
 - **Upstream Project:** [https://github.com/paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx)
 - **Container Base:**
-  - Paperless-ngx Core: [ghcr.io/paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx/pkgs/container/paperless-ngx) (`ghcr.io/paperless-ngx/paperless-ngx:3.1.3`)
+  - Paperless-ngx Core: [ghcr.io/paperless-ngx/paperless-ngx](https://github.com/paperless-ngx/paperless-ngx/pkgs/container/paperless-ngx) (`ghcr.io/paperless-ngx/paperless-ngx:3.3.4`)
   - Valkey / Redis Broker: [docker.io/valkey/valkey](https://hub.docker.com/r/valkey/valkey) (`docker.io/valkey/valkey:9.1.2-alpine`)
   - PostgreSQL Database: [docker.io/postgres](https://hub.docker.com/_/postgres) (`docker.io/postgres:18-alpine`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
 
-- **Paperless-ngx Core (`paper`):** Primary workload Deployment running `ghcr.io/paperless-ngx/paperless-ngx:3.1.3` on container port 8000, hosting the web interface, REST API, OCR pipelines, and Celery consumer workers.
+- **Paperless-ngx Core (`paper`):** Primary workload Deployment running `ghcr.io/paperless-ngx/paperless-ngx:3.3.4` on container port 8000, hosting the web interface, REST API, OCR pipelines, and Celery consumer workers.
 - **Valkey / Redis Broker (`paper-redis-master`):** Dedicated Valkey/Redis Deployment (`docker.io/valkey/valkey:9.1.2-alpine`) serving as the asynchronous message broker and cache for document indexing queues.
 - **PostgreSQL Database (`paper-postgresql`):** Dedicated PostgreSQL Deployment (`docker.io/postgres:18-alpine`) storing document metadata, full-text indexes, tags, user accounts, and system configuration.
 - **Core Service (`paper`):** ClusterIP service routing HTTP traffic on port 8000 to the Paperless-ngx web application.
@@ -104,7 +104,7 @@ timoni -n default delete paperless-timoni
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `ghcr.io/paperless-ngx/paperless-ngx` | Container image repository |
-| `image.tag` | string | `3.1.3` | Container image tag |
+| `image.tag` | string | `3.3.4` | Container image tag |
 | `image.pullPolicy` | string | `IfNotPresent` | Kubernetes image pull policy |
 | `service.main.ports.http.port` | int | `8000` | Kubernetes Service HTTP port |
 | `env` | map | `{}` | Additional environment variables for Paperless |
@@ -178,6 +178,11 @@ values: {
 - [Official Paperless-ngx Documentation](https://docs.paperless-ngx.com/)
 - [Paperless-ngx GitHub Repository](https://github.com/paperless-ngx/paperless-ngx)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-27
+- **Changed:** Upgraded Paperless-ngx container image from `3.1.3` to `3.3.4` (`ghcr.io/paperless-ngx/paperless-ngx:3.3.4`).
 
 ## Kubesec Scan Scores
 
