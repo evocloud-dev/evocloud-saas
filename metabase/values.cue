@@ -11,7 +11,7 @@ values: {
 
 	image: {
 		repository: "docker.io/metabase/metabase"
-		tag:        "v0.63.5"
+		tag:        "v0.65.1"
 		pullPolicy: "IfNotPresent"
 	}
 	imagePullSecrets: []
@@ -19,7 +19,7 @@ values: {
 	waitForDatabase: {
 		image: {
 			repository: "docker.io/library/busybox"
-			tag:        "1.37"
+			tag:        "1.38"
 			pullPolicy: "IfNotPresent"
 		}
 	}
@@ -64,7 +64,7 @@ values: {
 	}
 
 	gateway: {
-		enabled:     true
+		enabled:     false
 		annotations: {}
 		parentRefs: []
 		hostnames: []
@@ -146,7 +146,7 @@ values: {
 		archivePrefix: "metabase"
 		images: {
 			// Image used for PostgreSQL backup (must have pg_dump)
-			postgresql: "docker.io/library/postgres:18.4-trixie"
+			postgresql: "docker.io/library/postgres:18.6-trixie"
 			// Image used for S3 upload (MinIO client)
 			uploader: "docker.io/helmforge/mc:1.0.0"
 		}
@@ -235,7 +235,7 @@ values: {
 		}
 		image: {
 			repository: "docker.io/library/postgres"
-			tag:        "18.4-trixie"
+			tag:        "18.6-trixie"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {

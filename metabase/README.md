@@ -4,14 +4,14 @@
 [Metabase](https://www.metabase.com/) is an open-source business intelligence and data analytics platform that allows teams to explore data, build interactive dashboards, and generate automated reports without requiring technical SQL knowledge. By lowering technical barriers while preserving enterprise governance and data security, Metabase empowers organizations to make data-driven decisions seamlessly.
 
 ## Application Information
-- **Version:** 0.1.0 (App: v0.63.5)
+- **Version:** 0.1.1 (App: v0.65.1)
 - **Upstream Project:** [https://github.com/metabase/metabase](https://github.com/metabase/metabase)
-- **Container Base:** [docker.io/metabase/metabase](https://hub.docker.com/r/metabase/metabase) (`docker.io/metabase/metabase:v0.63.5`), [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.4-trixie`)
+- **Container Base:** [docker.io/metabase/metabase](https://hub.docker.com/r/metabase/metabase) (`docker.io/metabase/metabase:v0.65.1`), [docker.io/library/postgres](https://hub.docker.com/_/postgres) (`docker.io/library/postgres:18.6-trixie`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Metabase Core (`metabase-metabase`):** Primary web interface, query execution, and analytics engine running `docker.io/metabase/metabase:v0.63.5` on container port 3000, with an init container (`docker.io/library/busybox:1.37`) ensuring database readiness before startup.
-- **PostgreSQL Database Subchart (`metabase-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.4-trixie`) providing persistent relational storage (`8Gi`) for Metabase application metadata, dashboards, collections, queries, and user accounts.
+- **Metabase Core (`metabase-metabase`):** Primary web interface, query execution, and analytics engine running `docker.io/metabase/metabase:v0.65.1` on container port 3000, with an init container (`docker.io/library/busybox:1.38`) ensuring database readiness before startup.
+- **PostgreSQL Database Subchart (`metabase-postgresql`):** Dedicated PostgreSQL 18 StatefulSet (`docker.io/library/postgres:18.6-trixie`) providing persistent relational storage (`8Gi`) for Metabase application metadata, dashboards, collections, queries, and user accounts.
 - **Application Secret (`appSecret`):** Securely stores the cryptographic `encryptionSecretKey` used to encrypt connected database credentials and integrations.
 - **Kubernetes Service (`svc`):** ClusterIP service exposing port 80 routing internally to container port 3000.
 - **Gateway API HTTPRoute (`httproute`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resource providing modern Kubernetes Gateway API ingress routing.
@@ -72,7 +72,7 @@ timoni -n default delete metabase
 | `fullnameOverride` | string | `""` | Override the full release name used in resource naming |
 | `commonLabels` | map | `{}` | Additional common labels applied to all resources |
 | `image.repository` | string | `"docker.io/metabase/metabase"` | Metabase container image repository |
-| `image.tag` | string | `"v0.63.5"` | Metabase container image tag |
+| `image.tag` | string | `"v0.65.1"` | Metabase container image tag |
 | `image.pullPolicy` | string | `"IfNotPresent"` | Container image pull policy |
 | `metabase.port` | int | `3000` | Port where Metabase listens inside container |
 | `metabase.siteUrl` | string | `""` | Full external public URL of the Metabase instance |
@@ -112,7 +112,7 @@ timoni -n default delete metabase
 | `database.external.password` | string | `""` | External PostgreSQL password |
 | `postgresql.enabled` | bool | `true` | Deploy dedicated PostgreSQL database subchart |
 | `postgresql.image.repository` | string | `"docker.io/library/postgres"` | PostgreSQL container image repository |
-| `postgresql.image.tag` | string | `"18.4-trixie"` | PostgreSQL container image tag |
+| `postgresql.image.tag` | string | `"18.6-trixie"` | PostgreSQL container image tag |
 | `postgresql.auth.database` | string | `"metabase"` | Database name created on first run |
 | `postgresql.auth.username` | string | `"metabase"` | Database user created on first run |
 | `postgresql.auth.password` | string | `"change-me-please-db-password!"` | Password for PostgreSQL database user |
@@ -153,6 +153,13 @@ values: {
 - [Official Metabase Repository](https://github.com/metabase/metabase)
 - [Metabase Documentation](https://www.metabase.com/docs/latest/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded Metabase container image from `v0.63.5` to `v0.65.1` (`docker.io/metabase/metabase:v0.65.1`).
+- **Changed:** Upgraded BusyBox init container image from `1.37` to `1.38` (`docker.io/library/busybox:1.38`).
+- **Changed:** Upgraded PostgreSQL container image from `18.4-trixie` to `18.6-trixie` (`docker.io/library/postgres:18.6-trixie`).
 
 ## Kubesec Scan Scores
 

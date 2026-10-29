@@ -39,7 +39,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/metabase/metabase" | string
-		tag:        *"v0.63.1" | string
+		tag:        *"v0.65.1" | string
 		pullPolicy: *"IfNotPresent" | string
 		digest:     *"" | string
 	}
@@ -48,7 +48,7 @@ import (
 	waitForDatabase: {
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/busybox" | string
-			tag:        *"1.37" | string
+			tag:        *"1.38" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
@@ -193,7 +193,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/postgres" | string
-			tag:        *"18.4-trixie" | string
+			tag:        *"18.6-trixie" | string
 			pullPolicy: *"IfNotPresent" | string
 			digest:     *"" | string
 		}
@@ -232,7 +232,7 @@ import (
 		backoffLimit:               *1 | int
 		archivePrefix:              *"metabase" | string
 		images: {
-			postgresql: *"docker.io/library/postgres:18.4-trixie" | string
+			postgresql: *"docker.io/library/postgres:18.6-trixie" | string
 			uploader:   *"docker.io/helmforge/mc:1.0.0" | string
 		}
 		resources: corev1.#ResourceRequirements | *{}
