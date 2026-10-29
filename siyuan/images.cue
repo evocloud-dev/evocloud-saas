@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/b3log/siyuan" | string
-		tag:        *"v3.8.3" | string
+		tag:        *"v3.8.8" | string
 		digest:     *"" | string
 	}
 }

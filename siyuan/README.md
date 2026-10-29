@@ -6,10 +6,10 @@
 
 ## Application Information
 
-- **Version:** 3.8.3
+- **Version:** 3.8.8
 - **Official Website:** [https://b3log.org/siyuan/](https://b3log.org/siyuan/)
 - **Upstream Project:** [https://github.com/siyuan-note/siyuan](https://github.com/siyuan-note/siyuan)
-- **Container Base:** [docker.io/b3log/siyuan](https://hub.docker.com/r/b3log/siyuan) (`docker.io/b3log/siyuan:v3.8.3`)
+- **Container Base:** [docker.io/b3log/siyuan](https://hub.docker.com/r/b3log/siyuan) (`docker.io/b3log/siyuan:v3.8.8`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -89,7 +89,7 @@ timoni -n default delete siyuan
 | `commonLabels` | `object` | `{}` | Extra resource labels; selector labels are reserved |
 | `replicaCount` | `int` | `1` | Exactly one writer per workspace, including RWX volumes |
 | `image.repository` | `string` | `"docker.io/b3log/siyuan"` | Container image repository |
-| `image.tag` | `string` | `"v3.8.3"` | Verified stable image tag |
+| `image.tag` | `string` | `"v3.8.8"` | Verified stable image tag |
 | `image.digest` | `string` | `""` | Container image digest |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for a private mirror |
@@ -209,6 +209,13 @@ values: {
 - [Official SiYuan GitHub Repository](https://github.com/siyuan-note/siyuan)
 - [SiYuan HelmForge Documentation](https://helmforge.dev/docs/charts/siyuan)
 - [Timoni Documentation](https://timoni.sh)
+
+---
+
+## Changelog
+
+### 0.1.1 - 2026-10-28
+- **Changed:** Upgraded SiYuan container image from `v3.8.5` to `v3.8.8` (`docker.io/b3log/siyuan:v3.8.8`).
 
 ---
 

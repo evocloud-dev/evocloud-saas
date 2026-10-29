@@ -26,7 +26,7 @@ values: {
 		// -- Repository.
 		repository: "docker.io/b3log/siyuan"
 		// -- Verified stable image tag.
-		tag: "v3.8.5"
+		tag: "v3.8.8"
 		// -- Kubernetes pull policy.
 		pullPolicy: "IfNotPresent"
 	}
@@ -85,7 +85,7 @@ values: {
 	// -- Gateway.
 	gatewayAPI: {
 		// -- Render canonical Gateway API HTTPRoutes.
-		enabled: true
+		enabled: false
 		// -- GatewayClass name.
 		gatewayClassName: ""
 		// -- Route definitions with parentRefs, hostnames, rules, labels and annotations.
