@@ -4,7 +4,7 @@ package main
 values: {
 	hub: image: {
 		repository: *"quay.io/jupyterhub/k8s-hub" | string
-		tag:        *"4.4.2" | string
+		tag:        *"4.4.4" | string
 		digest:     *"" | string
 	}
 	proxy: image: {
@@ -14,7 +14,7 @@ values: {
 	}
 	singleuser: image: {
 		name:       *"quay.io/jupyter/base-notebook" | string
-		tag:        *"2026-10-05" | string
+		tag:        *"2026-10-23" | string
 		pullPolicy: *"IfNotPresent" | string
 	}
 }

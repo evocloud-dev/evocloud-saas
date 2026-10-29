@@ -18,7 +18,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "quay.io/jupyterhub/k8s-hub"
-			tag:        "4.4.2"
+			tag:        "4.4.4"
 			digest:     ""
 		}
 		baseUrl: "/"
@@ -85,7 +85,7 @@ values: {
 	singleuser: {
 		image: {
 			name:       "quay.io/jupyter/base-notebook"
-			tag:        "2026-10-05"
+			tag:        "2026-10-23"
 			pullPolicy: "IfNotPresent"
 		}
 		cpu: {

@@ -26,7 +26,7 @@ values: {
 			// -- JupyterHub Hub image repository.
 			repository: "quay.io/jupyterhub/k8s-hub"
 			// -- JupyterHub Hub image tag.
-			tag: "4.4.2"
+			tag: "4.4.4"
 			// -- JupyterHub Hub image pull policy.
 			pullPolicy: "IfNotPresent"
 		}
@@ -144,7 +144,7 @@ values: {
 			// -- Single-user notebook image repository.
 			name: "quay.io/jupyter/base-notebook"
 			// -- Single-user notebook image tag.
-			tag: "2026-10-05"
+			tag: "2026-10-23"
 			// -- Single-user notebook image pull policy.
 			pullPolicy: "IfNotPresent"
 		}

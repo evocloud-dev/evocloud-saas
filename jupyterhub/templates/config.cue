@@ -354,7 +354,7 @@ import (
 	singleuser: {
 		image: {
 			name:       *"quay.io/jupyter/base-notebook" | string
-			tag:        *"2026-10-05" | string
+			tag:        *"2026-10-23" | string
 			pullPolicy: *"IfNotPresent" | "Always" | "Never"
 		}
 		cpu: {
