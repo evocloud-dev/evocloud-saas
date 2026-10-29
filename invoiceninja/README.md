@@ -4,13 +4,13 @@
 [Invoice Ninja](https://invoiceninja.com/) is a leading open-source invoicing, billing, payment processing, and time-tracking platform built for freelancers, agencies, and small-to-medium enterprises. Powered by Laravel and Flutter, it empowers businesses to generate professional invoices and quotes, accept payments across 30+ gateway integrations (including Stripe and PayPal), track billable tasks and expenses, manage client projects, and automate recurring subscriptions.
 
 ## Application Information
-- **Version:** `5.13.33`
+- **Version:** `5.13.50`
 - **Upstream Project:** [https://github.com/invoiceninja/invoiceninja](https://github.com/invoiceninja/invoiceninja)
-- **Container Base:** [invoiceninja/invoiceninja-debian](https://hub.docker.com/r/invoiceninja/invoiceninja-debian) (`invoiceninja/invoiceninja-debian:5.13.33`)
+- **Container Base:** [invoiceninja/invoiceninja-debian](https://hub.docker.com/r/invoiceninja/invoiceninja-debian) (`invoiceninja/invoiceninja-debian:5.13.50`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Invoice Ninja Application Core (`invoice-app`):** Primary backend Deployment running `invoiceninja/invoiceninja-debian:5.13.33` on FastCGI port `9000`. Handles business logic, PDF invoice generation (via snappdf), database migrations, and background queue workers. Includes an init container (`busybox:1.37`) ensuring database and cache availability before application startup.
+- **Invoice Ninja Application Core (`invoice-app`):** Primary backend Deployment running `invoiceninja/invoiceninja-debian:5.13.50` on FastCGI port `9000`. Handles business logic, PDF invoice generation (via snappdf), database migrations, and background queue workers. Includes an init container (`busybox:1.37`) ensuring database and cache availability before application startup.
 - **Invoice Ninja NGINX Web Server (`invoice-nginx`):** Reverse proxy Deployment running unprivileged `nginxinc/nginx-unprivileged:alpine` on container port `8080`, exposed via ClusterIP Service port `80`. Routes incoming HTTP/HTTPS traffic to the application FastCGI server and serves public assets.
 - **MariaDB Database (`invoice-mysql`):** Relational database Deployment running `mariadb:lts` on port `3306` with persistent storage for company data, client details, invoices, and payment histories.
 - **Redis In-Memory Cache (`invoice-redis`):** High-speed in-memory datastore Deployment running `redis:alpine` on port `6379` managing application caching, session states, and asynchronous queue execution.
@@ -87,7 +87,7 @@ timoni -n default delete invoiceninja
 | `nameOverride` | `string` | `""` | Override the release name |
 | `fullnameOverride` | `string` | `""` | Override the fully qualified release name |
 | `app.image.repository` | `string` | `"invoiceninja/invoiceninja-debian"` | Invoice Ninja application image repository |
-| `app.image.tag` | `string` | `"5.13.33"` | Invoice Ninja application image tag |
+| `app.image.tag` | `string` | `"5.13.50"` | Invoice Ninja application image tag |
 | `app.image.pullPolicy` | `string` | `"IfNotPresent"` | [Kubernetes image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | `app.busyboxTag` | `string` | `"1.37"` | Busybox image tag for the init wait container |
 | `app.replicaCount` | `int` | `1` | Number of application replicas (requires RWX storage if > 1) |
@@ -191,6 +191,11 @@ values: {
 - [Official Invoice Ninja Repository](https://github.com/invoiceninja/invoiceninja)
 - [Invoice Ninja Documentation](https://invoiceninja.github.io/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded Invoice Ninja application container image from `5.13.33` to `5.13.50` (`invoiceninja/invoiceninja-debian:5.13.50`).
 
 ## Kubesec Scan Scores
 

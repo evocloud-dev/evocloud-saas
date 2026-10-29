@@ -14,7 +14,7 @@ values: {
 	app: {
 		image: {
 			repository: "invoiceninja/invoiceninja-debian"
-			tag:        "5.13.33"
+			tag:        "5.13.50"
 			pullPolicy: "IfNotPresent"
 		}
 		// Tag for the busybox init container that waits for MySQL/Redis.
@@ -148,7 +148,7 @@ values: {
 		securityContext: {
 			allowPrivilegeEscalation: false
 			runAsNonRoot:             true
-			runAsUser:                999 // mysql user in mariadb image
+			runAsUser:                999 
 			runAsGroup:               999
 			capabilities: {
 				drop: [
