@@ -625,7 +625,7 @@ import (
 		enabled: *false | bool
 		image: {
 			repository: *"opensearchproject/opensearch" | string
-			tag:        *"3.6.0" | string
+			tag:        *"3.9.0" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		hostname:       *"" | string

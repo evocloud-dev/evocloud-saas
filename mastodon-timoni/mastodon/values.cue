@@ -5,7 +5,7 @@ package main
 values: {
 	image: {
 		repository: "ghcr.io/mastodon/mastodon"
-		tag:        "v4.7.1"
+		tag:        "v4.7.3"
 		pullPolicy: "IfNotPresent"
 	}
 
@@ -212,7 +212,7 @@ values: {
 					]
 					image: {
 						repository: "ghcr.io/mastodon/mastodon"
-						tag:        "v4.7.1"
+						tag:        "v4.7.3"
 					}
 					customDatabaseConfigYml: configMapRef: {
 						name: ""
@@ -258,7 +258,7 @@ values: {
 		streaming: {
 			image: {
 				repository: "ghcr.io/mastodon/mastodon-streaming"
-				tag:        "v4.7.1"
+				tag:        "v4.7.3"
 			}
 			port:     4000
 			workers:  1
@@ -343,7 +343,7 @@ values: {
 			persistentTimeout:          "20"
 			image: {
 				repository: "ghcr.io/mastodon/mastodon"
-				tag:        "v4.7.1"
+				tag:        "v4.7.3"
 			}
 			customDatabaseConfigYml: configMapRef: {
 				name: ""
@@ -487,7 +487,7 @@ values: {
 		enabled: true
 		image: {
 			repository: "opensearchproject/opensearch"
-			tag:        "3.8.0"
+			tag:        "3.9.0"
 		}
 		resources: {
 			requests: {
