@@ -4,11 +4,11 @@
 [Mattermost](https://mattermost.com) is an open-source, self-hosted collaboration platform that provides secure messaging, voice/audio channels, project management, and developer workflow automation across the entire software development lifecycle. Designed for enterprise security and data control, Mattermost runs securely on Kubernetes with high availability, full persistence, and native PostgreSQL database integration via CloudNativePG.
 
 ## Application Information
-- **Version:** `12.0.0`
+- **Version:** `12.1.0`
 - **Official Website:** [https://mattermost.com](https://mattermost.com)
 - **Upstream Project:** [https://github.com/mattermost/mattermost-server](https://github.com/mattermost/mattermost-server)
 - **Container Base:**
-  - Mattermost Enterprise Edition: [docker.io/mattermost/mattermost-enterprise-edition](https://hub.docker.com/r/mattermost/mattermost-enterprise-edition) (`docker.io/mattermost/mattermost-enterprise-edition:release-12.0@sha256:6e591e3aa84788b98727a63c6196f4d470f10efdfe053a200dd49cf56e7247aa`)
+  - Mattermost Enterprise Edition: [docker.io/mattermost/mattermost-enterprise-edition](https://hub.docker.com/r/mattermost/mattermost-enterprise-edition) (`docker.io/mattermost/mattermost-enterprise-edition:release-12.1`)
   - CloudNativePG PostgreSQL: [ghcr.io/cloudnative-pg/postgresql](https://github.com/cloudnative-pg/postgresql-containers) (`ghcr.io/cloudnative-pg/postgresql:18.6@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533`)
   - Database Wait Helper: `oci.trueforge.org/containerforge/postgresql-client:9.6.24@sha256:8ca87491df3145248ee8040ab01ff816a2af13a401c6db950aac371c1b3ebf81`
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
@@ -80,8 +80,8 @@ timoni -n default delete mattermost
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `image.repository` | string | `docker.io/mattermost/mattermost-enterprise-edition` | Container image repository |
-| `image.tag` | string | `release-12.0` | Pinned container image tag |
-| `image.digest` | string | `sha256:6e591e3aa84788b98727a63c6196f4d470f10efdfe053a200dd49cf56e7247aa` | Container image digest |
+| `image.tag` | string | `release-12.1` | Pinned container image tag |
+| `image.digest` | string | `""` | Container image digest |
 | `image.pullPolicy` | string | `IfNotPresent` | Container image pull policy |
 | `workload.main.podSpec.containers.main.env` | object | `{TIMEZONE: "UTC", TZ: "UTC", UMASK: "0022", S6_READ_ONLY_ROOT: "1", ...}` | Environment variables passed to Mattermost |
 | `service.main.ports.main.port` | int | `10239` | Kubernetes Service port |
@@ -148,6 +148,11 @@ values: {
 - [Mattermost Documentation](https://docs.mattermost.com/)
 - [CloudNativePG Documentation](https://cloudnative-pg.io/documentation/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.1 - 2026-10-27
+- **Changed:** Upgraded Mattermost Enterprise Edition container image from `release-12.0` to `release-12.1` (`docker.io/mattermost/mattermost-enterprise-edition:release-12.1`).
 
 ## Kubesec Scan Scores
 
