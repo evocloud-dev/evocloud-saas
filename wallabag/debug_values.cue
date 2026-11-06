@@ -7,7 +7,7 @@ package main
 values: {
 	image: {
 		repository: "docker.io/wallabag/wallabag"
-		tag:        "2.6.14"
+		tag:        "2.6.14.1"
 		digest:     ""
 	}
 	test: {

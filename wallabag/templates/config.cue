@@ -39,7 +39,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"docker.io/wallabag/wallabag" | string
-		tag:        *"2.6.14" | string
+		tag:        *"2.6.14.1" | string
 		pullPolicy: *"IfNotPresent" | string
 		digest:     *"" | string
 	}
@@ -208,7 +208,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/redis" | string
-			tag:        *"8.8.1" | string
+			tag:        *"8.10.3" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		resources: corev1.#ResourceRequirements
