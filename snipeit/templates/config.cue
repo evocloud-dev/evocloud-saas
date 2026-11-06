@@ -66,7 +66,7 @@ import (
 	// The default image repository and tag is set in `values.cue`.
 	image: timoniv1.#Image & {
 		repository: *"snipe/snipe-it" | string
-		tag:        *"v8.7.2" | string
+		tag:        *"v8.8.3" | string
 		digest:     *"" | string
 	}
 
