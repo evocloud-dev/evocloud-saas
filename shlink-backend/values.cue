@@ -18,7 +18,7 @@ values: {
 		registry:   "docker.io"
 		repository: "shlinkio/shlink"
 		pullPolicy: "Always"
-		tag:        "5.1.6"
+		tag:        "5.1.8"
 	}
 	imagePullSecrets: []
 	replicaCount: 1
@@ -70,7 +70,7 @@ values: {
 	}
 
 	route: main: {
-		enabled: true
+		enabled: false
 		apiVersion: "gateway.networking.k8s.io/v1"
 		kind: "HTTPRoute"
 		annotations: {}
@@ -289,9 +289,13 @@ values: {
 	}
 	rabbitmq: {
 		enabled: true
+		auth: {
+			username: "shlink"
+			password: "shlink"
+		}
 		image: {
-			repository: "bitnamilegacy/rabbitmq"
-			tag:        "4.1.3-debian-12-r1"
+			repository: "rabbitmq"
+			tag:        "4.4.0-management-alpine"
 		}
 		resources: {
 			limits: {
@@ -388,7 +392,7 @@ values: {
 			tls: []
 		}
 		route: main: {
-			enabled: true
+			enabled: false
 			apiVersion: "gateway.networking.k8s.io/v1"
 			kind: "HTTPRoute"
 			annotations: {}

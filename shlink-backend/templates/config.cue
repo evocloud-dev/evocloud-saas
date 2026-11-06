@@ -52,7 +52,7 @@ import (
 		registry:   *"docker.io" | string
 		repository: *"shlinkio/shlink" | string
 		pullPolicy: *"Always" | string
-		tag:        *"5.1.6" | string
+		tag:        *"5.1.8" | string
 		reference:  "\(registry)/\(repository):\(tag)"
 	}
 	imagePullSecrets: [...timoniv1.#ObjectReference] | *[]
@@ -326,9 +326,13 @@ import (
 	}
 	rabbitmq: {
 		enabled: *false | bool
+		auth: {
+			username: *"shlink" | string
+			password: *"shlink" | string
+		}
 		image: {
-			repository: *"bitnamilegacy/rabbitmq" | string
-			tag:        *"4.1.3-debian-12-r1" | string
+			repository: *"rabbitmq" | string
+			tag:        *"4.4.0-management-alpine" | string
 		}
 		resources: *{
 			limits: {
@@ -599,11 +603,24 @@ import (
 		#rabbitmqUsername: config.rabbitmq.auth.username
 	}
 	if rabbitmq.enabled {
-		if config.rabbitmq.auth.username == "" {
-			#rabbitmqUsername: "user"
-		}
 		if config.rabbitmq.auth.username != "" {
 			#rabbitmqUsername: config.rabbitmq.auth.username
+		}
+		if config.rabbitmq.auth.username == "" {
+			#rabbitmqUsername: rabbitmq.auth.username
+		}
+	}
+
+	#rabbitmqPassword: string
+	if !rabbitmq.enabled {
+		#rabbitmqPassword: config.rabbitmq.auth.password
+	}
+	if rabbitmq.enabled {
+		if config.rabbitmq.auth.password != "" {
+			#rabbitmqPassword: config.rabbitmq.auth.password
+		}
+		if config.rabbitmq.auth.password == "" {
+			#rabbitmqPassword: rabbitmq.auth.password
 		}
 	}
 

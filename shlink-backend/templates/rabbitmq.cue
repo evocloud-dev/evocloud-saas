@@ -20,7 +20,7 @@ import (
 			}
 			type: corev1.#SecretTypeOpaque
 			stringData: {
-				"rabbitmq-password": #config.config.rabbitmq.auth.password
+				"rabbitmq-password": #config.#rabbitmqPassword
 			}
 		},
 		corev1.#Service & {
@@ -73,14 +73,29 @@ import (
 					spec: corev1.#PodSpec & {
 						serviceAccountName:           #config.#serviceAccountName
 						automountServiceAccountToken: false
+						securityContext: {
+							runAsNonRoot: true
+							runAsUser:    999
+							runAsGroup:   999
+							fsGroup:      999
+						}
 						containers: [{
 							name:  "rabbitmq"
 							image: "\(#config.rabbitmq.image.repository):\(#config.rabbitmq.image.tag)"
+							securityContext: {
+								allowPrivilegeEscalation: false
+								readOnlyRootFilesystem:   false
+								runAsNonRoot:             true
+								runAsUser:                999
+								runAsGroup:               999
+								capabilities: drop: ["ALL"]
+								seccompProfile: type: "RuntimeDefault"
+							}
 							env: [{
-								name:  "RABBITMQ_USERNAME"
+								name:  "RABBITMQ_DEFAULT_USER"
 								value: #config.#rabbitmqUsername
 							}, {
-								name: "RABBITMQ_PASSWORD"
+								name: "RABBITMQ_DEFAULT_PASS"
 								valueFrom: secretKeyRef: {
 									key:  "rabbitmq-password"
 									name: "\(#config.metadata.name)-rabbitmq"

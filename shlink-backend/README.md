@@ -6,26 +6,27 @@
 Built for cloud-native environments, this Timoni module provides a production-ready deployment of both the Shlink backend and the Shlink Web Client, complete with multi-database support (PostgreSQL, MariaDB, MySQL, SQLite), Valkey/Redis caching, Kubernetes Gateway API HTTPRoute routing, and compliance with the restricted Pod Security Standard.
 
 ## Application Information
-- **Version:** 5.1.6 (Web Client: 4.8.1)
+- **Version:** 5.1.8 (Web Client: 4.8.1)
 - **Official Website:** [https://shlink.io/](https://shlink.io/)
 - **Upstream Project:** [https://github.com/shlinkio/shlink](https://github.com/shlinkio/shlink)
 - **Container Base:**
-  - Shlink Backend: [docker.io/shlinkio/shlink](https://hub.docker.com/r/shlinkio/shlink) (`shlinkio/shlink:5.1.6`)
+  - Shlink Backend: [docker.io/shlinkio/shlink](https://hub.docker.com/r/shlinkio/shlink) (`shlinkio/shlink:5.1.8`)
   - Shlink Web Client: [docker.io/shlinkio/shlink-web-client](https://hub.docker.com/r/shlinkio/shlink-web-client) (`shlinkio/shlink-web-client:4.8.1`)
   - PostgreSQL Database: [docker.io/bitnamilegacy/postgresql](https://hub.docker.com/r/bitnamilegacy/postgresql) (`bitnamilegacy/postgresql:17.6.0-debian-12-r4`)
   - Redis / Valkey Cache: [docker.io/bitnamilegacy/redis](https://hub.docker.com/r/bitnamilegacy/redis) (`bitnamilegacy/redis:8.2.1-debian-12-r0`)
   - MySQL Database: [docker.io/bitnamilegacy/mysql](https://hub.docker.com/r/bitnamilegacy/mysql) (`bitnamilegacy/mysql:9.4.0-debian-12-r1`)
   - MariaDB Database: [docker.io/bitnamilegacy/mariadb](https://hub.docker.com/r/bitnamilegacy/mariadb) (`bitnamilegacy/mariadb:12.0.2-debian-12-r0`)
+  - RabbitMQ Message Broker: [docker.io/library/rabbitmq](https://hub.docker.com/_/rabbitmq) (`rabbitmq:4.4.0-management-alpine`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
-- **Shlink Core Backend (`shlink`):** High-performance PHP/Swoole application server running `shlinkio/shlink:5.1.6` on port 8080, handling URL shortening, redirect resolution, QR code rendering, and REST API endpoints.
+- **Shlink Core Backend (`shlink`):** High-performance PHP/Swoole application server running `shlinkio/shlink:5.1.8` on port 8080, handling URL shortening, redirect resolution, QR code rendering, and REST API endpoints.
 - **Shlink Web Client (`shlink-web`):** Modern React single-page frontend application running `shlinkio/shlink-web-client:4.8.1` on port 80 for managing links, domains, and analytics.
 - **PostgreSQL Database (`shlink-postgresql`):** Dedicated relational database StatefulSet (`bitnamilegacy/postgresql:17.6.0-debian-12-r4`) managing links, tags, and visit logs with persistent storage.
 - **Redis Cache (`shlink-redis`):** In-memory key-value cache StatefulSet (`bitnamilegacy/redis:8.2.1-debian-12-r0`) accelerating redirect caching and visit rate limiting.
 - **MySQL Database (`shlink-mysql`):** Optional relational database StatefulSet (`bitnamilegacy/mysql:9.4.0-debian-12-r1`).
 - **MariaDB Database (`shlink-mariadb`):** Optional relational database StatefulSet (`bitnamilegacy/mariadb:12.0.2-debian-12-r0`).
-- **RabbitMQ Message Broker (`shlink-rabbitmq`):** Optional message broker StatefulSet (`bitnamilegacy/rabbitmq:4.1.3-debian-12-r1`).
+- **RabbitMQ Message Broker (`shlink-rabbitmq`):** Optional message broker StatefulSet (`rabbitmq:4.4.0-management-alpine`).
 - **Gateway API HTTPRoute (`route`):** Native `gateway.networking.k8s.io/v1` HTTPRoute resources routing incoming traffic to backend and frontend services.
 - **HorizontalPodAutoscaler (`hpa`, `web-hpa`):** Automatically scales backend and web replicas based on CPU load.
 - **Kubernetes Services:** Dedicated ClusterIP services exposing the backend (port 8080), web frontend (port 80), and database/cache ports.
@@ -97,7 +98,7 @@ timoni -n default delete shlink
 |---|---|---|---|
 | `image.registry` | string | `docker.io` | Container image registry for Shlink backend |
 | `image.repository` | string | `shlinkio/shlink` | Container image repository for Shlink backend |
-| `image.tag` | string | `5.1.6` | Container image tag for Shlink backend |
+| `image.tag` | string | `5.1.8` | Container image tag for Shlink backend |
 | `image.pullPolicy` | string | `Always` | Image pull policy |
 | `replicaCount` | int | `1` | Backend pod replica count |
 | `service.port` | int | `8080` | ClusterIP service port for Shlink backend |
@@ -166,6 +167,12 @@ values: {
 - [Official Shlink Repository](https://github.com/shlinkio/shlink)
 - [Shlink Documentation](https://shlink.io/documentation/)
 - [Timoni Documentation](https://timoni.sh)
+
+## Changelog
+
+### 0.1.2 - 2026-10-28
+- **Changed:** Upgraded Shlink backend container image from `5.1.6` to `5.1.8` (`docker.io/shlinkio/shlink:5.1.8`).
+- **Changed:** Switched RabbitMQ from deprecated Bitnami legacy image to upstream CloudPirates-aligned official `rabbitmq:4.4.0-management-alpine` (`docker.io/library/rabbitmq:4.4.0-management-alpine`), resolving volume symlink crashloops.
 
 ## Kubesec Scan Scores
 
