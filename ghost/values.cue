@@ -13,7 +13,7 @@ values: {
 
 	image: {
 		repository: "docker.io/library/ghost"
-		tag:        "6.72.0"
+		tag:        "6.75.0"
 		pullPolicy: "IfNotPresent"
 	}
 	imagePullSecrets: []

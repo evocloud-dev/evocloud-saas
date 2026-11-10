@@ -8,7 +8,7 @@ values: {
 	podAnnotations: "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
 	image: {
 		repository: "docker.io/library/ghost"
-		tag:        "6.72.0"
+		tag:        "6.75.0"
 	}
 	test: {
 		enabled: true

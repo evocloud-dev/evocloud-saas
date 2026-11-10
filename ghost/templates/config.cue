@@ -83,7 +83,7 @@ import (
 
 	image: {
 		repository: *"docker.io/library/ghost" | string
-		tag:        *"6.72.0" | string
+		tag:        *"6.75.0" | string
 		pullPolicy: *"IfNotPresent" | string
 		reference:  "\(repository):\(tag)"
 	}
