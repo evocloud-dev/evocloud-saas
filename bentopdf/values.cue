@@ -19,7 +19,7 @@ values: {
 		// -- Repository.
 		repository: "ghcr.io/alam00000/bentopdf"
 		// -- Verified stable image tag.
-		tag: "2.8.10"
+		tag: "2.8.11"
 		// -- Digest.
 		digest: ""
 		// -- Kubernetes pull policy.
