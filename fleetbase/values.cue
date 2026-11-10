@@ -12,7 +12,7 @@ values: {
 	app: {
 		image: {
 			repository: "docker.io/fleetbase/fleetbase-api"
-			tag:        "v0.7.68"
+			tag:        "v0.7.75"
 			digest:     ""
 		}
 		replicas:    1
@@ -74,7 +74,7 @@ values: {
 		image: {
 			repository: "docker.io/nginx"
 			tag:        "stable-alpine"
-			digest:     ""
+			digest:     "sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311"
 		}
 		replicas: 1
 		port:     80
@@ -110,7 +110,7 @@ values: {
 	console: {
 		image: {
 			repository: "docker.io/fleetbase/fleetbase-console"
-			tag:        "v0.7.68"
+			tag:        "v0.7.75"
 			digest:     ""
 		}
 		enabled:    true
@@ -244,8 +244,8 @@ values: {
 	database: {
 		image: {
 			repository: "docker.io/mysql"
-			tag:        "8.0-oracle"
-			digest:     ""
+			tag:        "8.4-oracle"
+			digest:     "sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902"
 		}
 		enabled:            true
 		name:               "fleetbase"
@@ -293,7 +293,7 @@ values: {
 		image: {
 			repository: "docker.io/valkey/valkey"
 			tag:        "9.2"
-			digest:     ""
+			digest:     "sha256:247b5e730bdc9dc29fddb8274d1731b203a1a1a46af63eae3a9d55b4bf74853f"
 		}
 		enabled: true
 		port:    6379
