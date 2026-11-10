@@ -193,7 +193,7 @@ import (
 		image: {
 			registry:   *"docker.io" | string
 			repository: *"library/mongo" | string
-			tag:        *"7.0" | string
+			tag:        *"9.0.4" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		auth: {
