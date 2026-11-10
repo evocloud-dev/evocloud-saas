@@ -42,7 +42,7 @@ import (
 		replicaCount: *1 | int & >0
 		image: {
 			repository: *"ghcr.io/coollabsio/coolify" | string
-			tag:        *"4.5.0" | string
+			tag:        *"4.7.3" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		service: {

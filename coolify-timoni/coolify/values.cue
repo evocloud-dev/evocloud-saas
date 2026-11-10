@@ -14,7 +14,7 @@ values: {
 		replicaCount: 1
 		image: {
 			repository: "ghcr.io/coollabsio/coolify"
-			tag:        "4.5.0"
+			tag:        "4.7.3"
 			pullPolicy: "IfNotPresent"
 		}
 		service: {
