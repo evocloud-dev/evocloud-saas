@@ -11,7 +11,7 @@ import (
 // Define the module metadata.
 module: {
 	name:    "evo-coolify"
-	version: "0.1.3"
+	version: "0.1.4"
 }
 
 // Define the schema for the user-supplied values.

@@ -4,9 +4,9 @@
 [Coolify](https://coolify.io/) is an open-source & self-hostable alternative to Vercel, Heroku, Netlify and Railway for easily deploying websites, databases, web applications and 280+ one-click services to your own server.
 
 ## Application Information
-- **Version:** 4.5.0
+- **Version:** 4.7.3
 - **Upstream Project:** [https://github.com/coollabsio/coolify](https://github.com/coollabsio/coolify)
-- **Container Base:** [ghcr.io/coollabsio/coolify](https://github.com/coollabsio/coolify/pkgs/container/coolify) (`ghcr.io/coollabsio/coolify:4.5.0`)
+- **Container Base:** [ghcr.io/coollabsio/coolify](https://github.com/coollabsio/coolify/pkgs/container/coolify) (`ghcr.io/coollabsio/coolify:4.7.3`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -96,7 +96,7 @@ timoni -n default delete coolify
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `coolifyApp.image.repository` | string | `"ghcr.io/coollabsio/coolify"` | Coolify application container image repository |
-| `coolifyApp.image.tag` | string | `"4.5.0"` | Coolify application container image tag |
+| `coolifyApp.image.tag` | string | `"4.7.3"` | Coolify application container image tag |
 | `coolifyApp.image.pullPolicy` | string | `"IfNotPresent"` | Kubernetes image pull policy |
 | `coolifyApp.replicaCount` | int | `1` | Number of Coolify core application replicas |
 | `coolifyApp.resources.requests.cpu` | string | `"250m"` | CPU request for Coolify core container |
@@ -170,6 +170,9 @@ values: {
 - [Timoni Documentation](https://timoni.sh)
 
 ## Changelog
+
+### 0.1.4 - 2026-11-10
+- **Changed:** Upgraded Coolify application container image from `4.5.0` to `4.7.3` (`ghcr.io/coollabsio/coolify:4.7.3`).
 
 ### 0.1.3 - 2026-10-26
 - **Changed:** Upgraded Coolify application container image from `4.3.14` to `4.5.0` (`ghcr.io/coollabsio/coolify:4.5.0`).
