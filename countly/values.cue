@@ -20,7 +20,7 @@ values: {
 			// -- image repository
 			repository: "countly/api"
 			// -- Overrides the image tag
-			tag:        "25.03.55"
+			tag:        "25.03.58"
 			// -- image pull policy
 			pullPolicy: "Always"
 		}
@@ -192,7 +192,7 @@ values: {
 			// -- image repository
 			repository: "countly/frontend"
 			// -- Overrides the image tag
-			tag:        "25.03.55"
+			tag:        "25.03.58"
 			// -- image pull policy
 			pullPolicy: "Always"
 		}
@@ -392,7 +392,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "library/mongo"
-			tag:        "7.0"
+			tag:        "9.0.4"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {

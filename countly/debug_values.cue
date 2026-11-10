@@ -13,7 +13,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "countly/api"
-			tag:        "25.03.55"
+			tag:        "25.03.58"
 			pullPolicy: "Always"
 		}
 		imagePullSecrets: []
@@ -114,7 +114,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "countly/frontend"
-			tag:        "25.03.55"
+			tag:        "25.03.58"
 			pullPolicy: "Always"
 		}
 		imagePullSecrets: []
@@ -235,7 +235,7 @@ values: {
 		image: {
 			registry:   "docker.io"
 			repository: "library/mongo"
-			tag:        "7.0"
+			tag:        "9.0.4"
 			pullPolicy: "IfNotPresent"
 		}
 		auth: {
