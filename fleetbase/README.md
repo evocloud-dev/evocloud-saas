@@ -4,16 +4,16 @@
 [Fleetbase](https://fleetbase.io/) is an open-source, modular logistics and supply chain operating system. It provides dispatch, fleet management, live tracking, commerce, warehousing, and finance in a unified cloud-native platform with a REST API, webhooks, and an extension ecosystem. It supports self-hosting on Kubernetes infrastructure or managing operations via Fleetbase Cloud.
 
 ## Application Information
-- **Version:** `0.7.68`
+- **Version:** `0.7.75`
 - **Official Website:** [https://fleetbase.io/](https://fleetbase.io/)
 - **Upstream Project:** [https://github.com/fleetbase/fleetbase](https://github.com/fleetbase/fleetbase)
 - **Container Base:**
-  - Fleetbase API Application: [docker.io/fleetbase/fleetbase-api](https://hub.docker.com/r/fleetbase/fleetbase-api) (`docker.io/fleetbase/fleetbase-api:v0.7.68`)
-  - HTTPD Reverse Proxy: [docker.io/nginx](https://hub.docker.com/_/nginx) (`docker.io/nginx:stable-alpine`)
-  - Fleetbase Console Web UI: [docker.io/fleetbase/fleetbase-console](https://hub.docker.com/r/fleetbase/fleetbase-console) (`docker.io/fleetbase/fleetbase-console:v0.7.68`)
+  - Fleetbase API Application: [docker.io/fleetbase/fleetbase-api](https://hub.docker.com/r/fleetbase/fleetbase-api) (`docker.io/fleetbase/fleetbase-api:v0.7.75`)
+  - HTTPD Reverse Proxy: [docker.io/nginx](https://hub.docker.com/_/nginx) (`docker.io/nginx:stable-alpine@sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311`)
+  - Fleetbase Console Web UI: [docker.io/fleetbase/fleetbase-console](https://hub.docker.com/r/fleetbase/fleetbase-console) (`docker.io/fleetbase/fleetbase-console:v0.7.75`)
   - SocketCluster Broker: [docker.io/socketcluster/socketcluster](https://hub.docker.com/r/socketcluster/socketcluster) (`docker.io/socketcluster/socketcluster:v20.0.2`)
-  - Database Backend (MySQL): [docker.io/mysql](https://hub.docker.com/_/mysql) (`docker.io/mysql:8.0-oracle`)
-  - Cache & Message Bus (Redis/Valkey): [docker.io/valkey/valkey](https://hub.docker.com/r/valkey/valkey) (`docker.io/valkey/valkey:9.2`)
+  - Database Backend (MySQL): [docker.io/mysql](https://hub.docker.com/_/mysql) (`docker.io/mysql:8.4-oracle@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902`)
+  - Cache & Message Bus (Redis/Valkey): [docker.io/valkey/valkey](https://hub.docker.com/r/valkey/valkey) (`docker.io/valkey/valkey:9.2@sha256:247b5e730bdc9dc29fddb8274d1731b203a1a1a46af63eae3a9d55b4bf74853f`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -105,7 +105,7 @@ timoni -n fleet delete fleet
 | `app.autoscaling.maxReplicas` | int | `5` | Maximum replica count for application autoscaling |
 | `app.autoscaling.targetCPUUtilizationPercentage` | int | `80` | Target CPU utilization percentage |
 | `app.image.repository` | string | `docker.io/fleetbase/fleetbase-api` | API container image repository |
-| `app.image.tag` | string | `v0.7.68` | API container image tag |
+| `app.image.tag` | string | `v0.7.75` | API container image tag |
 | `app.replicas` | int | `1` | Replica count for application deployment |
 | `app.port` | int | `8000` | Port for application container |
 | `app.service.port` | int | `8000` | Service port for Fleetbase API |
@@ -121,6 +121,7 @@ timoni -n fleet delete fleet
 | `app.resources.limits.memory` | string | `1Gi` | Memory limit for application container |
 | `httpd.image.repository` | string | `docker.io/nginx` | Nginx HTTPD image repository |
 | `httpd.image.tag` | string | `stable-alpine` | Nginx HTTPD image tag |
+| `httpd.image.digest` | string | `sha256:583b7f2fce1cdb8da5ad5c39ebd3c33b98b87d493190e548bdee1fa8c619c311` | Nginx HTTPD image digest |
 | `httpd.replicas` | int | `1` | Replica count for HTTPD deployment |
 | `httpd.port` | int | `80` | Port exposed by HTTPD container |
 | `httpd.service.port` | int | `80` | Service port for HTTPD reverse proxy |
@@ -130,7 +131,7 @@ timoni -n fleet delete fleet
 | `httpd.resources.limits.cpu` | string | `200m` | CPU limit for HTTPD container |
 | `httpd.resources.limits.memory` | string | `256Mi` | Memory limit for HTTPD container |
 | `console.image.repository` | string | `docker.io/fleetbase/fleetbase-console` | Console frontend image repository |
-| `console.image.tag` | string | `v0.7.68` | Console frontend image tag |
+| `console.image.tag` | string | `v0.7.75` | Console frontend image tag |
 | `console.enabled` | bool | `true` | Enable Fleetbase Console web UI |
 | `console.replicas` | int | `1` | Replica count for Console deployment |
 | `console.port` | int | `4200` | Port exposed by Console container |
@@ -164,7 +165,8 @@ timoni -n fleet delete fleet
 | `socket.resources.limits.cpu` | string | `500m` | CPU limit for socket container |
 | `socket.resources.limits.memory` | string | `512Mi` | Memory limit for socket container |
 | `database.image.repository` | string | `docker.io/mysql` | MySQL container image repository |
-| `database.image.tag` | string | `8.0-oracle` | MySQL container image tag |
+| `database.image.tag` | string | `8.4-oracle` | MySQL container image tag |
+| `database.image.digest` | string | `sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902` | MySQL container image digest |
 | `database.enabled` | bool | `true` | Run in-cluster MySQL (`false` for external DB) |
 | `database.name` | string | `"fleetbase"` | MySQL database name |
 | `database.user` | string | `"root"` | MySQL database username |
@@ -183,6 +185,7 @@ timoni -n fleet delete fleet
 | `database.resources.limits.memory` | string | `1Gi` | Memory limit for database container |
 | `cache.image.repository` | string | `docker.io/valkey/valkey` | Redis / Valkey container image repository |
 | `cache.image.tag` | string | `9.2` | Redis / Valkey container image tag |
+| `cache.image.digest` | string | `sha256:247b5e730bdc9dc29fddb8274d1731b203a1a1a46af63eae3a9d55b4bf74853f` | Redis / Valkey container image digest |
 | `cache.enabled` | bool | `true` | Run in-cluster Redis/Valkey (`false` for external cache) |
 | `cache.port` | int | `6379` | Port for Redis/Valkey cache container |
 | `cache.service.port` | int | `6379` | Service port for Redis/Valkey cache |
