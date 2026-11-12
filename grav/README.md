@@ -5,11 +5,11 @@
 [Grav](https://getgrav.org) is a fast, simple, and flexible open-source flat-file CMS (Content Management System). Unlike traditional CMS platforms, Grav requires no database installation and stores content in Markdown files with YAML configuration, Twig templating, and smart caching.
 
 ## Application Information
-- **Version:** `2.2.13`
+- **Version:** `2.2.29`
 - **Official Website:** [https://getgrav.org/](https://getgrav.org/)
 - **Upstream Project:** [https://github.com/getgrav/grav](https://github.com/getgrav/grav)
 - **Container Base:**
-  - Grav Application: [ghcr.io/linuxserver/grav](https://github.com/linuxserver/docker-grav) (`ghcr.io/linuxserver/grav:2.2.13`)
+  - Grav Application: [ghcr.io/linuxserver/grav](https://github.com/linuxserver/docker-grav) (`ghcr.io/linuxserver/grav:2.2.29@sha256:53495858dd2adc50add38e05972c58fca32034da0f0d7c50351ac1f09ee0e6b5`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -106,8 +106,8 @@ timoni -n default delete grav
 | `serviceAccountName` | `string` | `"default"` | Kubernetes ServiceAccount name used by the pod |
 | `TZ` | `string` | `"UTC"` | Timezone environment variable (`TZ`) passed to the container |
 | `image.repository` | `string` | `"ghcr.io/linuxserver/grav"` | Container image repository |
-| `image.tag` | `string` | `"2.2.13"` | Container image release tag |
-| `image.digest` | `string` | `""` | Container image SHA256 digest |
+| `image.tag` | `string` | `"2.2.29"` | Container image release tag |
+| `image.digest` | `string` | `"sha256:53495858dd2adc50add38e05972c58fca32034da0f0d7c50351ac1f09ee0e6b5"` | Container image SHA256 digest |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for private mirrors |
 | `env` | `list` | `[...]` | Container environment variables (`TZ`, `UMASK`, `PUID`, `PGID`, etc.) |
@@ -173,6 +173,9 @@ timoni -n default delete grav
 - [Timoni Documentation](https://timoni.sh)
 
 ## Changelog
+
+### 0.1.2 - 2026-11-12
+- **Changed:** Upgraded Grav application container image from `2.2.13` to `2.2.29` (`ghcr.io/linuxserver/grav:2.2.29`).
 
 ### 0.1.1 - 2026-10-26
 - **Changed:** Upgraded Grav application container image from `2.2.9` to `2.2.13` (`ghcr.io/linuxserver/grav:2.2.13`).
