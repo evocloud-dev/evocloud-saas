@@ -29,7 +29,7 @@ values: {
 		// -- Container image repository
 		repository: "docker.io/linuxserver/heimdall"
 		// -- Image tag
-		tag: "2.8.3"
+		tag: "2.8.4"
 		// -- Image pull policy
 		pullPolicy: "IfNotPresent"
 		// -- Image digest

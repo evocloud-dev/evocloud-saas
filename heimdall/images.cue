@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/linuxserver/heimdall" | string
-		tag:        *"2.8.2" | string
+		tag:        *"2.8.4" | string
 		digest:     *"" | string
 	}
 	backup: images: {

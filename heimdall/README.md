@@ -6,10 +6,10 @@
 
 ## Application Information
 
-- **Version:** 2.8.3
+- **Version:** 2.8.4
 - **Official Website:** [https://heimdall.site/](https://heimdall.site/)
 - **Upstream Project:** [https://github.com/linuxserver/Heimdall](https://github.com/linuxserver/Heimdall)
-- **Container Base:** [docker.io/linuxserver/heimdall](https://hub.docker.com/r/linuxserver/heimdall) (`docker.io/linuxserver/heimdall:2.8.3`)
+- **Container Base:** [docker.io/linuxserver/heimdall](https://hub.docker.com/r/linuxserver/heimdall) (`docker.io/linuxserver/heimdall:2.8.4`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
@@ -83,7 +83,7 @@ timoni -n default delete heimdall
 | `fullnameOverride` | `string` | `""` | Override the complete resource name |
 | `commonLabels` | `object` | `{}` | Extra resource labels |
 | `image.repository` | `string` | `"docker.io/linuxserver/heimdall"` | Container image repository |
-| `image.tag` | `string` | `"2.8.3"` | Container image tag |
+| `image.tag` | `string` | `"2.8.4"` | Container image tag |
 | `image.pullPolicy` | `string` | `"IfNotPresent"` | Kubernetes image pull policy |
 | `imagePullSecrets` | `list` | `[]` | Registry credentials for private mirrors |
 | `heimdall.puid` | `int` | `1000` | User ID for file permissions in `/config` |
@@ -144,7 +144,10 @@ values: {
 - [LinuxServer.io Heimdall Image Documentation](https://docs.linuxserver.io/images/docker-heimdall/)
 - [Timoni Documentation](https://timoni.sh)
 
----
+## Changelog
+
+### 0.1.1 - 2026-11-12
+- **Changed:** Upgraded Heimdall application container image from `2.8.3` to `2.8.4` (`docker.io/linuxserver/heimdall:2.8.4`).
 
 ## Kubesec Scan Scores
 

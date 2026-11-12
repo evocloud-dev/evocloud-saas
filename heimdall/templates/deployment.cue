@@ -43,7 +43,7 @@ import (
 				}
 				containers: [{
 					name:            "heimdall"
-					image:           "\(_config.image.repository):\(_config.image.tag)"
+					image:           _config.image.reference
 					imagePullPolicy: _config.image.pullPolicy
 					if _config.securityContext != _|_ && len(_config.securityContext) > 0 {
 						securityContext: _config.securityContext

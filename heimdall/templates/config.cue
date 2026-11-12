@@ -30,7 +30,7 @@ import (
 	// Image configuration
 	image: timoniv1.#Image & {
 		repository: *"docker.io/linuxserver/heimdall" | string
-		tag:        *"2.8.2" | string
+		tag:        *"2.8.4" | string
 		pullPolicy: *"IfNotPresent" | string
 		digest:     *"" | string
 	}
