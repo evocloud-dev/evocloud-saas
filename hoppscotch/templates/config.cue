@@ -49,7 +49,7 @@ import (
 
 	image: {
 		repository: *"docker.io/hoppscotch/hoppscotch" | string
-		tag:        *"2026.9.0" | string
+		tag:        *"2026.10.1" | string
 		pullPolicy: *"IfNotPresent" | "Always" | "Never"
 	}
 
