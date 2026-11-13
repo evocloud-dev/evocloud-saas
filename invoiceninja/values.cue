@@ -14,7 +14,7 @@ values: {
 	app: {
 		image: {
 			repository: "invoiceninja/invoiceninja-debian"
-			tag:        "5.13.50"
+			tag:        "5.13.53"
 			pullPolicy: "IfNotPresent"
 		}
 		// Tag for the busybox init container that waits for MySQL/Redis.
