@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"docker.io/langflowai/langflow" | string
-		tag:        *"1.11.1" | string
+		tag:        *"1.13.2" | string
 		digest:     *"" | string
 	}
 }
