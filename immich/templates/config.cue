@@ -33,7 +33,7 @@ import (
 
 	image: timoniv1.#Image & {
 		repository: *"ghcr.io/immich-app/immich-server" | string
-		tag:        *"v3.3.4" | string
+		tag:        *"v3.4.1" | string
 		pullPolicy: *"IfNotPresent" | string
 	}
 
@@ -45,7 +45,7 @@ import (
 		}
 		image: timoniv1.#Image & {
 			repository: *"ghcr.io/immich-app/immich-machine-learning" | string
-			tag:        *"v3.3.5" | string
+			tag:        *"v3.4.1" | string
 			pullPolicy: *"IfNotPresent" | string
 		}
 		service: {
