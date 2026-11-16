@@ -24,7 +24,7 @@ import (
 	// Global settings
 	image: {
 		repository: *"chatwoot/chatwoot" | string
-		tag:        *"v4.19.0" | string
+		tag:        *"v4.19.1" | string
 		pullPolicy: *"IfNotPresent" | "Always" | "Never"
 	}
 	imagePullSecrets?: [...{name: string}]
