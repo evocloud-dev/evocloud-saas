@@ -4,7 +4,7 @@ package main
 values: {
 	image: {
 		repository: *"ghcr.io/alam00000/bentopdf" | string
-		tag:        *"2.8.10" | string
+		tag:        *"2.8.11" | string
 		digest:     *"" | string
 	}
 	metrics: image: {
