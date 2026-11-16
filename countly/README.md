@@ -4,18 +4,18 @@
 [Countly](https://countly.com/) brings first-party product analytics and user engagement together in one privacy-first platform, giving you control over your data, hosting, and customer experience.
 
 ## Application Information
-- **Version:** 25.03.55
+- **Version:** 25.03.58
 - **Upstream Project:** [https://github.com/Countly/countly-server](https://github.com/Countly/countly-server)
 - **Container Base:**
-  - Countly API: [docker.io/countly/api](https://hub.docker.com/r/countly/api) (`docker.io/countly/api:25.03.55`)
-  - Countly Frontend: [docker.io/countly/frontend](https://hub.docker.com/r/countly/frontend) (`docker.io/countly/frontend:25.03.55`)
-  - MongoDB Database: [docker.io/library/mongo](https://hub.docker.com/_/mongo) (`docker.io/library/mongo:7.0`)
+  - Countly API: [docker.io/countly/api](https://hub.docker.com/r/countly/api) (`docker.io/countly/api:25.03.58`)
+  - Countly Frontend: [docker.io/countly/frontend](https://hub.docker.com/r/countly/frontend) (`docker.io/countly/frontend:25.03.58`)
+  - MongoDB Database: [docker.io/library/mongo](https://hub.docker.com/_/mongo) (`docker.io/library/mongo:9.0.4`)
 - **Deployment Type:** Timoni Module / Kubernetes Cloud-Native Workload
 
 ## Components
 - **Countly API (`countly-api`):** Core API backend processing analytics beacons, managing worker queues, handling plugin integrations, and interfacing with MongoDB.
 - **Countly Frontend (`countly-frontend`):** Web dashboard providing visualization, user journey tracking, report management, and system administration.
-- **MongoDB Database (`countly-mongodb`):** Dedicated MongoDB 7.0 StatefulSet managing application data, analytics events, and user collections with persistent storage (`8Gi`).
+- **MongoDB Database (`countly-mongodb`):** Dedicated MongoDB 9.0.4 StatefulSet managing application data, analytics events, and user collections with persistent storage (`8Gi`).
 - **Countly API Service (`countly-api`):** ClusterIP service routing internal API traffic to container port 3001 (exposed on port 3000).
 - **Countly Frontend Service (`countly-frontend`):** ClusterIP service routing web interface requests to container port 6001 (exposed on port 3000).
 - **MongoDB Service (`countly-mongodb`):** ClusterIP service routing database traffic on TCP port 27017.
@@ -105,19 +105,19 @@ timoni -n default delete countly
 | `hostname` | string | `localhost` | Fully qualified domain name or hostname for Countly services |
 | `api.image.registry` | string | `docker.io` | Container image registry for Countly API |
 | `api.image.repository` | string | `countly/api` | Container image repository for Countly API |
-| `api.image.tag` | string | `25.03.55` | Pinned container image tag for Countly API |
+| `api.image.tag` | string | `25.03.58` | Pinned container image tag for Countly API |
 | `api.replicaCount` | int | `1` | Number of API replicas |
 | `api.service.port` | int | `3000` | Kubernetes Service port for Countly API |
 | `api.resources` | object | `{requests: {cpu: "200m", memory: "400Mi"}, limits: {cpu: "1000m", memory: "2Gi"}}` | Resource requests and limits for API pods |
 | `frontend.image.registry` | string | `docker.io` | Container image registry for Countly Frontend |
 | `frontend.image.repository` | string | `countly/frontend` | Container image repository for Countly Frontend |
-| `frontend.image.tag` | string | `25.03.55` | Pinned container image tag for Countly Frontend |
+| `frontend.image.tag` | string | `25.03.58` | Pinned container image tag for Countly Frontend |
 | `frontend.replicaCount` | int | `1` | Number of Frontend replicas |
 | `frontend.service.port` | int | `3000` | Kubernetes Service port for Countly Frontend |
 | `frontend.resources` | object | `{requests: {cpu: "100m", memory: "100Mi"}, limits: {cpu: "500m", memory: "500Mi"}}` | Resource requests and limits for Frontend pods |
 | `mongodb.enabled` | bool | `true` | Deploy internal MongoDB StatefulSet |
 | `mongodb.image.repository` | string | `library/mongo` | Container image repository for MongoDB |
-| `mongodb.image.tag` | string | `7.0` | Container image tag for MongoDB |
+| `mongodb.image.tag` | string | `9.0.4` | Container image tag for MongoDB |
 | `mongodb.useStatefulSet` | bool | `true` | Use StatefulSet deployment mode for MongoDB persistence |
 | `mongodb.auth.database` | string | `countly` | Database name for Countly application data |
 | `mongodb.resources` | object | `{requests: {cpu: "100m", memory: "256Mi"}, limits: {cpu: "500m", memory: "1Gi"}}` | Resource requests and limits for MongoDB |
@@ -152,6 +152,10 @@ values: {
 - [Timoni Documentation](https://timoni.sh)
 
 ## Changelog
+
+### 0.1.2 - 2026-11-10
+- **Changed:** Upgraded Countly API and Frontend container images from `25.03.55` to `25.03.58` (`docker.io/countly/api:25.03.58` and `docker.io/countly/frontend:25.03.58`).
+- **Changed:** Upgraded MongoDB container image from `7.0` to `9.0.4` (`docker.io/library/mongo:9.0.4`).
 
 ### 0.1.1 - 2026-10-26
 - **Changed:** Upgraded Countly API and Frontend container images from `25.05.4` to `25.03.55` (`docker.io/countly/api:25.03.55` and `docker.io/countly/frontend:25.03.55`).
