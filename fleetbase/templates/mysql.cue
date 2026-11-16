@@ -41,7 +41,7 @@ import (
 						name:            "mysql"
 						image:           #config.images.database.reference
 						imagePullPolicy: #config.images.database.pullPolicy
-						args: ["mysqld", "--skip-log-bin"]
+						args: ["mysqld", "--skip-log-bin", "--restrict-fk-on-non-standard-key=OFF"]
 						ports: [
 							{
 								name:          "mysql"
