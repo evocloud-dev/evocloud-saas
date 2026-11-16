@@ -48,7 +48,7 @@ import (
 				terminationGracePeriodSeconds: _config.terminationGracePeriodSeconds
 				containers: [{
 					name:            _config.metadata.name
-					image:           "\(_config.image.repository):\(_config.image.tag)"
+					image:           _config.image.reference
 					imagePullPolicy: _config.image.pullPolicy
 					if len(_config.app.command) > 0 {
 						command: _config.app.command
