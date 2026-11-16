@@ -21,7 +21,7 @@ values: {
 		// -- Immich server image repository.
 		repository: "ghcr.io/immich-app/immich-server"
 		// -- Immich server image tag.
-		tag: "v3.3.4"
+		tag: "v3.4.1"
 		// -- Immich server image pull policy.
 		pullPolicy: "IfNotPresent"
 	}
@@ -40,7 +40,7 @@ values: {
 			// -- Machine-learning image repository.
 			repository: "ghcr.io/immich-app/immich-machine-learning"
 			// -- Machine-learning image tag.
-			tag: "v3.3.5"
+			tag: "v3.4.1"
 			// -- Machine-learning image pull policy.
 			pullPolicy: "IfNotPresent"
 		}
