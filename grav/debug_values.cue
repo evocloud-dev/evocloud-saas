@@ -8,8 +8,8 @@ values: {
 	image: {
 		repository: "ghcr.io/linuxserver/grav"
 		pullPolicy: "IfNotPresent"
-		tag:        "2.2.13"
-		digest:     "sha256:a355dd195ae6245bcae467fdfa10b71ae54f0f93c423eb54e3e4c1f920c6fce7"
+		tag:        "2.2.29"
+		digest:     "sha256:53495858dd2adc50add38e05972c58fca32034da0f0d7c50351ac1f09ee0e6b5"
 	}
 	service: {
 		main: {
