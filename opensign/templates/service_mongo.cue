@@ -9,7 +9,7 @@ import (
 	apiVersion: "v1"
 	kind:       "Service"
 	metadata: {
-		name:      "mongo"
+		name:      "\(#config.metadata.name)-mongo"
 		namespace: #config.metadata.namespace
 		labels:    #config.metadata.labels
 	}

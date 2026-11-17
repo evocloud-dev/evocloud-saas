@@ -4,12 +4,19 @@ values: {
 	nameOverride:     ""
 	fullnameOverride: ""
 
+	existingSecret: ""
+
+	config: {
+		publicUrl: "http://opensign.example.com"
+		apiUrl:    "http://opensign.example.com/app"
+	}
+
 	server: {
 		enabled: true
 		image: {
 			repository: "docker.io/opensign/opensignserver"
 			tag:        "main"
-			digest:     ""
+			digest:     "sha256:674fa8393122cb550d5c2fa4ddae5e13989387f27d63db98e6c23272849a551e"
 		}
 		replicas: 1
 		port:     8080
@@ -27,6 +34,7 @@ values: {
 			}
 		}
 		securityContext: {
+			allowPrivilegeEscalation: false
 			capabilities: drop: ["ALL"]
 		}
 		persistence: {
@@ -39,6 +47,29 @@ values: {
 			create: true
 			name:   ""
 		}
+		probes: {
+			startup: {
+				enabled:             true
+				initialDelaySeconds: 10
+				periodSeconds:       5
+				timeoutSeconds:      3
+				failureThreshold:    30
+			}
+			liveness: {
+				enabled:             true
+				initialDelaySeconds: 30
+				periodSeconds:       15
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+			readiness: {
+				enabled:             true
+				initialDelaySeconds: 15
+				periodSeconds:       10
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+		}
 	}
 
 	client: {
@@ -46,7 +77,7 @@ values: {
 		image: {
 			repository: "docker.io/opensign/opensign"
 			tag:        "main"
-			digest:     ""
+			digest:     "sha256:093910c698c135e272a794ec1df81324c584b0c1011bb95da0c04ff22adb45ac"
 		}
 		replicas: 1
 		port:     3000
@@ -62,26 +93,56 @@ values: {
 			}
 		}
 		securityContext: {
+			allowPrivilegeEscalation: false
 			capabilities: drop: ["ALL"]
 		}
 		serviceAccount: {
 			create: true
 			name:   ""
 		}
+		autoscaling: {
+			enabled:                           false
+			minReplicas:                       1
+			maxReplicas:                       5
+			targetCPUUtilizationPercentage:    80
+			targetMemoryUtilizationPercentage: 80
+		}
+		podDisruptionBudget: {
+			enabled:        false
+			minAvailable:   ""
+			maxUnavailable: "1"
+		}
+		probes: {
+			startup: {
+				enabled:             true
+				initialDelaySeconds: 5
+				periodSeconds:       5
+				timeoutSeconds:      3
+				failureThreshold:    30
+			}
+			liveness: {
+				enabled:             true
+				initialDelaySeconds: 20
+				periodSeconds:       15
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+			readiness: {
+				enabled:             true
+				initialDelaySeconds: 10
+				periodSeconds:       10
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+		}
 	}
 
 	mongodb: {
 		enabled: true
-		// WARNING: MongoDB versions are strictly incompatible with Linux kernel 
-		// versions 6.19 through 7.0.13 
-		// SOLUTION: To fix this permanently on modern host systems without runtime hacks, 
-		// we downgraded the image tag to MongoDB 7.0. Alternatively, the host Linux 
-		// kernel can be upgraded to version 7.0.14 or later to resolve the bug natively.
-		// OFFICIAL REFERENCE: https://www.mongodb.com/docs/manual/administration/production-notes/
 		image: {
 			repository: "docker.io/library/mongo"
-			tag:        "7.0"
-			digest:     ""
+			tag:        "9.0.8"
+			digest:     "sha256:20af90d0f14159e5532a4929608bc7cd9ecd718d3bae9d2f5457f4f0c509e3dc"
 		}
 		port: 27017
 		resources: {
@@ -95,32 +156,79 @@ values: {
 			}
 		}
 		podSecurityContext: {
-			fsGroup: 999
+			runAsNonRoot: true
+			runAsUser:    999
+			runAsGroup:   999
+			fsGroup:      999
+			seccompProfile: type: "RuntimeDefault"
 		}
-		securityContext: {}
+		securityContext: {
+			allowPrivilegeEscalation: false
+			capabilities: drop: ["ALL"]
+		}
 		persistence: {
 			enabled:      true
 			storageClass: ""
 			accessMode:   "ReadWriteOnce"
 			size:         "10Gi"
 		}
+		serviceAccount: {
+			create: true
+			name:   ""
+		}
+		probes: {
+			liveness: {
+				enabled:             true
+				initialDelaySeconds: 20
+				periodSeconds:       15
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+			readiness: {
+				enabled:             true
+				initialDelaySeconds: 10
+				periodSeconds:       10
+				timeoutSeconds:      5
+				failureThreshold:    3
+			}
+		}
 	}
 
-	caddy: {
-		enabled: true
-		image: {
-			repository: "docker.io/library/caddy"
-			tag:        "2.11.4"
-			digest:     ""
+	externalMongodb: {
+		enabled:              false
+		uri:                  ""
+		existingSecret:       ""
+		existingSecretKey:    "uri"
+		existingSecretUriKey: ""
+	}
+
+	gateway: {
+		enabled:     true
+		annotations: {}
+		parentRefs: [
+			{
+				name:      "shared-gtw"
+				namespace: "kube-system"
+			},
+		]
+		hostnames: [
+			"opensign.example.com",
+		]
+	}
+
+	backup: {
+		enabled:                    false
+		schedule:                   "0 2 * * *"
+		suspend:                    false
+		concurrencyPolicy:          "Forbid"
+		successfulJobsHistoryLimit: 3
+		failedJobsHistoryLimit:     3
+		backoffLimit:               1
+		archivePrefix:              "opensign"
+		images: {
+			mongodb:  "docker.io/library/mongo:9.0.8"
+			uploader: "docker.io/helmforge/mc:1.0.0"
 		}
-		serviceType: "ClusterIP"
-		hostUrl:     "https://localhost:3001"
-		caddyfile: """
-			:80, :3001 {
-			    reverse_proxy /api/* server:8080
-			    reverse_proxy client:3000
-			}
-			"""
 		resources: {
 			limits: {
 				cpu:    "500m"
@@ -131,30 +239,44 @@ values: {
 				memory: "128Mi"
 			}
 		}
-		persistence: {
-			enabled:      true
-			storageClass: ""
-			accessMode:   "ReadWriteOnce"
-			dataSize:     "1Gi"
-			configSize:   "1Gi"
+		s3: {
+			endpoint:                   ""
+			bucket:                     ""
+			prefix:                     "opensign"
+			createBucketIfNotExists:    true
+			existingSecret:             ""
+			existingSecretAccessKeyKey: "access-key"
+			existingSecretSecretKeyKey: "secret-key"
+			accessKey:                  ""
+			secretKey:                  ""
 		}
+	}
+
+	externalSecrets: {
+		enabled:    false
+		apiVersion: "external-secrets.io/v1"
+		name:       ""
+		secretStoreRef: {
+			name: ""
+			kind: "SecretStore"
+		}
+		target: {
+			name:           ""
+			creationPolicy: "Owner"
+		}
+		refreshInterval: "1h"
+		annotations: {}
 	}
 
 	envSecret: {
 		NODE_ENV:             "production"
-		HOST_URL:             "https://localhost:3001"
-		PUBLIC_URL:           "https://localhost:3001"
 		GENERATE_SOURCEMAP:   "false"
 		REACT_APP_APPID:      "opensign"
-		REACT_APP_SERVERURL:  "https://localhost:3001/api/app"
 
 		// Backend Core
 		appName:              "open_sign_server"
 		MASTER_KEY:           "opensign-master-key-12345"
-		MONGO_URI:            "mongodb://mongo:27017/opensign"
-		MONGODB_URI:          "mongodb://mongo:27017/opensign"
 		PARSE_MOUNT:          "/app"
-		SERVER_URL:           "https://server:8080/app"
 		APP_ID:               "opensign"
 
 		// Storage & Local Mode
@@ -176,63 +298,11 @@ values: {
 		SMTP_USER_EMAIL:      "mailer@yourdomain.com"
 		SMTP_PASS:            "password"
 
-		// Document signing certificate
-		PFX_BASE64:           """
-			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
-			3pXAXxZuvVvv9tsb4bdrBAhyb+KCIjp/gAICCAA=
-			"""
-		PASS_PHRASE:          "opensign"
+		// Document signing certificate (Base64-encoded PKCS#12 bundle + export passphrase).
+		// REQUIRED for digital PDF signing when users finalize a document.
+		// Leave empty if supplying via existingSecret, ExternalSecret, or UI console.
+		// See README.md for instructions on generating a local dev certificate via OpenSSL.
+		PFX_BASE64:           ""
+		PASS_PHRASE:          ""
 	}
 }
