@@ -9,7 +9,7 @@ import (
 	apiVersion: "v1"
 	kind:       "PersistentVolumeClaim"
 	metadata: {
-		name:      "mongo-data"
+		name:      "\(#config.metadata.name)-mongo-data"
 		namespace: #config.metadata.namespace
 		labels:    #config.metadata.labels
 	}

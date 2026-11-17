@@ -24,16 +24,12 @@ import (
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
 
 	// The labels allows adding `metadata.labels` to all resources.
-	// The `app.kubernetes.io/name` and `app.kubernetes.io/version` labels
-	// are automatically generated and can't be overwritten.
 	metadata: labels: timoniv1.#Labels
 
 	// The annotations allows adding `metadata.annotations` to all resources.
 	metadata: annotations?: timoniv1.#Annotations
 
 	// The selector allows adding label selectors to Deployments and Services.
-	// The `app.kubernetes.io/name` label selector is automatically generated
-	// from the instance name and can't be overwritten.
 	selector: timoniv1.#Selector & {#Name: metadata.name}
 
 	nameOverride:     *"" | string
@@ -41,12 +37,14 @@ import (
 
 	podSecurityContext?: corev1.#PodSecurityContext
 
+	existingSecret: *"" | string
+
 	server: {
 		enabled: *true | bool
 		image: timoniv1.#Image & {
 			repository: *"docker.io/opensign/opensignserver" | string
 			tag:        *"main" | string
-			digest:     *"" | string
+			digest:     *"sha256:674fa8393122cb550d5c2fa4ddae5e13989387f27d63db98e6c23272849a551e" | string
 		}
 		replicas: *1 | int & >0
 		port:     *8080 | int & >0 & <=65535
@@ -63,6 +61,29 @@ import (
 			create: *true | bool
 			name:   *"" | string
 		}
+		probes: {
+			startup: {
+				enabled:             *true | bool
+				initialDelaySeconds: *10 | int
+				periodSeconds:       *5 | int
+				timeoutSeconds:      *3 | int
+				failureThreshold:    *30 | int
+			}
+			liveness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *30 | int
+				periodSeconds:       *15 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+			readiness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *15 | int
+				periodSeconds:       *10 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+		}
 	}
 
 	client: {
@@ -70,7 +91,7 @@ import (
 		image: timoniv1.#Image & {
 			repository: *"docker.io/opensign/opensign" | string
 			tag:        *"main" | string
-			digest:     *"" | string
+			digest:     *"sha256:093910c698c135e272a794ec1df81324c584b0c1011bb95da0c04ff22adb45ac" | string
 		}
 		replicas: *1 | int & >0
 		port:     *3000 | int & >0 & <=65535
@@ -81,14 +102,49 @@ import (
 			create: *true | bool
 			name:   *"" | string
 		}
+		autoscaling: {
+			enabled:                           *false | bool
+			minReplicas:                       *1 | int
+			maxReplicas:                       *5 | int
+			targetCPUUtilizationPercentage:    *80 | int
+			targetMemoryUtilizationPercentage: *80 | int
+		}
+		podDisruptionBudget: {
+			enabled:        *false | bool
+			minAvailable:   *"" | string
+			maxUnavailable: *"1" | string
+		}
+		probes: {
+			startup: {
+				enabled:             *true | bool
+				initialDelaySeconds: *5 | int
+				periodSeconds:       *5 | int
+				timeoutSeconds:      *3 | int
+				failureThreshold:    *30 | int
+			}
+			liveness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *20 | int
+				periodSeconds:       *15 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+			readiness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *10 | int
+				periodSeconds:       *10 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+		}
 	}
 
 	mongodb: {
 		enabled: *true | bool
 		image: timoniv1.#Image & {
 			repository: *"docker.io/library/mongo" | string
-			tag:        *"7.0" | string
-			digest:     *"" | string
+			tag:        *"9.0.8" | string
+			digest:     *"sha256:20af90d0f14159e5532a4929608bc7cd9ecd718d3bae9d2f5457f4f0c509e3dc" | string
 		}
 		port: *27017 | int & >0 & <=65535
 		resources:          timoniv1.#ResourceRequirements
@@ -100,26 +156,109 @@ import (
 			accessMode:   *"ReadWriteOnce" | "ReadOnlyMany" | "ReadWriteMany"
 			size:         *"10Gi" | string
 		}
+		serviceAccount: {
+			create: *true | bool
+			name:   *"" | string
+		}
+		probes: {
+			liveness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *20 | int
+				periodSeconds:       *15 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+			readiness: {
+				enabled:             *true | bool
+				initialDelaySeconds: *10 | int
+				periodSeconds:       *10 | int
+				timeoutSeconds:      *5 | int
+				failureThreshold:    *3 | int
+			}
+		}
 	}
 
-	caddy: {
-		enabled: *true | bool
-		image: timoniv1.#Image & {
-			repository: *"docker.io/library/caddy" | string
-			tag:        *"2.11.4" | string
-			digest:     *"" | string
+	externalMongodb: {
+		enabled:              *false | bool
+		uri:                  *"" | string
+		existingSecret:       *"" | string
+		existingSecretKey:    *"uri" | string
+		existingSecretUriKey: *"" | string
+	}
+
+	gateway: {
+		enabled:     *false | bool
+		annotations: *{} | {[string]: string}
+		parentRefs:  *[
+			{
+				name:      "eg"
+				namespace: "envoy-gateway-system"
+			},
+		] | [...{
+			name:        string
+			namespace?:  string
+			sectionName?: string
+			group?:      string
+			kind?:       string
+			port?:       int
+		}]
+		hostnames: *["opensign.example.com"] | [...string]
+	}
+
+	backup: {
+		enabled:                    *false | bool
+		schedule:                   *"0 2 * * *" | string
+		suspend:                    *false | bool
+		concurrencyPolicy:          *"Forbid" | "Allow" | "Replace"
+		successfulJobsHistoryLimit: *3 | int
+		failedJobsHistoryLimit:     *3 | int
+		backoffLimit:               *1 | int
+		archivePrefix:              *"opensign" | string
+		images: {
+			mongodb:  *"docker.io/library/mongo:9.0.8" | string
+			uploader: *"docker.io/helmforge/mc:1.0.0" | string
 		}
-		serviceType: *"LoadBalancer" | "NodePort" | "ClusterIP"
-		hostUrl:     *"https://localhost:3001" | string
-		caddyfile:   string
-		resources:   timoniv1.#ResourceRequirements
-		persistence: {
-			enabled:      *true | bool
-			storageClass: *"" | string
-			accessMode:   *"ReadWriteOnce" | "ReadOnlyMany" | "ReadWriteMany"
-			dataSize:     *"1Gi" | string
-			configSize:   *"1Gi" | string
+		resources: timoniv1.#ResourceRequirements
+		s3: {
+			endpoint:                   *"" | string
+			bucket:                     *"" | string
+			prefix:                     *"opensign" | string
+			createBucketIfNotExists:    *true | bool
+			existingSecret:             *"" | string
+			existingSecretAccessKeyKey: *"access-key" | string
+			existingSecretSecretKeyKey: *"secret-key" | string
+			accessKey:                  *"" | string
+			secretKey:                  *"" | string
 		}
+	}
+
+	test?: {
+		enabled: *false | bool
+		image?:  timoniv1.#Image
+	}
+
+	config: {
+		publicUrl: *"http://localhost:3000" | string
+		apiUrl:    *"http://localhost:8080/app" | string
+	}
+
+	externalSecrets: {
+		enabled:    *false | bool
+		apiVersion: *"external-secrets.io/v1" | string
+		name:       *"" | string
+		secretStoreRef: {
+			name: *"" | string
+			kind: *"SecretStore" | string
+		}
+		target: {
+			name:           *"" | string
+			creationPolicy: *"Owner" | string
+			template?:      {...}
+		}
+		refreshInterval: *"1h" | string
+		data:            *[] | [...]
+		dataFrom:        *[] | [...]
+		annotations:     *{} | {[string]: string}
 	}
 
 	envSecret: {[string]: string}
@@ -146,9 +285,18 @@ import (
 			}
 			deployClient: #ClientDeployment & {#config: config}
 			svcClient:    #ClientService & {#config:    config}
+			if config.client.autoscaling.enabled {
+				hpaClient: #ClientHPA & {#config: config}
+			}
+			if config.client.podDisruptionBudget.enabled {
+				pdbClient: #ClientPDB & {#config: config}
+			}
 		}
 
-		if config.mongodb.enabled {
+		if config.mongodb.enabled && !config.externalMongodb.enabled {
+			if config.mongodb.serviceAccount.create {
+				saMongo: #MongoServiceAccount & {#config: config}
+			}
 			if config.mongodb.persistence.enabled {
 				pvcMongo: #MongoPVC & {#config: config}
 			}
@@ -156,16 +304,23 @@ import (
 			svcMongo:    #MongoService & {#config:    config}
 		}
 
-		if config.caddy.enabled {
-			cmCaddy: #CaddyConfigMap & {#config: config}
-			if config.caddy.persistence.enabled {
-				pvcCaddyData:   #CaddyDataPVC & {#config:   config}
-				pvcCaddyConfig: #CaddyConfigPVC & {#config: config}
-			}
-			deployCaddy: #CaddyDeployment & {#config: config}
-			svcCaddy:    #CaddyService & {#config:    config}
+		if config.gateway.enabled {
+			httpRoute: #HTTPRoute & {#config: config}
 		}
 
-		envSecret: #EnvSecret & {#config: config}
+		if config.backup.enabled {
+			backupConfigMap: #BackupConfigMap & {#config: config}
+			backupCronJob:   #BackupCronJob & {#config:   config}
+		}
+
+		if config.externalSecrets.enabled {
+			externalSecret: #ExternalSecret & {#config: config}
+		}
+
+		if config.existingSecret == "" && !config.externalSecrets.enabled {
+			envSecret: #EnvSecret & {#config: config}
+		}
 	}
+
+	tests: {}
 }
