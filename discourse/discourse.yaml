@@ -1,0 +1,733 @@
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse
+  namespace: default
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse
+  namespace: default
+spec:
+  progressDeadlineSeconds: 1800
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: discourse
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app.kubernetes.io/name: discourse
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: DISCOURSE_HOSTNAME
+          value: discourse.localhost
+        - name: DISCOURSE_DEVELOPER_EMAILS
+          value: admin@example.com
+        - name: DISCOURSE_SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              key: secret-key-base
+              name: discourse-app
+        - name: DISCOURSE_DB_HOST
+          value: discourse-postgresql
+        - name: DISCOURSE_DB_PORT
+          value: "5432"
+        - name: DISCOURSE_DB_NAME
+          value: discourse
+        - name: DISCOURSE_DB_USERNAME
+          value: discourse
+        - name: DISCOURSE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: user-password
+              name: discourse-postgresql-auth
+        - name: DISCOURSE_REDIS_HOST
+          value: discourse-redis-client
+        - name: DISCOURSE_REDIS_PORT
+          value: "6379"
+        - name: DISCOURSE_SKIP_EMAIL_SETUP
+          value: "1"
+        - name: UNICORN_WORKERS
+          value: "2"
+        - name: UNICORN_SIDEKIQS
+          value: "1"
+        - name: MIGRATE_ON_BOOT
+          value: "1"
+        - name: PRECOMPILE_ON_BOOT
+          value: "1"
+        - name: CREATE_DB_ON_BOOT
+          value: "0"
+        image: docker.io/discourse/discourse:2026.7.4@sha256:8ae4f1e692a5da1548a36a6d9fc2bae18cf28d1efbebb12ba16928b31b14783d
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 6
+          httpGet:
+            httpHeaders:
+            - name: Host
+              value: discourse.localhost
+            path: /srv/status
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: discourse
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            httpHeaders:
+            - name: Host
+              value: discourse.localhost
+            path: /srv/status
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 3Gi
+          requests:
+            cpu: 250m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - CHOWN
+            - DAC_OVERRIDE
+            - FOWNER
+            - NET_BIND_SERVICE
+            - SETGID
+            - SETUID
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          runAsUser: 0
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            httpHeaders:
+            - name: Host
+              value: discourse.localhost
+            path: /srv/status
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /shared
+          name: shared
+      initContainers:
+      - command:
+        - sh
+        - -ec
+        - |
+          until nc -z -w 2 discourse-postgresql 5432; do sleep 2; done
+          until nc -z -w 2 discourse-redis-client 6379; do sleep 2; done
+        image: docker.io/library/busybox:1.37.0-uclibc
+        imagePullPolicy: IfNotPresent
+        name: wait-for-services
+        resources:
+          limits:
+            cpu: 50m
+            memory: 32Mi
+          requests:
+            cpu: 5m
+            memory: 8Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65534
+          runAsNonRoot: true
+          runAsUser: 65534
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      serviceAccountName: discourse
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - name: shared
+        persistentVolumeClaim:
+          claimName: discourse-shared
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: discourse
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations: {}
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-shared
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-app
+  namespace: default
+stringData:
+  secret-key-base: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql-auth
+  namespace: default
+stringData:
+  postgres-password: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  user-password: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+type: Opaque
+---
+apiVersion: v1
+data:
+  pg_hba.conf: |-
+    local   all             all                                     scram-sha-256
+    host    all             all             127.0.0.1/32            scram-sha-256
+    host    all             all             ::1/128                 scram-sha-256
+    host    all             all             0.0.0.0/0               scram-sha-256
+    host    all             all             ::/0                    scram-sha-256
+  postgres_exporter.yml: |
+    {}
+  postgresql.conf: |-
+    listen_addresses = '*'
+    port = 5432
+    wal_level = replica
+    hot_standby = on
+    max_wal_senders = 10
+    max_replication_slots = 10
+    wal_keep_size = '512MB'
+    password_encryption = scram-sha-256
+    max_connections = 200
+    shared_buffers = '256MB'
+    ssl = off
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql-config
+  namespace: default
+---
+apiVersion: v1
+data:
+  01-init-users.sh: |-
+    #!/bin/bash
+    set -euo pipefail
+    export PGPASSWORD="${POSTGRES_PASSWORD}"
+    psql --username "${POSTGRES_USER}" --dbname postgres \
+      --set=app_username="${APP_USERNAME}" \
+      --set=app_password="${APP_PASSWORD}" \
+      --set=app_database="${APP_DATABASE}" \
+      --set=replication_username="${REPLICATION_USERNAME:-}" \
+      --set=replication_password="${REPLICATION_PASSWORD:-}" <<'SQL'
+    SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'app_username', :'app_password')
+    WHERE :'app_username' <> ''
+      AND :'app_password' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'app_username') \gexec
+
+    SELECT format('CREATE DATABASE %I OWNER %I', :'app_database', :'app_username')
+    WHERE :'app_database' <> ''
+      AND :'app_username' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'app_database') \gexec
+
+    SELECT format('CREATE ROLE %I REPLICATION LOGIN PASSWORD %L', :'replication_username', :'replication_password')
+    WHERE :'replication_username' <> ''
+      AND :'replication_password' <> ''
+      AND NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'replication_username') \gexec
+    SQL
+
+    # PostgreSQL 15+ revokes CREATE on the public schema for non-superusers.
+    # Grant schema privileges so the application user can run migrations.
+    if [ -n "${APP_DATABASE}" ] && [ -n "${APP_USERNAME}" ]; then
+      psql --username "${POSTGRES_USER}" --dbname "${APP_DATABASE}" \
+        -c "GRANT ALL ON SCHEMA public TO \"${APP_USERNAME}\";"
+    fi
+  02-discourse.sh: |-
+    #!/bin/sh
+    set -eu
+    psql --username "${POSTGRES_USER}" --dbname postgres \
+      --set=app_database="${APP_DATABASE}" \
+      --set=app_username="${APP_USERNAME}" <<'SQL'
+    SELECT format('ALTER DATABASE %I OWNER TO %I', :'app_database', :'app_username') \gexec
+    SQL
+    psql --username "${POSTGRES_USER}" --dbname "${APP_DATABASE}" <<'SQL'
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    CREATE EXTENSION IF NOT EXISTS unaccent;
+    CREATE EXTENSION IF NOT EXISTS vector;
+    SQL
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql-initdb
+  namespace: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql-primary-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/role: standalone
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql
+  namespace: default
+spec:
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+  selector:
+    app.kubernetes.io/component: postgresql
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/role: standalone
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-postgresql
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgresql
+      app.kubernetes.io/name: discourse
+      app.kubernetes.io/role: standalone
+  serviceName: discourse-postgresql-primary-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgresql
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: discourse
+        app.kubernetes.io/part-of: helmforge
+        app.kubernetes.io/role: standalone
+        app.kubernetes.io/version: 0.0.0-devel
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - -c
+        - config_file=/etc/postgresql/generated/postgresql.conf
+        - -c
+        - hba_file=/etc/postgresql/generated/pg_hba.conf
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: discourse
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgres-password
+              name: discourse-postgresql-auth
+        - name: APP_DATABASE
+          value: discourse
+        - name: APP_USERNAME
+          value: discourse
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: user-password
+              name: discourse-postgresql-auth
+        image: docker.io/pgvector/pgvector:0.8.7-pg18-trixie@sha256:5895949dfcdf308eb0cd31c950c93c14895c77f33fbedfecf1fa511ab1d4bcd2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="${POSTGRES_PASSWORD}" pg_isready -U postgres -h 127.0.0.1
+              -p 5432 -d postgres
+          failureThreshold: 6
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          name: postgres
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - |-
+              DATA_DIR="${PGDATA:-/var/lib/postgresql/data/pgdata}"
+              if [ ! -s "${DATA_DIR}/PG_VERSION" ]; then
+                exit 1
+              fi
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              if psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1" >/dev/null 2>&1; then
+                if ! psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1 FROM pg_database WHERE datname = 'postgres'" | grep -qx 1; then
+                  createdb -U postgres -h 127.0.0.1 -p 5432 postgres
+                fi
+              else
+                echo "Unable to verify or repair the postgres database on this PostgreSQL data directory." >&2
+                exit 1
+              fi
+              PGPASSWORD="${POSTGRES_PASSWORD}" pg_isready -U postgres -h 127.0.0.1 -p 5432 -d postgres
+          failureThreshold: 6
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 999
+          runAsNonRoot: true
+          runAsUser: 999
+        startupProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - |-
+              DATA_DIR="${PGDATA:-/var/lib/postgresql/data/pgdata}"
+              if [ ! -s "${DATA_DIR}/PG_VERSION" ]; then
+                exit 1
+              fi
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              if psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1" >/dev/null 2>&1; then
+                if ! psql -U postgres -h 127.0.0.1 -p 5432 -d template1 -tAc "SELECT 1 FROM pg_database WHERE datname = 'postgres'" | grep -qx 1; then
+                  createdb -U postgres -h 127.0.0.1 -p 5432 postgres
+                fi
+              else
+                echo "Unable to verify or repair the postgres database on this PostgreSQL data directory." >&2
+                exit 1
+              fi
+          failureThreshold: 60
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /etc/postgresql/generated
+          name: config
+        - mountPath: /docker-entrypoint-initdb.d
+          name: initdb
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - configMap:
+          name: discourse-postgresql-config
+        name: config
+      - name: initdb
+        projected:
+          defaultMode: 493
+          sources:
+          - configMap:
+              name: discourse-postgresql-initdb
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: discourse
+        app.kubernetes.io/part-of: helmforge
+        app.kubernetes.io/version: 0.0.0-devel
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+---
+apiVersion: v1
+data:
+  redis-standalone.conf: |-
+    bind 0.0.0.0
+    protected-mode no
+    port 6379
+    dir /data
+    appendonly yes
+    save 900 1
+    save 300 10
+    save 60 10000
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-redis-config
+  namespace: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: redis-headless
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-redis-headless
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: redis
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/name: discourse
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: redis-client
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-redis-client
+  namespace: default
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: redis
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/role: standalone
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: timoni
+    app.kubernetes.io/name: discourse
+    app.kubernetes.io/part-of: helmforge
+    app.kubernetes.io/version: 0.0.0-devel
+  name: discourse-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+      app.kubernetes.io/name: discourse
+      app.kubernetes.io/role: standalone
+  serviceName: discourse-redis-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: redis
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: discourse
+        app.kubernetes.io/part-of: helmforge
+        app.kubernetes.io/role: standalone
+        app.kubernetes.io/version: 0.0.0-devel
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - /etc/redis/redis.conf
+        command:
+        - redis-server
+        image: docker.io/library/redis:8.10.2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 6
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          timeoutSeconds: 5
+        name: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsGroup: 999
+          runAsNonRoot: true
+          runAsUser: 999
+        startupProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - redis-cli -p 6379 ping | grep -qx PONG
+          failureThreshold: 30
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /etc/redis/redis.conf
+          name: config
+          subPath: redis-standalone.conf
+        - mountPath: /data
+          name: data
+      securityContext:
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - configMap:
+          name: discourse-redis-config
+        name: config
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/managed-by: timoni
+        app.kubernetes.io/name: discourse
+        app.kubernetes.io/part-of: helmforge
+        app.kubernetes.io/version: 0.0.0-devel
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
