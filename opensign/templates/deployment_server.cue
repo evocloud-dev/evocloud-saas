@@ -31,7 +31,11 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
-				serviceAccountName: *#config.server.serviceAccount.name | "\(#config.metadata.name)-server"
+				automountServiceAccountToken: false
+				serviceAccountName: [
+					if #config.server.serviceAccount.name != "" {#config.server.serviceAccount.name},
+					"\(#config.metadata.name)-server",
+				][0]
 				if #config.podSecurityContext != _|_ {
 					securityContext: #config.podSecurityContext
 				}
@@ -50,33 +54,122 @@ import (
 							value: #config.server.env.NODE_ENV
 						},
 						{
-							name:  "SERVER_URL"
-							value: "$(HOST_URL)/api/app"
+							name: "HOST_URL"
+							valueFrom: secretKeyRef: {
+								name: [
+									if #config.existingSecret != "" {#config.existingSecret},
+									"\(#config.metadata.name)-env",
+								][0]
+								key: "HOST_URL"
+							}
 						},
 						{
-							name:  "PUBLIC_URL"
-							value: "$(HOST_URL)"
+							name: "SERVER_URL"
+							valueFrom: secretKeyRef: {
+								name: [
+									if #config.existingSecret != "" {#config.existingSecret},
+									"\(#config.metadata.name)-env",
+								][0]
+								key: "SERVER_URL"
+							}
+						},
+						{
+							name: "PUBLIC_URL"
+							valueFrom: secretKeyRef: {
+								name: [
+									if #config.existingSecret != "" {#config.existingSecret},
+									"\(#config.metadata.name)-env",
+								][0]
+								key: "PUBLIC_URL"
+							}
+						},
+						if #config.externalMongodb.enabled && #config.externalMongodb.existingSecret != "" {
+							name: "MONGO_URI"
+							valueFrom: secretKeyRef: {
+								name: #config.externalMongodb.existingSecret
+								key: [
+									if #config.externalMongodb.existingSecretUriKey != "" {#config.externalMongodb.existingSecretUriKey},
+									#config.externalMongodb.existingSecretKey,
+								][0]
+							}
+						},
+						if #config.externalMongodb.enabled && #config.externalMongodb.existingSecret != "" {
+							name: "MONGODB_URI"
+							valueFrom: secretKeyRef: {
+								name: #config.externalMongodb.existingSecret
+								key: [
+									if #config.externalMongodb.existingSecretUriKey != "" {#config.externalMongodb.existingSecretUriKey},
+									#config.externalMongodb.existingSecretKey,
+								][0]
+							}
+						},
+						if #config.externalMongodb.enabled && #config.externalMongodb.existingSecret == "" && #config.externalMongodb.uri != "" {
+							name:  "MONGO_URI"
+							value: #config.externalMongodb.uri
+						},
+						if #config.externalMongodb.enabled && #config.externalMongodb.existingSecret == "" && #config.externalMongodb.uri != "" {
+							name:  "MONGODB_URI"
+							value: #config.externalMongodb.uri
+						},
+						if !#config.externalMongodb.enabled && #config.mongodb.enabled {
+							name:  "MONGO_URI"
+							value: "mongodb://\(#config.metadata.name)-mongo:\(#config.mongodb.port)/opensign"
+						},
+						if !#config.externalMongodb.enabled && #config.mongodb.enabled {
+							name:  "MONGODB_URI"
+							value: "mongodb://\(#config.metadata.name)-mongo:\(#config.mongodb.port)/opensign"
 						},
 					]
 					envFrom: [{
-						secretRef: name: "\(#config.metadata.name)-env"
+						secretRef: name: [
+							if #config.existingSecret != "" {#config.existingSecret},
+							"\(#config.metadata.name)-env",
+						][0]
 					}]
 					resources:       #config.server.resources
 					securityContext: #config.server.securityContext
-					readinessProbe: {
-						tcpSocket: port: #config.server.port
-						initialDelaySeconds: 20
-						periodSeconds:       10
+					if #config.server.probes.readiness.enabled {
+						readinessProbe: {
+							tcpSocket: port: #config.server.port
+							initialDelaySeconds: #config.server.probes.readiness.initialDelaySeconds
+							periodSeconds:       #config.server.probes.readiness.periodSeconds
+							timeoutSeconds:      #config.server.probes.readiness.timeoutSeconds
+							failureThreshold:    #config.server.probes.readiness.failureThreshold
+						}
+					}
+					if #config.server.probes.liveness.enabled {
+						livenessProbe: {
+							tcpSocket: port: #config.server.port
+							initialDelaySeconds: #config.server.probes.liveness.initialDelaySeconds
+							periodSeconds:       #config.server.probes.liveness.periodSeconds
+							timeoutSeconds:      #config.server.probes.liveness.timeoutSeconds
+							failureThreshold:    #config.server.probes.liveness.failureThreshold
+						}
+					}
+					if #config.server.probes.startup.enabled {
+						startupProbe: {
+							tcpSocket: port: #config.server.port
+							initialDelaySeconds: #config.server.probes.startup.initialDelaySeconds
+							periodSeconds:       #config.server.probes.startup.periodSeconds
+							timeoutSeconds:      #config.server.probes.startup.timeoutSeconds
+							failureThreshold:    #config.server.probes.startup.failureThreshold
+						}
 					}
 					volumeMounts: [{
 						name:      "files"
 						mountPath: "/usr/src/app/files"
 					}]
 				}]
-				volumes: [{
-					name: "files"
-					persistentVolumeClaim: claimName: "opensign-files"
-				}]
+				volumes: [
+					if #config.server.persistence.enabled {
+						name: "files"
+						persistentVolumeClaim: claimName: "\(#config.metadata.name)-files"
+					},
+					if !#config.server.persistence.enabled {
+						name: "files"
+						emptyDir: {}
+					},
+				]
 			}
 		}
 	}

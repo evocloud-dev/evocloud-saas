@@ -31,6 +31,11 @@ import (
 				}
 			}
 			spec: corev1.#PodSpec & {
+				automountServiceAccountToken: false
+				serviceAccountName: [
+					if #config.mongodb.serviceAccount.name != "" {#config.mongodb.serviceAccount.name},
+					"\(#config.metadata.name)-mongo",
+				][0]
 				if #config.mongodb.podSecurityContext != _|_ {
 					securityContext: #config.mongodb.podSecurityContext
 				}
@@ -50,15 +55,39 @@ import (
 					}]
 					resources:       #config.mongodb.resources
 					securityContext: #config.mongodb.securityContext
+					if #config.mongodb.probes.readiness.enabled {
+						readinessProbe: {
+							tcpSocket: port: #config.mongodb.port
+							initialDelaySeconds: #config.mongodb.probes.readiness.initialDelaySeconds
+							periodSeconds:       #config.mongodb.probes.readiness.periodSeconds
+							timeoutSeconds:      #config.mongodb.probes.readiness.timeoutSeconds
+							failureThreshold:    #config.mongodb.probes.readiness.failureThreshold
+						}
+					}
+					if #config.mongodb.probes.liveness.enabled {
+						livenessProbe: {
+							tcpSocket: port: #config.mongodb.port
+							initialDelaySeconds: #config.mongodb.probes.liveness.initialDelaySeconds
+							periodSeconds:       #config.mongodb.probes.liveness.periodSeconds
+							timeoutSeconds:      #config.mongodb.probes.liveness.timeoutSeconds
+							failureThreshold:    #config.mongodb.probes.liveness.failureThreshold
+						}
+					}
 					volumeMounts: [{
 						name:      "data"
 						mountPath: "/data/db"
 					}]
 				}]
-				volumes: [{
-					name: "data"
-					persistentVolumeClaim: claimName: "mongo-data"
-				}]
+				volumes: [
+					if #config.mongodb.persistence.enabled {
+						name: "data"
+						persistentVolumeClaim: claimName: "\(#config.metadata.name)-mongo-data"
+					},
+					if !#config.mongodb.persistence.enabled {
+						name: "data"
+						emptyDir: {}
+					},
+				]
 			}
 		}
 	}

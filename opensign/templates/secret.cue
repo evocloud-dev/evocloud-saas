@@ -6,6 +6,7 @@ import (
 
 #EnvSecret: corev1.#Secret & {
 	#config: #Config
+
 	apiVersion: "v1"
 	kind:       "Secret"
 	metadata: {
@@ -14,5 +15,12 @@ import (
 		labels:    #config.metadata.labels
 	}
 	type: "Opaque"
-	stringData: #config.envSecret
+	stringData: {
+		#config.envSecret
+
+		HOST_URL:            #config.config.publicUrl
+		PUBLIC_URL:          #config.config.publicUrl
+		REACT_APP_SERVERURL: #config.config.apiUrl
+		SERVER_URL:          #config.config.apiUrl
+	}
 }

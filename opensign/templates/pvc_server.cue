@@ -9,7 +9,7 @@ import (
 	apiVersion: "v1"
 	kind:       "PersistentVolumeClaim"
 	metadata: {
-		name:      "opensign-files"
+		name:      "\(#config.metadata.name)-files"
 		namespace: #config.metadata.namespace
 		labels:    #config.metadata.labels
 	}

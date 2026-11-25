@@ -9,7 +9,7 @@ import (
 	apiVersion: "v1"
 	kind:       "Service"
 	metadata: {
-		name:      "server"
+		name:      "\(#config.metadata.name)-server"
 		namespace: #config.metadata.namespace
 		labels:    #config.metadata.labels
 	}
